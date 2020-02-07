@@ -19,7 +19,8 @@
     "knex": "^0.20.8",
     "morgan": "^1.9.1",
     "objection": "^2.1.2",
-    "permit": "^0.2.4"
+    "permit": "^0.2.4",
+    "pg": "^7.18.1"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",

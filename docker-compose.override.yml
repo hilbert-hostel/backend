@@ -1,0 +1,36 @@
+version: '3.2'
+
+services:
+  backend:
+    image: node:12
+    container_name: hilbert-backend-dev
+    depends_on:
+      - db
+    restart: always
+    volumes:
+      - ./src:/app/src
+      - ./node_modules:/app/node_modules
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./scripts:/app/scripts
+    ports:
+      - 3000:3000
+    environment:
+      NODE_ENV: development
+      POSTGRES_URI: postgres://postgres:password@db/postgres
+    working_dir: /app
+    command: ['yarn', 'dev']
+
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

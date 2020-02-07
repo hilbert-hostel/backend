@@ -1,0 +1,9 @@
+version: '3.2'
+
+services:
+  backend:
+    build:
+      context: ./
+    container_name: hilbert-backend
+    environment:
+      PORT:
