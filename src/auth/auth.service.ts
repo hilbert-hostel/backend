@@ -12,17 +12,8 @@ export const makeGenerateJWT = ({ config }: Dependencies): GenerateJWT => (
     user: User
 ) =>
     new Promise((resolve, reject) => {
-        jwt.sign(
-            { userID: user.id } as Token,
-            config.SECRET,
-            {},
-            (err, token) => {
-                if (err) {
-                    return reject(err)
-                } else {
-                    return resolve(token)
-                }
-            }
+        jwt.sign({ userID: user.id } as Token, config.SECRET, (err, token) =>
+            err ? reject(err) : resolve(token)
         )
     })
 
@@ -31,13 +22,9 @@ export const makeVerifyJWT = ({ config }: Dependencies): VerifyJWT => (
     token: string
 ) =>
     new Promise((resolve, reject) => {
-        jwt.verify(token, config.SECRET, {}, (err, token) => {
-            if (err) {
-                return reject(err)
-            } else {
-                return resolve(token as Token)
-            }
-        })
+        jwt.verify(token, config.SECRET, (err, token) =>
+            err ? reject(err) : resolve(token as Token)
+        )
     })
 
 export type CreateUser = (
