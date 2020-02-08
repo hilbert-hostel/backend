@@ -7,3 +7,4 @@ services:
     container_name: hilbert-backend
     environment:
       PORT:
+      SECRET:

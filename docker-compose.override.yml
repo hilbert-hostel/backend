@@ -18,6 +18,8 @@ services:
     environment:
       NODE_ENV: development
       POSTGRES_URI: postgres://postgres:password@db/postgres
+      PORT: 3000
+      SECRET: SECRET
     working_dir: /app
     command: ['yarn', 'dev']
 
