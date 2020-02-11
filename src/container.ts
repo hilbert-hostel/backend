@@ -10,6 +10,7 @@ import {
     VerifyJWT
 } from './auth/auth.service'
 import { config, Config } from './config'
+import { InitializeDatabase, makeInitializeDatabase } from './db'
 
 export interface Dependencies {
     config: Config
@@ -17,6 +18,7 @@ export interface Dependencies {
     verifyJWT: VerifyJWT
     createUser: CreateUser
     login: Login
+    initializeDatabase: InitializeDatabase
 }
 
 type RegisterDeps<T> = {
@@ -29,6 +31,7 @@ export const dependencies: RegisterDeps<Dependencies> = {
     verifyJWT: asFunction(makeVerifyJWT),
     createUser: asFunction(makeCreateUser),
     login: asFunction(makeLogin)
+    initializeDatabase: asFunction(makeInitializeDatabase)
 }
 
 const DIContainer = createContainer()

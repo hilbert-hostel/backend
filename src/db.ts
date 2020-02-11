@@ -1,10 +1,12 @@
 import Knex from 'knex'
 import { Model } from 'objection'
+import { Dependencies } from './container'
 
-export const initializeDatabase = (client: string, connection: string) => {
+export type InitializeDatabase = () => void
+export const makeInitializeDatabase = ({ config }: Dependencies) => () => {
     const knex = Knex({
-        client,
-        connection
+        client: config.DB,
+        connection: config.DB_URI
     })
 
     Model.knex(knex)

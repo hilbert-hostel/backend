@@ -4,7 +4,8 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { AuthRouter } from './auth/auth.router'
 import { config } from './config'
-import { initializeDatabase } from './db'
+import { container } from './container'
+
 const app = express()
 
 app.use(express.json())
@@ -17,6 +18,6 @@ app.get('/ping', (req, res) => {
 })
 app.use('/auth', AuthRouter)
 
-initializeDatabase('pg', config.POSTGRES_URI)
+container.initializeDatabase()
 
 app.listen(config.PORT, () => console.log(`listening on port ${config.PORT}`))
