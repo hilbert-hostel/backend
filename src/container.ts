@@ -1,22 +1,24 @@
-import { asFunction, asValue, createContainer, Resolver } from 'awilix'
+import { asClass, asFunction, asValue, createContainer, Resolver } from 'awilix'
 import {
-    CreateUser,
     GenerateJWT,
     Login,
-    makeCreateUser,
     makeGenerateJWT,
     makeLogin,
+    makeRegisterUser,
     makeVerifyJWT,
+    RegisterUser,
     VerifyJWT
 } from './auth/auth.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import { UserRepository } from './user/user.repository'
 
 export interface Dependencies {
     config: Config
+    userRepository: UserRepository
     generateJWT: GenerateJWT
     verifyJWT: VerifyJWT
-    createUser: CreateUser
+    registerUser: RegisterUser
     login: Login
     initializeDatabase: InitializeDatabase
 }
@@ -27,10 +29,11 @@ type RegisterDeps<T> = {
 
 export const dependencies: RegisterDeps<Dependencies> = {
     config: asValue(config),
+    userRepository: asClass(UserRepository),
     generateJWT: asFunction(makeGenerateJWT),
     verifyJWT: asFunction(makeVerifyJWT),
-    createUser: asFunction(makeCreateUser),
-    login: asFunction(makeLogin)
+    registerUser: asFunction(makeRegisterUser),
+    login: asFunction(makeLogin),
     initializeDatabase: asFunction(makeInitializeDatabase)
 }
 

@@ -9,7 +9,7 @@ const router = Router()
 
 router.post('/register', validate(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
-    const user = await container.createUser(input)
+    const user = await container.registerUser(input)
     res.json(user)
 })
 
