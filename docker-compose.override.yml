@@ -17,7 +17,8 @@ services:
       - 3000:3000
     environment:
       NODE_ENV: development
-      POSTGRES_URI: postgres://postgres:password@db/postgres
+      DB_URI: postgres://postgres:password@db/postgres
+      DB: pg
       PORT: 3000
       SECRET: SECRET
     working_dir: /app

@@ -8,3 +8,4 @@ services:
     environment:
       PORT:
       SECRET:
+      DB_URI:
