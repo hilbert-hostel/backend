@@ -1,0 +1,73 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Hilbert API
+  description: Docs for using the Hilbert system
+paths:
+  /auth/register:
+    post:
+      description: Create a new account
+      parameters:
+        - name: register
+          in: body
+          description: creates a new account in our database
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - firstname
+              - lastname
+              - phone
+              - address
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              phone:
+                type: string
+              address:
+                type: string
+      responses:
+        201:
+          description: Account successfully created
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+        400:
+          description: Bad Request
+  /auth/login:
+    post:
+      description: Login to an existing account
+      parameters:
+        - name: register
+          in: body
+          description: email and password
+          schema:
+            type: object
+            required:
+              - email
+              - password
+
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Login successfully
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+        400:
+          description: Incorrect email or password.
