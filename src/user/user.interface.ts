@@ -3,4 +3,6 @@ export interface CreateUser {
     password: string
     firstname: string
     lastname: string
+    phone: string
+    address: string
 }

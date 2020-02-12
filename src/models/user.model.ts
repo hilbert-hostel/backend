@@ -6,6 +6,8 @@ export interface User {
     password: string
     firstname: string
     lastname: string
+    phone: string
+    address: string
 }
 export class UserModel extends Model implements User {
     id!: string
@@ -13,5 +15,7 @@ export class UserModel extends Model implements User {
     password!: string
     firstname!: string
     lastname!: string
+    phone!: string
+    address!: string
     static tableName = 'users'
 }

@@ -12,7 +12,9 @@ test('jwt', async () => {
         email: 'asdf',
         password: 'password',
         firstname: 'name',
-        lastname: 'name'
+        lastname: 'name',
+        phone: '0812345678',
+        address: 'Earth'
     })
     expect(typeof jwt).toBe('string')
     const decoded = await makeVerifyJWT(fakeConfig)(jwt)

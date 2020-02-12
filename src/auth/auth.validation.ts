@@ -8,7 +8,9 @@ export const registerValidator = yup.object().shape<RegisterInput>({
         .required(),
     password: yup.string().required(),
     firstname: yup.string().required(),
-    lastname: yup.string().required()
+    lastname: yup.string().required(),
+    phone: yup.string().required(),
+    address: yup.string().required()
 })
 
 export const loginValidator = yup.object().shape<LoginInput>({

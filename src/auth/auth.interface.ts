@@ -1,13 +1,10 @@
+import { CreateUser } from '../user/user.interface'
+
 export interface Token {
     userID: string
 }
 
-export interface RegisterInput {
-    email: string
-    password: string
-    firstname: string
-    lastname: string
-}
+export type RegisterInput = CreateUser
 
 export interface LoginInput {
     email: string
