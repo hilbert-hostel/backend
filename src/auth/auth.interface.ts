@@ -1,6 +1,7 @@
 import { CreateUser } from '../user/user.interface'
 
-export interface Token {
+export type Token = string
+export interface TokenPayload {
     userID: string
 }
 
