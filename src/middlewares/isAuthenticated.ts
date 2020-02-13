@@ -9,7 +9,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         permit.fail(res)
         return next(new Error(`Authentication required!`))
     }
-    const { userID } = await container.verifyJWT(token)
+    const { userID } = await container.jwtService.verifyToken(token)
     if (!userID) {
         permit.fail(res)
         return next(new Error(`Authentication required!`))

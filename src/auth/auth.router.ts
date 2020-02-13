@@ -9,16 +9,15 @@ const router = Router()
 
 router.post('/register', validate(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
-    const user = await container.registerUser(input)
+    const user = await container.authService.registerUser(input)
     res.json(user)
 })
 
 router.post('/login', validate(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
-    const user = await container.login(input)
+    const user = await container.authService.login(input)
     res.json(user)
 })
-
 router.get('/ping', isAuthenticated, async (req, res) => {
     res.json(res.locals.userID)
 })
