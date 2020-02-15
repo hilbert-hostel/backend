@@ -12,7 +12,10 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
     private readonly userRepository: IUserRepository
     private readonly jwtService: IJwtService
-    constructor({ userRepository, jwtService }: Dependencies) {
+    constructor({
+        userRepository,
+        jwtService
+    }: Dependencies<IUserRepository | IJwtService>) {
         this.userRepository = userRepository
         this.jwtService = jwtService
     }

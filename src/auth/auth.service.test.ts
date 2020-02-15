@@ -33,7 +33,7 @@ describe('Auth Service', () => {
             return {} as any
         }
     }
-    const authService = new AuthService({ userRepository, jwtService } as any)
+    const authService = new AuthService({ userRepository, jwtService })
     test('register', async () => {
         const input: RegisterInput = {
             email: 'email',

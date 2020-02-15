@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken'
+import { Config } from '../config'
 import { Dependencies } from '../container'
 import { User } from '../models/user.model'
 import { Token, TokenPayload } from './auth.interface'
@@ -10,7 +11,7 @@ export interface IJwtService {
 
 export class JwtService implements IJwtService {
     private readonly secret: string
-    constructor({ config }: Dependencies) {
+    constructor({ config }: Dependencies<Config>) {
         this.secret = config.SECRET
     }
 

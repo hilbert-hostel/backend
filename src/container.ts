@@ -5,7 +5,7 @@ import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
 import { IUserRepository, UserRepository } from './user/user.repository'
 
-export interface Dependencies {
+export interface AllDependencies {
     config: Config
     userRepository: IUserRepository
     jwtService: IJwtService
@@ -17,7 +17,7 @@ type RegisterDeps<T> = {
     [P in keyof T]: Resolver<T[P]>
 }
 
-export const dependencies: RegisterDeps<Dependencies> = {
+export const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     userRepository: asClass(UserRepository),
     jwtService: asClass(JwtService),
@@ -29,4 +29,13 @@ const DIContainer = createContainer()
 
 DIContainer.register(dependencies)
 
-export const container = DIContainer.cradle as Dependencies
+export const container = DIContainer.cradle as AllDependencies
+
+type SubType<Base, Condition> = Pick<
+    Base,
+    {
+        [Key in keyof Base]: Base[Key] extends Condition ? Key : never
+    }[keyof Base]
+>
+
+export type Dependencies<Types> = SubType<AllDependencies, Types>
