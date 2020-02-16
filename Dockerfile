@@ -6,7 +6,7 @@ COPY ./package.json ./yarn.lock ./
 RUN yarn
 
 # Build
-COPY ./tsconfig.json ./tsconfig.build.json ./
+COPY ./tsconfig.json ./
 COPY ./src ./src
 RUN yarn build
 
