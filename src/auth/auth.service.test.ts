@@ -22,6 +22,19 @@ describe('Auth Service', () => {
                 address: 'zxc'
             }
             return email === 'email' ? user : undefined
+        },
+
+        async findOneById(id) {
+            const user = {
+                id: '1234',
+                email: 'email',
+                password: await hash('password', 10),
+                firstname: 'asd',
+                lastname: 'asd',
+                phone: 'asd',
+                address: 'zxc'
+            }
+            return id === '1234' ? user : undefined
         }
     }
     const authService = new AuthService({ userRepository })

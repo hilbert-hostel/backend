@@ -12,7 +12,7 @@ import {
 import { loginValidator, registerValidator } from './auth.validation'
 
 const router = Router()
-const { authService, jwtService } = container
+const { authService, jwtService, userRepository } = container
 router.post('/register', validate(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
     const user = await authService.registerUser(input)
@@ -29,6 +29,7 @@ router.post('/login', validate(loginValidator), async (req, res) => {
     res.json(payload)
 })
 router.get('/ping', isAuthenticated, async (req, res) => {
-    res.json(res.locals.userID)
+    const user = await userRepository.findOneById(res.locals.userID)
+    res.json(omit(['password'], user))
 })
 export { router as AuthRouter }
