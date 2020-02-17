@@ -2,7 +2,6 @@ import { hash } from 'bcryptjs'
 import { IUserRepository } from '../user/user.repository'
 import { RegisterInput } from './auth.interface'
 import { AuthService } from './auth.service'
-import { IJwtService } from './jwt.service'
 
 describe('Auth Service', () => {
     const userRepository: IUserRepository = {
@@ -25,15 +24,7 @@ describe('Auth Service', () => {
             return email === 'email' ? user : undefined
         }
     }
-    const jwtService: IJwtService = {
-        async generateToken() {
-            return 'token'
-        },
-        async verifyToken() {
-            return {} as any
-        }
-    }
-    const authService = new AuthService({ userRepository, jwtService })
+    const authService = new AuthService({ userRepository })
     test('register', async () => {
         const input: RegisterInput = {
             email: 'email',
@@ -43,7 +34,7 @@ describe('Auth Service', () => {
             phone: 'asd',
             address: 'zxc'
         }
-        const { user } = await authService.registerUser(input)
+        const user = await authService.registerUser(input)
         expect(user.password).toEqual(expect.any(String))
         expect(user.password).not.toEqual(input.password)
         expect(user).toEqual({
