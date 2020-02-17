@@ -22,7 +22,7 @@ services:
       PORT: 3000
       SECRET: SECRET
     working_dir: /app
-    command: ['yarn', 'dev']
+    command: sh -c 'yarn knex --cwd ./src migrate:up && yarn dev'
 
   db:
     image: postgres
