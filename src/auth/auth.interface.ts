@@ -14,7 +14,7 @@ export interface LoginInput {
 }
 
 export interface RegisterPayload {
-    user: User
+    user: Omit<User, 'password'>
     token: string
 }
 
