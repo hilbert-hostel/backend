@@ -15,6 +15,8 @@ export async function up(knex: Knex): Promise<any> {
         table.text('password').notNullable()
         table.text('firstname').notNullable()
         table.text('lastname').notNullable()
+        table.text('address').notNullable()
+        table.text('phone').notNullable()
     })
 }
 
