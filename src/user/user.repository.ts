@@ -1,5 +1,5 @@
 import { User, UserModel } from '../models/user.model'
-import { CreateUser } from './user.interface'
+import { CreateUser, FindUser } from './user.interface'
 
 export interface IUserRepository {
     create(data: CreateUser): Promise<User>
@@ -10,7 +10,7 @@ export class UserRepository implements IUserRepository {
         return UserModel.query().insert(data)
     }
 
-    findOne(condition: Partial<User>) {
+    findOne(condition: FindUser) {
         return UserModel.query().findOne(condition)
     }
 }

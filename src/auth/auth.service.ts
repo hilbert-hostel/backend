@@ -1,13 +1,17 @@
 import { compare, hash } from 'bcryptjs'
 import { Dependencies } from '../container'
-import { User } from '../models/user.model'
 import { IUserRepository } from '../user/user.repository'
-import { LoginInput, RegisterInput } from './auth.interface'
+import {
+    LoginInput,
+    LoginPayload,
+    RegisterInput,
+    RegisterPayload
+} from './auth.interface'
 import { IJwtService } from './jwt.service'
 
 export interface IAuthService {
-    registerUser(input: RegisterInput): Promise<{ user: User; token: string }>
-    login(input: LoginInput): Promise<{ user: User; token: string }>
+    registerUser(input: RegisterInput): Promise<RegisterPayload>
+    login(input: LoginInput): Promise<LoginPayload>
 }
 export class AuthService implements IAuthService {
     private readonly userRepository: IUserRepository
