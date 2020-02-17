@@ -41,6 +41,8 @@ paths:
             properties:
               token:
                 type: string
+              user:
+                $ref: '#/models/User'
         400:
           description: Bad Request
   /auth/login:
@@ -55,7 +57,6 @@ paths:
             required:
               - email
               - password
-
             properties:
               email:
                 type: string
@@ -69,5 +70,40 @@ paths:
             properties:
               token:
                 type: string
+              user:
+                $ref: '#/models/User'
         400:
           description: Incorrect email or password.
+  /auth/ping:
+    get:
+      description: test authentication
+      responses:
+        200:
+          description: successfully authenticate
+          schema:
+            $ref: '#/models/User'
+        401:
+          description: authentication failed
+
+models:
+  User:
+    required:
+      - id
+      - email
+      - firstname
+      - lastname
+      - phone
+      - address
+    properties:
+      id:
+        type: string
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      phone:
+        type: string
+      address:
+        type: string
