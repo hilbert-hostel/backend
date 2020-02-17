@@ -8,6 +8,7 @@ RUN yarn
 # Build
 COPY ./tsconfig.json ./
 COPY ./src ./src
+COPY ./scripts ./scripts
 RUN yarn build
 
 FROM node:12-alpine
