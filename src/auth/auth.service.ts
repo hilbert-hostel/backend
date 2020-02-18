@@ -27,7 +27,7 @@ export class AuthService implements IAuthService {
             username: input.username
         })
         if (!user) throw new Error('Wrong email or password.')
-        const correct = compare(input.password, user.password)
+        const correct = await compare(input.password, user.password)
         if (!correct) throw new Error('Wrong email or password.')
         return user
     }
