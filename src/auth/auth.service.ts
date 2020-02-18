@@ -26,9 +26,9 @@ export class AuthService implements IAuthService {
         const user = await this.userRepository.findOne({
             username: input.username
         })
-        if (!user) throw new Error('Wrong email or password.')
+        if (!user) throw new Error('Wrong username or password.')
         const correct = await compare(input.password, user.password)
-        if (!correct) throw new Error('Wrong email or password.')
+        if (!correct) throw new Error('Wrong username or password.')
         return user
     }
 }
