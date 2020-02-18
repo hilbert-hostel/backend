@@ -1,11 +1,10 @@
 import * as jwt from 'jsonwebtoken'
 import { Config } from '../config'
 import { Dependencies } from '../container'
-import { User } from '../models/user.model'
 import { Token, TokenPayload } from './auth.interface'
 
 export interface IJwtService {
-    generateToken(user: User): Promise<Token>
+    generateToken(userID: string): Promise<Token>
     verifyToken(token: string): Promise<TokenPayload>
 }
 
@@ -15,12 +14,10 @@ export class JwtService implements IJwtService {
         this.secret = config.SECRET
     }
 
-    generateToken(user: User): Promise<string> {
+    generateToken(userID: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            jwt.sign(
-                { userID: user.id } as TokenPayload,
-                this.secret,
-                (err, token) => (err ? reject(err) : resolve(token))
+            jwt.sign({ userID } as TokenPayload, this.secret, (err, token) =>
+                err ? reject(err) : resolve(token)
             )
         })
     }

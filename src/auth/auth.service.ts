@@ -23,10 +23,12 @@ export class AuthService implements IAuthService {
     }
 
     async login(input: LoginInput) {
-        const user = await this.userRepository.findOne({ email: input.email })
-        if (!user) throw new Error('Wrong email or password.')
-        const correct = compare(input.password, user.password)
-        if (!correct) throw new Error('Wrong email or password.')
+        const user = await this.userRepository.findOne({
+            username: input.username
+        })
+        if (!user) throw new Error('Wrong username or password.')
+        const correct = await compare(input.password, user.password)
+        if (!correct) throw new Error('Wrong username or password.')
         return user
     }
 }

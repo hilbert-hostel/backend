@@ -5,5 +5,6 @@ module.exports = {
         'ts-jest': {
             diagnostics: false
         }
-    }
+    },
+    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.ts$'
 }

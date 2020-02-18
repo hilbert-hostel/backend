@@ -9,7 +9,7 @@ export interface TokenPayload {
 export type RegisterInput = CreateUser
 
 export interface LoginInput {
-    email: string
+    username: string
     password: string
 }
 

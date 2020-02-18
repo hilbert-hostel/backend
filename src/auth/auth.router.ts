@@ -16,7 +16,7 @@ const { authService, jwtService, userRepository } = container
 router.post('/register', validate(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
     const user = await authService.registerUser(input)
-    const token = await jwtService.generateToken(user)
+    const token = await jwtService.generateToken(user.id)
     const payload: RegisterPayload = { user: omit(['password'], user), token }
     res.json(payload)
 })
@@ -24,7 +24,7 @@ router.post('/register', validate(registerValidator), async (req, res) => {
 router.post('/login', validate(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
     const user = await authService.login(input)
-    const token = await jwtService.generateToken(user)
+    const token = await jwtService.generateToken(user.id)
     const payload: LoginPayload = { user: omit(['password'], user), token }
     res.json(payload)
 })
