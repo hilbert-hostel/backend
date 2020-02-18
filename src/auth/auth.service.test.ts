@@ -11,28 +11,26 @@ describe('Auth Service', () => {
                 ...input
             }
         },
-        async findOne({ email }) {
+        async findOne({ username }) {
             const user = {
                 id: '1234',
+                username: 'username',
                 email: 'email',
                 password: await hash('password', 10),
                 firstname: 'asd',
-                lastname: 'asd',
-                phone: 'asd',
-                address: 'zxc'
+                lastname: 'asd'
             }
-            return email === 'email' ? user : undefined
+            return username === 'username' ? user : undefined
         },
 
         async findOneById(id) {
             const user = {
                 id: '1234',
+                username: 'username',
                 email: 'email',
                 password: await hash('password', 10),
                 firstname: 'asd',
-                lastname: 'asd',
-                phone: 'asd',
-                address: 'zxc'
+                lastname: 'asd'
             }
             return id === '1234' ? user : undefined
         }
@@ -40,12 +38,11 @@ describe('Auth Service', () => {
     const authService = new AuthService({ userRepository })
     test('register', async () => {
         const input: RegisterInput = {
+            username: 'username',
             email: 'email',
             password: 'password',
             firstname: 'asd',
-            lastname: 'asd',
-            phone: 'asd',
-            address: 'zxc'
+            lastname: 'asd'
         }
         const user = await authService.registerUser(input)
         expect(user.password).toEqual(expect.any(String))
@@ -58,23 +55,31 @@ describe('Auth Service', () => {
     })
     describe('login', () => {
         expect.assertions(3)
-        test('wrong email', () => {
+        test('wrong email', async () => {
             const input = {
-                email: 'eyy',
+                username: 'eyy',
                 password: 'password'
             }
-            expect(authService.login(input)).rejects.toThrow()
+            try {
+                await authService.login(input)
+            } catch (e) {
+                expect(e).toBeDefined()
+            }
         })
-        test('wrong password', () => {
+        test('wrong password', async () => {
             const input = {
-                email: 'email',
+                username: 'username',
                 password: 'asd'
             }
-            expect(authService.login(input)).rejects.toThrow()
+            try {
+                await authService.login(input)
+            } catch (e) {
+                expect(e).toBeDefined()
+            }
         })
         test('correct', async () => {
             const input = {
-                email: 'email',
+                username: 'username',
                 password: 'password'
             }
             const result = await authService.login(input)

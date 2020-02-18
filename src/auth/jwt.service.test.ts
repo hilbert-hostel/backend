@@ -1,5 +1,6 @@
 import { JwtService } from './jwt.service'
 test('jwt', async () => {
+    expect.assertions(2)
     const fakeConfig = {
         config: {
             SECRET: '1234'
@@ -8,12 +9,11 @@ test('jwt', async () => {
     const jwtService = new JwtService(fakeConfig)
     const jwt = await jwtService.generateToken({
         id: '1234',
-        email: 'asdf',
+        username: 'asdf',
+        email: 'email',
         password: 'password',
         firstname: 'name',
-        lastname: 'name',
-        phone: '0812345678',
-        address: 'Earth'
+        lastname: 'name'
     })
     expect(typeof jwt).toBe('string')
     const decoded = await jwtService.verifyToken(jwt)
