@@ -14,13 +14,14 @@ paths:
           schema:
             type: object
             required:
+              - username
               - email
               - password
               - firstname
               - lastname
-              - phone
-              - address
             properties:
+              username:
+                type: string
               email:
                 type: string
               password:
@@ -28,10 +29,6 @@ paths:
               firstname:
                 type: string
               lastname:
-                type: string
-              phone:
-                type: string
-              address:
                 type: string
       responses:
         201:
@@ -51,14 +48,14 @@ paths:
       parameters:
         - name: register
           in: body
-          description: email and password
+          description: username and password
           schema:
             type: object
             required:
-              - email
+              - username
               - password
             properties:
-              email:
+              username:
                 type: string
               password:
                 type: string
@@ -73,7 +70,7 @@ paths:
               user:
                 $ref: '#/models/User'
         400:
-          description: Incorrect email or password.
+          description: Incorrect username or password.
   /auth/ping:
     get:
       description: test authentication
@@ -89,13 +86,14 @@ models:
   User:
     required:
       - id
+      - username
       - email
       - firstname
       - lastname
-      - phone
-      - address
     properties:
       id:
+        type: string
+      username:
         type: string
       email:
         type: string
