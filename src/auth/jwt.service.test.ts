@@ -7,14 +7,7 @@ test('jwt', async () => {
         }
     } as any
     const jwtService = new JwtService(fakeConfig)
-    const jwt = await jwtService.generateToken({
-        id: '1234',
-        username: 'asdf',
-        email: 'email',
-        password: 'password',
-        firstname: 'name',
-        lastname: 'name'
-    })
+    const jwt = await jwtService.generateToken('1234')
     expect(typeof jwt).toBe('string')
     const decoded = await jwtService.verifyToken(jwt)
     expect(decoded.userID).toBe('1234')
