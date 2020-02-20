@@ -1,0 +1,9 @@
+language: postgres
+
+sudo: required
+
+services: 
+- docker
+
+script:
+- echo "hello world"
