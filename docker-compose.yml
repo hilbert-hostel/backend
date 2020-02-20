@@ -9,3 +9,5 @@ services:
       PORT:
       SECRET:
       DB_URI:
+      DB:
+      NODE_ENV:

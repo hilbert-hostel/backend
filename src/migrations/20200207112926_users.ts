@@ -9,15 +9,22 @@ export async function up(knex: Knex): Promise<any> {
             .primary()
             .defaultTo(knex.raw('uuid_generate_v4()'))
         table
+            .text('username')
+            .unique()
+            .notNullable()
+        table
             .text('email')
             .unique()
             .notNullable()
         table.text('password').notNullable()
         table.text('firstname').notNullable()
         table.text('lastname').notNullable()
+        table.text('address').nullable()
+        table.text('phone').nullable()
     })
 }
 
 export async function down(knex: Knex): Promise<any> {
-    return knex.raw('drop extension if exists "uuid-ossp"')
+    await knex.schema.dropTable('users')
+    return await knex.raw('drop extension if exists "uuid-ossp"')
 }

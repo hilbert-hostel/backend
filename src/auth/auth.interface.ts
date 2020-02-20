@@ -1,15 +1,21 @@
-export interface Token {
+import { User } from '../models/user.model'
+import { CreateUser } from '../user/user.interface'
+
+export type Token = string
+export interface TokenPayload {
     userID: string
 }
 
-export interface RegisterInput {
-    email: string
-    password: string
-    firstname: string
-    lastname: string
-}
+export type RegisterInput = CreateUser
 
 export interface LoginInput {
-    email: string
+    username: string
     password: string
 }
+
+export interface RegisterPayload {
+    user: Omit<User, 'password'>
+    token: string
+}
+
+export type LoginPayload = RegisterPayload
