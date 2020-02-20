@@ -1,3 +1,4 @@
+import cors from 'cors'
 import express from 'express'
 import 'express-async-errors'
 import helmet from 'helmet'
@@ -10,7 +11,9 @@ import { Router } from './router'
 container.initializeDatabase()
 
 const app = express()
-
+if (config.NODE_ENV !== 'production') {
+    app.use(cors())
+}
 app.use(express.json())
 app.use(morgan('dev'))
 app.use(helmet())
