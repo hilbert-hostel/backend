@@ -1,4 +1,4 @@
-language: postgres
+language: bash
 
 sudo: required
 
