@@ -1,5 +1,6 @@
 import { compare, hash } from 'bcryptjs'
 import { Dependencies } from '../container'
+import { BadRequestError } from '../error/HttpError'
 import { User } from '../models/user.model'
 import { IUserRepository } from '../user/user.repository'
 import { LoginInput, RegisterInput } from './auth.interface'
@@ -26,9 +27,9 @@ export class AuthService implements IAuthService {
         const user = await this.userRepository.findOne({
             username: input.username
         })
-        if (!user) throw new Error('Wrong username or password.')
+        if (!user) throw new BadRequestError('Wrong username or password.')
         const correct = await compare(input.password, user.password)
-        if (!correct) throw new Error('Wrong username or password.')
+        if (!correct) throw new BadRequestError('Wrong username or password.')
         return user
     }
 }
