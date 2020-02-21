@@ -2,6 +2,8 @@ language: node.js
 node_js:
 - "node"
 
+sudo: required
+
 cache: yarn
 
 before_install:
@@ -14,5 +16,12 @@ services:
 - docker
 
 script:
+- yarn test
+- docker build -t hilbert-backend .
 
-- 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then yarn test; fi' 
+after_success:
+- docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+- docker tag hilbert-backend $DOCKER_USER/hilbert-backend:$TRAVIS_BUILD_NUMBER
+- docker push $DOCKER_USER/hilbert-backend:$TRAVIS_BUILD_NUMBER
+- docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
+- docker push $DOCKER_USER/hilbert-backend:latest
