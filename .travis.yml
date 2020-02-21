@@ -21,7 +21,7 @@ script:
 
 after_success:
 - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-- docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER
 - docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER
+- docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER
 - docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
 - docker push $DOCKER_USER/hilbert-backend:latest
