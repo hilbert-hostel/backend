@@ -1,4 +1,4 @@
-import { User } from '../models/user.model'
+import { User } from '../models/user'
 
 export type CreateUser = Omit<User, 'id' | 'phone' | 'address'>
 

@@ -1,4 +1,4 @@
-import { User } from '../models/user.model'
+import { User } from '../models/user'
 import { CreateUser } from '../user/user.interface'
 
 export type Token = string

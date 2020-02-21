@@ -1,5 +1,5 @@
-import { Model } from 'objection'
-
+import uuid from 'uuid/v4'
+import BaseModel from './base'
 export interface User {
     id: string
     username: string
@@ -10,7 +10,7 @@ export interface User {
     phone?: string
     address?: string
 }
-export class UserModel extends Model implements User {
+export default class UserModel extends BaseModel implements User {
     id!: string
     username!: string
     email!: string
@@ -19,5 +19,8 @@ export class UserModel extends Model implements User {
     lastname!: string
     phone?: string
     address?: string
-    static tableName = 'users'
+    static tableName = 'user'
+    $beforeInsert() {
+        this.id = uuid()
+    }
 }

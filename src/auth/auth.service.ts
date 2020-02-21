@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcryptjs'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
-import { User } from '../models/user.model'
+import { User } from '../models/user'
 import { IUserRepository } from '../user/user.repository'
 import { LoginInput, RegisterInput } from './auth.interface'
 

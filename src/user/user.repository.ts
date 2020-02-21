@@ -1,4 +1,4 @@
-import { User, UserModel } from '../models/user.model'
+import UserModel, { User } from '../models/user'
 import { CreateUser, FindUser } from './user.interface'
 
 export interface IUserRepository {
