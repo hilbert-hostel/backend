@@ -6,10 +6,12 @@ export interface TokenPayload {
     userID: string
 }
 
-export type RegisterInput = CreateUser
+export interface RegisterInput extends Omit<CreateUser, 'national_id'> {
+    nationalID: string
+}
 
 export interface LoginInput {
-    username: string
+    email: string
     password: string
 }
 

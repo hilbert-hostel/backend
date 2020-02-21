@@ -4,28 +4,28 @@ import BaseModel from './base'
 import { Reservation } from './reservation'
 export interface User {
     id: string
-    username: string
     email: string
     password: string
     firstname: string
     lastname: string
-    phone?: string
-    address?: string
-    reservationMade?: Reservation
-    reservationIn?: Reservation[]
+    national_id: string
+    phone: string
+    address: string
+    reservation_made?: Reservation[]
+    reservation_in?: Reservation[]
 }
 export default class UserModel extends BaseModel implements User {
     id!: string
-    username!: string
     email!: string
     password!: string
     firstname!: string
     lastname!: string
-    phone?: string
-    address?: string
+    national_id!: string
+    phone!: string
+    address!: string
     static tableName = 'user'
     static relationMappings = {
-        reservationMade: {
+        reservation_made: {
             relation: Model.HasManyRelation,
             modelClass: 'reservation',
             join: {
@@ -33,7 +33,7 @@ export default class UserModel extends BaseModel implements User {
                 to: 'reservation.user'
             }
         },
-        reservationIn: {
+        reservation_in: {
             relation: Model.ManyToManyRelation,
             modelClass: 'reservation',
             join: {

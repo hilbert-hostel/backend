@@ -16,8 +16,10 @@ export class AuthService implements IAuthService {
     }
     async registerUser(input: RegisterInput) {
         const hashed = await hash(input.password, 10)
+        const { nationalID, ...rest } = input
         const user = await this.userRepository.create({
-            ...input,
+            ...rest,
+            national_id: nationalID,
             password: hashed
         })
         return user
@@ -25,11 +27,11 @@ export class AuthService implements IAuthService {
 
     async login(input: LoginInput) {
         const user = await this.userRepository.findOne({
-            username: input.username
+            email: input.email
         })
-        if (!user) throw new BadRequestError('Wrong username or password.')
+        if (!user) throw new BadRequestError('Wrong email or password.')
         const correct = await compare(input.password, user.password)
-        if (!correct) throw new BadRequestError('Wrong username or password.')
+        if (!correct) throw new BadRequestError('Wrong email or password.')
         return user
     }
 }

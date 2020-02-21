@@ -2,12 +2,6 @@ import * as yup from 'yup'
 import { LoginInput, RegisterInput } from './auth.interface'
 
 export const registerValidator = yup.object().shape<RegisterInput>({
-    username: yup
-        .string()
-        .min(6)
-        .max(64)
-        .matches(/^(?=.*[a-zA-Z]).{6,}$/gm)
-        .required(),
     email: yup
         .string()
         .email()
@@ -18,10 +12,21 @@ export const registerValidator = yup.object().shape<RegisterInput>({
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{9,}$/gm)
         .required(),
     firstname: yup.string().required(),
-    lastname: yup.string().required()
+    nationalID: yup
+        .string()
+        .length(13)
+        .matches(/^[0-9]{13}$/)
+        .required(),
+    lastname: yup.string().required(),
+    phone: yup
+        .string()
+        .length(10)
+        .matches(/^[0-9]{10}$/)
+        .required(),
+    address: yup.string().required()
 })
 
 export const loginValidator = yup.object().shape<LoginInput>({
-    username: yup.string().required(),
+    email: yup.string().required(),
     password: yup.string().required()
 })
