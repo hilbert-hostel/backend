@@ -14,4 +14,5 @@ services:
 - docker
 
 script:
+
 - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then yarn test; fi' 
