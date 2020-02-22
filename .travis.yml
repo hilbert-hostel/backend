@@ -16,12 +16,16 @@ services:
 - docker
 
 script:
-- yarn test
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] ; then yarn test  ; fi
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then ; fi # used when deploying pa?
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then ; fi # used when deploying pa?
 - docker build -t hilbert-backend .
 
 after_success:
 - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-- docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER
-- docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER
+- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER && 
+        docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER ; fi
+- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER && 
+        docker push $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER ; fi
 - docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
 - docker push $DOCKER_USER/hilbert-backend:latest
