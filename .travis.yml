@@ -1,9 +1,32 @@
-language: bash
+language: node.js
+node_js:
+- "node"
 
 sudo: required
+
+cache: yarn
+
+before_install:
+- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.13.0 -export PATH="$HOME/.yarn/bin:$PATH"
+
+install:
+- yarn
 
 services: 
 - docker
 
 script:
-- echo "hello world"
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] ; then yarn test  ; fi
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then yarn test; fi # used when deploying pa?
+- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then yarn test; fi # used when deploying pa?
+- docker build -t hilbert-backend .
+
+after_success:
+- docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+# not sure if this part works na
+- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER && 
+        docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER ; fi
+- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER && 
+        docker push $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER ; fi
+- docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
+- docker push $DOCKER_USER/hilbert-backend:latest
