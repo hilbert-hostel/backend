@@ -3,14 +3,24 @@ import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import {
+    IReservationRepository,
+    ReservationRepository
+} from './reservation/reservation.repository'
+import {
+    IReservationService,
+    ReservationService
+} from './reservation/reservation.service'
 import { IUserRepository, UserRepository } from './user/user.repository'
 
 export interface AllDependencies {
     config: Config
+    initializeDatabase: InitializeDatabase
     userRepository: IUserRepository
     jwtService: IJwtService
     authService: IAuthService
-    initializeDatabase: InitializeDatabase
+    reservationRepository: IReservationRepository
+    reservationService: IReservationService
 }
 
 type RegisterDeps<T> = {
@@ -19,10 +29,12 @@ type RegisterDeps<T> = {
 
 export const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
+    initializeDatabase: asFunction(makeInitializeDatabase),
     userRepository: asClass(UserRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
-    initializeDatabase: asFunction(makeInitializeDatabase)
+    reservationRepository: asClass(ReservationRepository),
+    reservationService: asClass(ReservationService)
 }
 
 const DIContainer = createContainer()

@@ -1,4 +1,4 @@
-version: "3.2"
+version: '3.2'
 
 services:
   backend:
@@ -22,7 +22,7 @@ services:
       PORT: 3000
       SECRET: SECRET
     working_dir: /app
-    command: sh -c 'yarn knex --cwd ./src migrate:up && yarn dev'
+    command: yarn dev
 
   db:
     image: postgres

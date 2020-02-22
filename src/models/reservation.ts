@@ -7,8 +7,8 @@ export interface Reservation {
     id: string
     check_in: Date
     check_out: Date
-    add_ons: string
-    special_requests: string
+    add_ons?: string
+    special_requests?: string
     created_at: Date
     updated_at: Date
     beds?: Bed[]
@@ -19,8 +19,8 @@ export class ReservationModel extends BaseModel implements Reservation {
     id!: string
     check_in!: Date
     check_out!: Date
-    add_ons!: string
-    special_requests!: string
+    add_ons?: string
+    special_requests?: string
     created_at!: Date
     updated_at!: Date
     static tableName = 'reservation'
