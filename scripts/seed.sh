@@ -1,3 +1,3 @@
 #! /bin/bash
 
-yarn knex seed:run -x ts --cwd ./src
+yarn knex seed:run --cwd ./src
