@@ -1,10 +1,15 @@
 import * as Knex from 'knex'
+import moment from 'moment'
+import shortid from 'shortid'
+import uuid from 'uuid/v4'
 import { Bed } from '../models/bed'
 import { Room } from '../models/room'
 
 export async function seed(knex: Knex): Promise<any> {
     // Deletes ALL existing entries
     await knex('room').del()
+    await knex('user').del()
+    await knex('reservation').del()
 
     // Inserts seed entries
     const rooms: Array<Omit<Room, 'beds'>> = [
@@ -338,16 +343,49 @@ export async function seed(knex: Knex): Promise<any> {
     if (mixedDormBeds.length !== 20)
         throw new Error('should have 20 mixed dorm beds')
 
-    const beds = ([] as Array<Omit<Bed, 'id'>>).concat(
-        doubleBathRoomBeds,
-        doubleNoBathRoomBeds,
-        tripleBathRoomBeds,
-        tripleNoBathRoomBeds,
-        femaleDormBeds,
-        mixedDormBeds
-    )
+    const beds = ([] as Array<Omit<Bed, 'id'>>)
+        .concat(
+            doubleBathRoomBeds,
+            doubleNoBathRoomBeds,
+            tripleBathRoomBeds,
+            tripleNoBathRoomBeds,
+            femaleDormBeds,
+            mixedDormBeds
+        )
+        .map((bed, i) => ({ id: i + 1, ...bed }))
     await knex('room').insert(
         rooms.map(r => ({ ...r, facilities: JSON.stringify(r.facilities) }))
     )
-    return knex('bed').insert(beds)
+    await knex('bed').insert(beds)
+    const user_id = uuid()
+    await knex('user')
+        .returning(['id'])
+        .insert({
+            id: user_id,
+            email: 'yamarashi@email.com',
+            password: 'YamaKung69',
+            firstname: 'F',
+            lastname: 'W',
+            national_id: '111111111111',
+            phone: '000000000',
+            address: 'here'
+        })
+    const check_in = moment().add(1, 'day')
+    const check_out = moment().add(3, 'day')
+    const reservation_id = shortid()
+    await knex('reservation')
+        .returning(['id'])
+        .insert({
+            id: reservation_id,
+            check_in,
+            check_out
+        })
+    await knex('reservation_member').insert({ reservation_id, user_id })
+    return await knex('reserved_bed').insert([
+        { reservation_id, bed_id: 1 },
+        { reservation_id, bed_id: 2 },
+        { reservation_id, bed_id: 3 },
+        { reservation_id, bed_id: 4 },
+        { reservation_id, bed_id: 5 }
+    ])
 }
