@@ -57,18 +57,6 @@ export class ReservationModel extends BaseModel implements Reservation {
                 },
                 to: 'bed.id'
             }
-        },
-        rooms: {
-            relation: Model.ManyToManyRelation,
-            modelClass: 'room',
-            join: {
-                from: 'reservation.id',
-                through: {
-                    from: 'reserved_bed.reservation_id',
-                    to: 'reserved_bed.bed_id'
-                },
-                to: 'bed.id'
-            }
         }
     }
     $beforeInsert() {

@@ -18,19 +18,14 @@ export interface IReservationRepository {
 export class ReservationRepository implements IReservationRepository {
     findAvailableRooms(check_in: string, check_out: string) {
         return RoomModel.query()
-            .join('bed', 'room.id', '=', 'bed.room_id')
-            .fullOuterJoin('reserved_bed', 'reserved_bed.bed_id', '=', 'bed.id')
-            .fullOuterJoin(
-                'reservation',
-                'reservation.id',
-                '=',
-                'reserved_bed.reservation_id'
-            )
-            .whereNull('reservation.id')
-            .orWhere('reservation.check_out', '<=', check_in)
-            .orWhere('reservation.check_in', '>', check_out)
-            .groupBy('room.id')
-            .select('room.*', RoomModel.raw('array_agg(bed.id) as beds'))
+            .withGraphJoined('beds', { joinOperation: 'innerJoin' })
+            .modifyGraph('beds', bed => {
+                bed.fullOuterJoinRelated('reservations')
+                    .whereNull('reservations.id')
+                    .orWhere('reservations.check_out', '<=', check_in)
+                    .orWhere('reservations.check_in', '>', check_out)
+                    .select('bed.id')
+            })
             .orderBy('room.id')
     }
 

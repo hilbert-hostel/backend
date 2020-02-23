@@ -18,6 +18,18 @@ export default class BedModel extends BaseModel implements Bed {
                 from: 'bed.room_id',
                 to: 'room.id'
             }
+        },
+        reservations: {
+            relation: Model.ManyToManyRelation,
+            modelClass: 'reservation',
+            join: {
+                from: 'bed.id',
+                through: {
+                    from: 'reserved_bed.bed_id',
+                    to: 'reserved_bed.reservation_id'
+                },
+                to: 'reservation.id'
+            }
         }
     }
 }
