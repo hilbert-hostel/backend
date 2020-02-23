@@ -1,3 +1,5 @@
+if: $TRAVIS_EVENT_TYPE != "push"
+
 language: node.js
 node_js:
 - "node"
@@ -14,7 +16,6 @@ install:
 
 services: 
 - docker
-
 script:
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] ; then yarn test  ; fi
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then yarn test; fi # used when deploying pa?
