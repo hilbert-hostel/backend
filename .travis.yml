@@ -19,7 +19,6 @@ stages:
         
         - name: docker build to docker hub
           if: NOT type = push
-        
 
 jobs:
         include:
