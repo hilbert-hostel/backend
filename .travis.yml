@@ -1,34 +1,48 @@
-language: node.js
+language: node_js
 node_js:
-- "node"
-
-sudo: required
+        - "node"
 
 cache: yarn
 
 before_install:
-- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.13.0 -export PATH="$HOME/.yarn/bin:$PATH"
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.13.0 -export PATH="$HOME/.yarn/bin:$PATH"
 
 install:
 - yarn
 
 services: 
-- docker
+        - docker
 
-script:
-- if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] ; then yarn test  ; fi
-- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then yarn test; fi # used when deploying pa?
-- if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then yarn test; fi # used when deploying pa?
-- docker build -t hilbert-backend .
-- echo "Sup bitch"
+stages:
+        - name: run test
+          if: type = pull_request
+        
+        - name: docker build to docker hub
+          if: type != pull_request AND type != push
+        
 
-after_success:
-- docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER && 
-        docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER ; fi
-- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER && 
-        docker push $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER ; fi
-- if [[ $TRAVIS_PULL_REQUEST_BRANCH == "feat/reservation" ]] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER && 
-        docker push $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER ; fi
-- docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
-- docker push $DOCKER_USER/hilbert-backend:latest
+jobs:
+        include:
+                - stage: run test
+                  script: 
+                        - yarn test
+                
+                - stage: docker build to docker hub
+                  script:
+                        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+                        - docker build -t hilbert-backend .
+                        
+                        - if [ $TRAVIS_BRANCH == "dev" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER && 
+                                docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER ; fi
+                        
+                        - if [ $TRAVIS_BRANCH == "master" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER && 
+                                docker push $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER ; fi
+                        
+                        - if [ $TRAVIS_BRANCH == "feat/reservation" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER && 
+                                docker push $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER ; fi
+                        
+                        - docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
+                        - docker push $DOCKER_USER/hilbert-backend:latest
+                
+                  
+
