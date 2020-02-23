@@ -15,8 +15,11 @@ install:
 services: 
 - docker
 
+branches: 
+        only:
+        - master
+
 script:
-- if [[$TRAVIS_EVENT_TYPE == "merge_pull_request"]] ; then no-ci ; fi
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" ]] ; then yarn test  ; fi
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then yarn test; fi # used when deploying pa?
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then yarn test; fi # used when deploying pa?
