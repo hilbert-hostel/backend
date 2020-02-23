@@ -20,6 +20,7 @@ script:
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "dev" ]] ; then yarn test; fi # used when deploying pa?
 - if [[ $TRAVIS_EVENT_TYPE == "pull_request" && $TRAVIS_PULL_REQUEST_BRANCH == "master" ]] ; then yarn test; fi # used when deploying pa?
 - docker build -t hilbert-backend .
+- echo "Sup bitch"
 
 after_success:
 - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
