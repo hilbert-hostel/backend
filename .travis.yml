@@ -18,8 +18,8 @@ stages:
           if: type = pull_request
         
         - name: docker build to docker hub
-          if: (NOT (type IN (push, pull_request)))
-        
+
+          if: NOT type IN (push, pull_request)       
 
 jobs:
         include:
