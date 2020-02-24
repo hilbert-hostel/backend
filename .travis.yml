@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+        - "node"
+
+cache: yarn
+
+services: 
+        - docker
+
+stages:
+        - name: run test
+          if: type = pull_request
+        
+        - name: docker build to docker hub
+          if: type = push
+        
+jobs:
+        include:
+                - stage: run test
+                  script: 
+                        - yarn test
+                
+                - stage: docker build to docker hub
+                  script:
+                        - ./scripts/publish_docker_image.sh
