@@ -10,4 +10,6 @@ then
 else 
     docker tag hilbert-backend $DOCKER_USER/hilbert-backend:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
     docker push $DOCKER_USER/hilbert-backend:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
+    docker tag hilbert-backend $DOCKER_USER/hilbert-backend:$TRAVIS_BRANCH-latest
+    docker push $DOCKER_USER/hilbert-backend:$TRAVIS_BRANCH-latest
 fi
