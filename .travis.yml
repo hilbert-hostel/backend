@@ -18,9 +18,8 @@ stages:
           if: type = pull_request
         
         - name: docker build to docker hub
-          if: NOT type = push AND NOT type = pull_request
+          if: type = push
         
-
 jobs:
         include:
                 - stage: run test
@@ -29,20 +28,5 @@ jobs:
                 
                 - stage: docker build to docker hub
                   script:
-                        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-                        - docker build -t hilbert-backend .
+                        - ./scripts/publish_docker_image.sh
                         
-                        - if [ $TRAVIS_BRANCH == "dev" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER && 
-                                docker push $DOCKER_USER/hilbert-backend:dev-$TRAVIS_BUILD_NUMBER ; fi
-                        
-                        - if [ $TRAVIS_BRANCH == "master" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER && 
-                                docker push $DOCKER_USER/hilbert-backend:prod-$TRAVIS_BUILD_NUMBER ; fi
-                        
-                        - if [ $TRAVIS_BRANCH == "feat/reservation" ] ; then docker tag hilbert-backend $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER && 
-                                docker push $DOCKER_USER/hilbert-backend:feat/reservation-$TRAVIS_BUILD_NUMBER ; fi
-                        
-                        - docker tag hilbert-backend $DOCKER_USER/hilbert-backend:latest
-                        - docker push $DOCKER_USER/hilbert-backend:latest
-                
-                  
-
