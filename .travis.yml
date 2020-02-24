@@ -29,4 +29,3 @@ jobs:
                 - stage: docker build to docker hub
                   script:
                         - ./scripts/publish_docker_image.sh
-                        
