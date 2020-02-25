@@ -2,6 +2,7 @@ import { Model } from 'objection'
 import shortid from 'shortid'
 import BaseModel from './base'
 import { Bed } from './bed'
+import { CreatedUpdatedAt, GenID } from './decorators'
 import { User } from './user'
 export interface Reservation {
     id: string
@@ -15,6 +16,8 @@ export interface Reservation {
     user?: User
     members?: User[]
 }
+@GenID(shortid)
+@CreatedUpdatedAt()
 export class ReservationModel extends BaseModel implements Reservation {
     id!: string
     check_in!: Date
@@ -58,8 +61,5 @@ export class ReservationModel extends BaseModel implements Reservation {
                 to: 'bed.id'
             }
         }
-    }
-    $beforeInsert() {
-        this.id = shortid.generate()
     }
 }

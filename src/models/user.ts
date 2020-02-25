@@ -1,6 +1,7 @@
 import { Model } from 'objection'
 import uuid from 'uuid/v4'
 import BaseModel from './base'
+import { GenID } from './decorators'
 import { Reservation } from './reservation'
 export interface User {
     id: string
@@ -14,6 +15,7 @@ export interface User {
     reservation_made?: Reservation[]
     reservation_in?: Reservation[]
 }
+@GenID(uuid)
 export default class UserModel extends BaseModel implements User {
     id!: string
     email!: string
@@ -45,8 +47,5 @@ export default class UserModel extends BaseModel implements User {
                 to: 'reservation.id'
             }
         }
-    }
-    $beforeInsert() {
-        this.id = uuid()
     }
 }
