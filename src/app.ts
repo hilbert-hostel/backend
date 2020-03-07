@@ -22,6 +22,10 @@ const main = async () => {
     app.use(morgan('dev'))
     app.use(helmet())
     app.use('/', Router)
+    app.use('/door/:op', (req, res) => {
+        mqttClient.publish('door', req.params.op)
+        res.send(req.query.message)
+    })
     app.use(errorHandler)
     app.listen(config.PORT, () =>
         console.log(`listening on port ${config.PORT}`)
