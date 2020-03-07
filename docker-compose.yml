@@ -11,3 +11,7 @@ services:
       DB_URI:
       DB:
       NODE_ENV:
+      MQTT_HOST:
+      MQTT_PORT:
+      MQTT_USERNAME:
+      MQTT_PASSWORD:
