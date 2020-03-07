@@ -1,3 +1,4 @@
+import { hash } from 'bcryptjs'
 import * as Knex from 'knex'
 import moment from 'moment'
 import shortid from 'shortid'
@@ -363,7 +364,7 @@ export async function seed(knex: Knex): Promise<any> {
         .insert({
             id: user_id,
             email: 'yamarashi@email.com',
-            password: 'YamaKung69',
+            password: await hash('YamaKung69', 10),
             firstname: 'F',
             lastname: 'W',
             national_id: '111111111111',
