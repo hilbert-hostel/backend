@@ -8,15 +8,25 @@ import { container } from './container'
 import { errorHandler } from './error/errorHandler'
 import { Router } from './router'
 
-container.initializeDatabase()
+const main = async () => {
+    const { mqttClient, initializeDatabase, connectMqtt } = container
+    initializeDatabase()
+    await connectMqtt()
+    const app = express()
 
-const app = express()
-if (config.NODE_ENV !== 'production') {
-    app.use(cors())
+    if (config.NODE_ENV !== 'production') {
+        app.use(cors())
+    }
+
+    app.use(express.json())
+    app.use(morgan('dev'))
+    app.use(helmet())
+    app.use('/', Router)
+    app.use(errorHandler)
+    app.listen(config.PORT, () =>
+        console.log(`listening on port ${config.PORT}`)
+    )
+
 }
-app.use(express.json())
-app.use(morgan('dev'))
-app.use(helmet())
-app.use('/', Router)
-app.use(errorHandler)
-app.listen(config.PORT, () => console.log(`listening on port ${config.PORT}`))
+
+main()

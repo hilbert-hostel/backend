@@ -16,7 +16,11 @@ export const config = {
     NODE_ENV: env.NODE_ENV,
     DB_URI: env.DB_URI,
     DB: env.DB,
-    SECRET: env.SECRET
+    SECRET: env.SECRET,
+    MQTT_HOST: env.MQTT_HOST,
+    MQTT_PORT: env.MQTT_PORT,
+    MQTT_USERNAME: env.MQTT_USERNAME,
+    MQTT_PASWORD: env.MQTT_PASSWORD
 }
 
 export type Config = typeof config

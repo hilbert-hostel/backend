@@ -1,8 +1,10 @@
 import { asClass, asFunction, asValue, createContainer, Resolver } from 'awilix'
+import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
     ReservationRepository
@@ -21,24 +23,27 @@ export interface AllDependencies {
     authService: IAuthService
     reservationRepository: IReservationRepository
     reservationService: IReservationService
+    mqttClient: MqttClient
+    connectMqtt: ConnectMqtt
 }
 
 type RegisterDeps<T> = {
     [P in keyof T]: Resolver<T[P]>
 }
 
-export const dependencies: RegisterDeps<AllDependencies> = {
+const DIContainer = createContainer()
+
+const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     initializeDatabase: asFunction(makeInitializeDatabase),
     userRepository: asClass(UserRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
     reservationRepository: asClass(ReservationRepository),
-    reservationService: asClass(ReservationService)
+    reservationService: asClass(ReservationService),
+    mqttClient: asFunction(mqttClient),
+    connectMqtt: asFunction(connectMqtt)
 }
-
-const DIContainer = createContainer()
-
 DIContainer.register(dependencies)
 
 export const container = DIContainer.cradle as AllDependencies
