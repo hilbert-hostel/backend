@@ -6,6 +6,9 @@ import morgan from 'morgan'
 import { config } from './config'
 import { container } from './container'
 import { errorHandler } from './error/errorHandler'
+import { isAuthenticated } from './middlewares/isAuthenticated'
+import { isCheckedIn } from './middlewares/isCheckedIn'
+import { isInRoom } from './middlewares/isInRoom'
 import { Router } from './router'
 
 const main = async () => {
@@ -22,10 +25,37 @@ const main = async () => {
     app.use(morgan('dev'))
     app.use(helmet())
     app.use('/', Router)
-    app.use('/door/:op', (req, res) => {
-        mqttClient.publish('door', req.params.op)
-        res.send(req.query.message)
-    })
+
+    app.post(
+        '/door/lock',
+        isAuthenticated,
+        isInRoom,
+        isCheckedIn,
+        (req, res) => {
+            mqttClient.publish('door', 'lock')
+            res.send('eyy')
+        }
+    )
+    app.post(
+        '/door/unlock',
+        isAuthenticated,
+        isInRoom,
+        isCheckedIn,
+        (req, res) => {
+            mqttClient.publish('door', 'unlock')
+            res.send('eyy')
+        }
+    )
+    app.post(
+        '/door/status',
+        isAuthenticated,
+        isInRoom,
+        isCheckedIn,
+        (req, res) => {
+            mqttClient.publish('door', 'status')
+            res.send('eyy')
+        }
+    )
     app.use(errorHandler)
     app.listen(config.PORT, () =>
         console.log(`listening on port ${config.PORT}`)
