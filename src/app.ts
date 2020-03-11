@@ -47,12 +47,12 @@ const main = async () => {
         }
     )
     app.post(
-        '/door/status',
+        '/door/sound',
         isAuthenticated,
         isInRoom,
         isCheckedIn,
         (req, res) => {
-            mqttClient.publish('door', 'status')
+            mqttClient.publish('door', 'sound')
             res.send('eyy')
         }
     )
