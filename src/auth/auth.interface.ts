@@ -21,3 +21,8 @@ export interface RegisterPayload {
 }
 
 export type LoginPayload = RegisterPayload
+
+export interface VerifyUserInput {
+    userID: string
+    token: string
+}

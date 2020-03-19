@@ -1,4 +1,4 @@
-version: '3.2'
+version: "3.2"
 
 services:
   backend:
@@ -15,3 +15,7 @@ services:
       MQTT_PORT:
       MQTT_USERNAME:
       MQTT_PASSWORD:
+      MAILER_USER:
+      MAILER_CLIENT_ID:
+      MAILER_CLIENT_SECRET:
+      MAILER_REFRESH_TOKEN:

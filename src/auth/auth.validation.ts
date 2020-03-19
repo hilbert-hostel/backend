@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { LoginInput, RegisterInput } from './auth.interface'
+import { LoginInput, RegisterInput, VerifyUserInput } from './auth.interface'
 
 export const registerValidator = yup.object().shape<RegisterInput>({
     email: yup
@@ -29,4 +29,12 @@ export const registerValidator = yup.object().shape<RegisterInput>({
 export const loginValidator = yup.object().shape<LoginInput>({
     email: yup.string().required(),
     password: yup.string().required()
+})
+
+export const verifyUserValidator = yup.object().shape<VerifyUserInput>({
+    userID: yup.string().required(),
+    token: yup
+        .string()
+        .required()
+        .matches(/^\d{6}$/)
 })

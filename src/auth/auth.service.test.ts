@@ -1,13 +1,17 @@
 import { hash } from 'bcryptjs'
+import { config } from '../config'
+import { IMailService } from '../email/email.service'
 import { IUserRepository } from '../user/user.repository'
 import { RegisterInput } from './auth.interface'
 import { AuthService } from './auth.service'
+import { IVerificationTokenRepository } from './verificationToken.repository'
 
 describe('Auth Service', () => {
     const userRepository: IUserRepository = {
         async create(input) {
             return {
                 id: '1234',
+                is_verified: false,
                 ...input
             }
         },
@@ -20,7 +24,8 @@ describe('Auth Service', () => {
                 lastname: 'asd',
                 national_id: '1234567890123',
                 phone: '0801234567',
-                address: 'Earth'
+                address: 'Earth',
+                is_verified: false
             }
             return email === 'email' ? user : undefined
         },
@@ -34,12 +39,53 @@ describe('Auth Service', () => {
                 lastname: 'asd',
                 national_id: '1234567890123',
                 phone: '0801234567',
-                address: 'Earth'
+                address: 'Earth',
+                is_verified: false
             }
             return id === '1234' ? user : undefined
+        },
+
+        async updateOneById(id, update) {
+            const user = {
+                id: '1234',
+                email: 'email',
+                password: await hash('password', 10),
+                firstname: 'asd',
+                lastname: 'asd',
+                national_id: '1234567890123',
+                phone: '0801234567',
+                address: 'Earth',
+                is_verified: false
+            }
+            return id === '1234' ? { ...user, ...update } : undefined
         }
     }
-    const authService = new AuthService({ userRepository })
+    const verificationTokenRepository: IVerificationTokenRepository = {
+        async create({ user_id, token }) {
+            return {
+                id: '12345',
+                user_id,
+                token
+            }
+        },
+        async findOne({ user_id, token }) {
+            const t = {
+                id: '12345',
+                user_id,
+                token
+            }
+            return t.user_id === user_id && t.token === token ? t : undefined
+        }
+    }
+    const mailService: IMailService = {
+        async sendMail() {}
+    }
+    const authService = new AuthService({
+        userRepository,
+        verificationTokenRepository,
+        config,
+        mailService
+    })
     test('register', async () => {
         const input: RegisterInput = {
             email: 'email',
