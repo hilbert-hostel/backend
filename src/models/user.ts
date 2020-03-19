@@ -14,6 +14,7 @@ export interface User {
     address: string
     reservation_made?: Reservation[]
     reservation_in?: Reservation[]
+    is_verified: boolean
 }
 @GenID(uuid)
 export default class UserModel extends BaseModel implements User {
@@ -25,6 +26,7 @@ export default class UserModel extends BaseModel implements User {
     national_id!: string
     phone!: string
     address!: string
+    is_verified!: boolean
     static tableName = 'user'
     static relationMappings = {
         reservation_made: {

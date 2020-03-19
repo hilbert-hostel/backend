@@ -2,6 +2,10 @@ import { asClass, asFunction, asValue, createContainer, Resolver } from 'awilix'
 import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
+import {
+    IVerificationTokenRepository,
+    VerificationTokenRepository
+} from './auth/verificationToken.repository'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
@@ -19,6 +23,7 @@ export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
     userRepository: IUserRepository
+    verificationTokenRepository: IVerificationTokenRepository
     jwtService: IJwtService
     authService: IAuthService
     reservationRepository: IReservationRepository
@@ -37,6 +42,7 @@ const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     initializeDatabase: asFunction(makeInitializeDatabase),
     userRepository: asClass(UserRepository),
+    verificationTokenRepository: asClass(VerificationTokenRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
     reservationRepository: asClass(ReservationRepository),
