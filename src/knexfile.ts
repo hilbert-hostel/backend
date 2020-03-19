@@ -1,9 +1,12 @@
-// Update with your config settings.
+import * as dotenv from 'dotenv'
 
+dotenv.config({ path: '../.env' })
+console.log(process.env.DB_URI)
+// Update with your config settings.
 module.exports = {
     development: {
         client: 'postgresql',
-        connection: 'postgres://postgres:password@localhost:5432/postgres'
+        connection: process.env.DB_URI
     },
 
     staging: {
