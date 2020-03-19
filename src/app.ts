@@ -12,55 +12,59 @@ import { isInRoom } from './middlewares/isInRoom'
 import { Router } from './router'
 
 const main = async () => {
-    const { mqttClient, initializeDatabase, connectMqtt } = container
-    initializeDatabase()
-    await connectMqtt()
-    const app = express()
+    try {
+        const { mqttClient, initializeDatabase, connectMqtt } = container
+        initializeDatabase()
+        await connectMqtt()
+        const app = express()
 
-    if (config.NODE_ENV !== 'production') {
-        app.use(cors())
+        if (config.NODE_ENV !== 'production') {
+            app.use(cors())
+        }
+
+        app.use(express.json())
+        app.use(morgan('dev'))
+        app.use(helmet())
+        app.use('/', Router)
+
+        app.post(
+            '/door/lock',
+            isAuthenticated,
+            isInRoom,
+            isCheckedIn,
+            (req, res) => {
+                mqttClient.publish('door', 'lock')
+                res.send('eyy')
+            }
+        )
+        app.post(
+            '/door/unlock',
+            isAuthenticated,
+            isInRoom,
+            isCheckedIn,
+            (req, res) => {
+                mqttClient.publish('door', 'unlock')
+                res.send('eyy')
+            }
+        )
+        app.post(
+            '/door/sound',
+            isAuthenticated,
+            isInRoom,
+            isCheckedIn,
+            (req, res) => {
+                mqttClient.publish('door', 'sound')
+                res.send('eyy')
+            }
+        )
+        app.use(errorHandler)
+        app.listen(config.PORT, () =>
+            console.log(`listening on port ${config.PORT}`)
+        )
+    } catch (e) {
+        console.log(e)
+        process.exit(1)
     }
-
-    app.use(express.json())
-    app.use(morgan('dev'))
-    app.use(helmet())
-    app.use('/', Router)
-
-    app.post(
-        '/door/lock',
-        isAuthenticated,
-        isInRoom,
-        isCheckedIn,
-        (req, res) => {
-            mqttClient.publish('door', 'lock')
-            res.send('eyy')
-        }
-    )
-    app.post(
-        '/door/unlock',
-        isAuthenticated,
-        isInRoom,
-        isCheckedIn,
-        (req, res) => {
-            mqttClient.publish('door', 'unlock')
-            res.send('eyy')
-        }
-    )
-    app.post(
-        '/door/sound',
-        isAuthenticated,
-        isInRoom,
-        isCheckedIn,
-        (req, res) => {
-            mqttClient.publish('door', 'sound')
-            res.send('eyy')
-        }
-    )
-    app.use(errorHandler)
-    app.listen(config.PORT, () =>
-        console.log(`listening on port ${config.PORT}`)
-    )
-
 }
 
 main()

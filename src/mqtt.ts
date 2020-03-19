@@ -1,6 +1,7 @@
 import mqtt, { MqttClient } from 'mqtt'
 import { Config } from './config'
 import { Dependencies } from './container'
+import { timeoutPromise } from './utils'
 
 export const mqttClient = ({ config }: Dependencies<Config>) => {
     const client = mqtt.connect(config.MQTT_HOST, {
@@ -13,9 +14,14 @@ export const mqttClient = ({ config }: Dependencies<Config>) => {
 
 export type ConnectMqtt = () => Promise<void>
 export const connectMqtt = ({ mqttClient }: Dependencies<MqttClient>) => () =>
-    new Promise<void>(resolve => {
-        mqttClient.on('connect', () => {
-            console.log('connected to mqtt broker')
-            resolve()
-        })
-    })
+    timeoutPromise(
+        new Promise<void>((resolve, reject) => {
+            console.log('connecting to mqtt broker')
+            mqttClient.on('connect', () => {
+                console.log('connected to mqtt broker')
+                resolve()
+            })
+        }),
+        10000,
+        'Connection to mqtt broker timed out.'
+    )
