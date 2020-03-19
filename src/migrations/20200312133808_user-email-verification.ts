@@ -11,8 +11,16 @@ export async function up(knex: Knex): Promise<any> {
             .primary()
         table.uuid('user_id').notNullable()
         table.string('token').notNullable()
-        table.foreign('user_id').references('user.id')
+        table
+            .foreign('user_id')
+            .references('user.id')
+            .onDelete('CASCADE')
     })
 }
 
-export async function down(knex: Knex): Promise<any> {}
+export async function down(knex: Knex): Promise<any> {
+    await knex.schema.dropTableIfExists('verification_token')
+    return await knex.schema.alterTable('user', table => {
+        table.dropColumn('is_verified')
+    })
+}
