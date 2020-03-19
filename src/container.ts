@@ -8,6 +8,7 @@ import {
 } from './auth/verificationToken.repository'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import { IMailService, MailService } from './email/email.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
@@ -18,7 +19,6 @@ import {
     ReservationService
 } from './reservation/reservation.service'
 import { IUserRepository, UserRepository } from './user/user.repository'
-
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -30,6 +30,7 @@ export interface AllDependencies {
     reservationService: IReservationService
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
+    mailService: IMailService
 }
 
 type RegisterDeps<T> = {
@@ -48,8 +49,10 @@ const dependencies: RegisterDeps<AllDependencies> = {
     reservationRepository: asClass(ReservationRepository),
     reservationService: asClass(ReservationService),
     mqttClient: asFunction(mqttClient),
-    connectMqtt: asFunction(connectMqtt)
+    connectMqtt: asFunction(connectMqtt),
+    mailService: asClass(MailService)
 }
+
 DIContainer.register(dependencies)
 
 export const container = DIContainer.cradle as AllDependencies
