@@ -18,4 +18,13 @@ export async function up(knex: Knex): Promise<any> {
     })
 }
 
-export async function down(knex: Knex): Promise<any> {}
+export async function down(knex: Knex): Promise<any> {
+    return await knex.schema.alterTable('user', table => {
+        table.dropColumn('national_id')
+        table.dropColumn('phone')
+        table
+            .text('username')
+            .unique()
+            .notNullable()
+    })
+}

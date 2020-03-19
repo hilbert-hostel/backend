@@ -81,7 +81,7 @@ export async function up(knex: Knex): Promise<any> {
 }
 
 export async function down(knex: Knex): Promise<any> {
-    await knex.schema.dropSchemaIfExists('user')
+    await knex.schema.dropTableIfExists('user')
     await knex.schema.dropTableIfExists('reservation_member')
     await knex.schema.dropTableIfExists('reserved_bed')
     await knex.schema.dropTableIfExists('reservation')
