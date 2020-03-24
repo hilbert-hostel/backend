@@ -1,13 +1,13 @@
 import { hash } from 'bcryptjs'
 import { config } from '../config'
 import { IMailService } from '../email/email.service'
-import { IUserRepository } from '../user/user.repository'
+import { IGuestRepository } from '../guest/guest.repository'
 import { RegisterInput } from './auth.interface'
 import { AuthService } from './auth.service'
 import { IVerificationTokenRepository } from './verificationToken.repository'
 
 describe('Auth Service', () => {
-    const userRepository: IUserRepository = {
+    const guestRepository: IGuestRepository = {
         async create(input) {
             return {
                 id: '1234',
@@ -61,27 +61,27 @@ describe('Auth Service', () => {
         }
     }
     const verificationTokenRepository: IVerificationTokenRepository = {
-        async create({ user_id, token }) {
+        async create({ guest_id, token }) {
             return {
                 id: '12345',
-                user_id,
+                guest_id,
                 token
             }
         },
-        async findOne({ user_id, token }) {
+        async findOne({ guest_id, token }) {
             const t = {
                 id: '12345',
-                user_id,
+                guest_id,
                 token
             }
-            return t.user_id === user_id && t.token === token ? t : undefined
+            return t.guest_id === guest_id && t.token === token ? t : undefined
         }
     }
     const mailService: IMailService = {
         async sendMail() {}
     }
     const authService = new AuthService({
-        userRepository,
+        guestRepository,
         verificationTokenRepository,
         config,
         mailService

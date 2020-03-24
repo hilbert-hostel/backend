@@ -3,7 +3,8 @@ import uuid from 'uuid/v4'
 import BaseModel from './base'
 import { GenID } from './decorators'
 import { Reservation } from './reservation'
-export interface User {
+
+export interface Guest {
     id: string
     email: string
     password: string
@@ -17,7 +18,7 @@ export interface User {
     is_verified: boolean
 }
 @GenID(uuid)
-export default class UserModel extends BaseModel implements User {
+export default class GuestModel extends BaseModel implements Guest {
     id!: string
     email!: string
     password!: string
@@ -27,7 +28,7 @@ export default class UserModel extends BaseModel implements User {
     phone!: string
     address!: string
     is_verified!: boolean
-    static tableName = 'user'
+    static tableName = 'guest'
     static relationMappings = {
         reservation_made: {
             relation: Model.HasManyRelation,

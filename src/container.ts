@@ -9,6 +9,7 @@ import {
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
 import { IMailService, MailService } from './email/email.service'
+import { GuestRepository, IGuestRepository } from './guest/guest.repository'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
@@ -18,11 +19,10 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
-import { IUserRepository, UserRepository } from './user/user.repository'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
-    userRepository: IUserRepository
+    guestRepository: IGuestRepository
     verificationTokenRepository: IVerificationTokenRepository
     jwtService: IJwtService
     authService: IAuthService
@@ -42,7 +42,7 @@ const DIContainer = createContainer()
 const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     initializeDatabase: asFunction(makeInitializeDatabase),
-    userRepository: asClass(UserRepository),
+    guestRepository: asClass(GuestRepository),
     verificationTokenRepository: asClass(VerificationTokenRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),

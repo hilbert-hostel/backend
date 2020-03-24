@@ -4,11 +4,11 @@ import { Room } from './room'
 export interface Bed {
     id: number
     room_id: number
-    room?: Room
 }
 export default class BedModel extends BaseModel implements Bed {
     id!: number
     room_id!: number
+    room?: Room
     static tableName = 'bed'
     static relationMappings = {
         room: {

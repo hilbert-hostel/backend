@@ -17,7 +17,7 @@ import {
 } from './auth.validation'
 
 const router = Router()
-const { authService, jwtService, userRepository } = container
+const { authService, jwtService, guestRepository } = container
 
 router.post('/register', validateBody(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
@@ -40,13 +40,13 @@ router.post('/login', validateBody(loginValidator), async (req, res) => {
 })
 
 router.get('/ping', isAuthenticated, async (req, res) => {
-    const user = await userRepository.findOneById(res.locals.userID)
+    const user = await guestRepository.findOneById(res.locals.userID)
     res.json(omit(['password'], user))
 })
 
 router.get('/verify', validatQuery(verifyUserValidator), async (req, res) => {
     const { userID, token } = req.query as VerifyUserInput
-    const user = await authService.verifyUser(userID, token)
+    const user = await authService.verifyGuest(userID, token)
     res.send(user)
 })
 

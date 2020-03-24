@@ -3,7 +3,7 @@ import VerificationTokenModel, {
 } from '../models/verificationToken'
 
 export interface CreateVerificationToken {
-    user_id: string
+    guest_id: string
     token: string
 }
 export type FindVerificationToken = CreateVerificationToken
