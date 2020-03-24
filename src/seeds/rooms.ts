@@ -1,368 +1,180 @@
 import { hash } from 'bcryptjs'
 import * as Knex from 'knex'
 import moment from 'moment'
+import { Model } from 'objection'
 import shortid from 'shortid'
 import uuid from 'uuid/v4'
-import { Bed } from '../models/bed'
-import { Room } from '../models/room'
+import FacilityModel, { Facility } from '../models/facility'
+import RoomModel from '../models/room'
 
 export async function seed(knex: Knex): Promise<any> {
     // Deletes ALL existing entries
     await knex('room').del()
-    await knex('user').del()
+    await knex('guest').del()
     await knex('reservation').del()
+    await knex('facility').del()
+    Model.knex(knex)
+    // create facilities
+    const facilities: Facility[] = [
+        { name: 'refundable' },
+        { name: 'breakfast included' },
+        { name: 'wifi' },
+        { name: 'air conditioner' },
+        { name: 'bottled water', description: 'per person per night' },
+        { name: 'shampoo', description: 'per person per night' },
+        { name: 'soap', description: 'per person per night' },
+        { name: 'towel', description: 'per person' }
+    ]
+    await FacilityModel.query()
+        .insert(facilities)
+        .returning('name')
+    // create rooms
+    let id = 1
+    const makeBeds = (amount: number): any[] => {
+        const beds: any[] = []
+        for (let i = 0; i < amount; i++) {
+            beds.push({ id })
+            id++
+        }
+        return beds
+    }
+    const mixedDormPhotos: any = [
+        {
+            photo_url:
+                'https://www.myboutiquehotel.com/photos/106370/room-17553924-840x460.jpg'
+        }
+    ]
+    const womenDormPhotos: any = [
+        {
+            photo_url:
+                'https://a0.muscache.com/im/pictures/109451542/8989b537_original.jpg?aki_policy=large'
+        }
+    ]
 
-    // Inserts seed entries
-    const rooms: Array<Omit<Room, 'beds'>> = [
+    await RoomModel.query().insertGraph([
         {
             id: 1,
-            type: 'Double room with bathroom',
-            price: 1500,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'shower',
-                'bathroom',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(6),
+            photos: mixedDormPhotos
         },
         {
             id: 2,
-            type: 'Double room with bathroom',
-            price: 1500,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'shower',
-                'bathroom',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(6),
+            photos: mixedDormPhotos
         },
         {
             id: 3,
-            type: 'Double room with no bathroom',
-            price: 1000,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(6),
+            photos: mixedDormPhotos
         },
         {
             id: 4,
-            type: 'Double room with no bathroom',
-            price: 1000,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 10 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(10),
+            photos: mixedDormPhotos
         },
         {
             id: 5,
-            type: 'Double room with no bathroom',
-            price: 1000,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 10 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(10),
+            photos: mixedDormPhotos
         },
         {
             id: 6,
-            type: 'Triple room with bathroom',
-            price: 2000,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'shower',
-                'bathroom',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 15 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(15),
+            photos: mixedDormPhotos
         },
         {
             id: 7,
-            type: 'Triple Room with no bathroom',
-            price: 1500,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 600,
+            type: 'mixed-dorm',
+            description: `Private room with twin-size bed with 15 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(15),
+            photos: mixedDormPhotos
         },
         {
             id: 8,
-            type: 'Triple Room with no bathroom',
-            price: 1500,
-            facilities: [
-                'hair dryer',
-                'toiletries',
-                'towels',
-                'telephone',
-                'TV',
-                'air conditioning',
-                'free bottled water',
-                'closet',
-                'clothes rack'
-            ]
+            price: 650,
+            type: 'women-dorm',
+            description: `Private women room with queen-size bed with 10 beds in a row. Comprising more social life, showers, room with multiple bunks and lastly, security for women. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(10),
+            photos: womenDormPhotos
         },
         {
             id: 9,
-            type: 'Bunk Bed in Female Dormitory Room',
-            price: 500,
-            facilities: ['towels', 'TV', 'air conditioning', 'closet']
-        },
-        {
-            id: 10,
-            type: 'Bunk Bed in Mixed Dormitory Room',
-            price: 500,
-            facilities: ['towels', 'TV', 'air conditioning', 'closet']
-        },
-        {
-            id: 11,
-            type: 'Bunk Bed in Mixed Dormitory Room',
-            price: 500,
-            facilities: ['towels', 'TV', 'air conditioning', 'closet']
+            price: 650,
+            type: 'women-dorm',
+            description: `Private women room with queen-size bed with 10 beds in a row. Comprising more social life, showers, room with multiple bunks and lastly, security for women. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
+            beds: makeBeds(10),
+            photos: womenDormPhotos
         }
-    ]
-    if (rooms.length !== 11) throw new Error('should have 11 rooms')
-    const doubleBathRoomBeds: Array<Omit<Bed, 'id'>> = [
-        {
-            room_id: 1
-        },
-        {
-            room_id: 1
-        },
-        {
-            room_id: 2
-        },
-        {
-            room_id: 2
-        }
-    ]
-    if (doubleBathRoomBeds.length !== 4)
-        throw new Error('should have 4 double room with bathroom beds')
-    const doubleNoBathRoomBeds: Array<Omit<Bed, 'id'>> = [
-        {
-            room_id: 3
-        },
-        {
-            room_id: 3
-        },
-        {
-            room_id: 4
-        },
-        {
-            room_id: 4
-        },
-        {
-            room_id: 5
-        },
-        {
-            room_id: 5
-        }
-    ]
-    if (doubleNoBathRoomBeds.length !== 6)
-        throw new Error('should have 6 double room with no bathroom beds')
+    ])
 
-    const tripleBathRoomBeds: Array<Omit<Bed, 'id'>> = [
+    // connect rooms and facilities
+    const makeRoomFacilityPairs = (room_id: number, facilities: any[]) =>
+        facilities.map(f => ({ ...f, room_id }))
+    const f = [
         {
-            room_id: 6
+            count: 1,
+            facility_name: 'refundable'
         },
         {
-            room_id: 6
+            count: 1,
+            facility_name: 'breakfast included'
         },
         {
-            room_id: 6
+            count: 1,
+            facility_name: 'wifi'
+        },
+        {
+            count: 1,
+            facility_name: 'air conditioner'
+        },
+        {
+            count: 1,
+            facility_name: 'bottled water'
+        },
+        {
+            count: 2,
+            facility_name: 'shampoo'
+        },
+        {
+            count: 2,
+            facility_name: 'soap'
+        },
+        {
+            count: 1,
+            facility_name: 'towel'
         }
     ]
-    if (tripleBathRoomBeds.length !== 3)
-        throw new Error('should have 3 triple room with bathroom beds')
-
-    const tripleNoBathRoomBeds: Array<Omit<Bed, 'id'>> = [
-        {
-            room_id: 7
-        },
-        {
-            room_id: 7
-        },
-        {
-            room_id: 7
-        },
-        {
-            room_id: 8
-        },
-        {
-            room_id: 8
-        },
-        {
-            room_id: 8
-        }
-    ]
-    if (tripleNoBathRoomBeds.length !== 6)
-        throw new Error('should have 6 triple room with no bathroom beds')
-
-    const femaleDormBeds: Array<Omit<Bed, 'id'>> = [
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        },
-        {
-            room_id: 9
-        }
-    ]
-    if (femaleDormBeds.length !== 10)
-        throw new Error('should have 10 female dorm beds')
-
-    const mixedDormBeds: Array<Omit<Bed, 'id'>> = [
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 10
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        },
-        {
-            room_id: 11
-        }
-    ]
-    if (mixedDormBeds.length !== 20)
-        throw new Error('should have 20 mixed dorm beds')
-
-    const beds = ([] as Array<Omit<Bed, 'id'>>)
-        .concat(
-            doubleBathRoomBeds,
-            doubleNoBathRoomBeds,
-            tripleBathRoomBeds,
-            tripleNoBathRoomBeds,
-            femaleDormBeds,
-            mixedDormBeds
-        )
-        .map((bed, i) => ({ id: i + 1, ...bed }))
-    await knex('room').insert(
-        rooms.map(r => ({ ...r, facilities: JSON.stringify(r.facilities) }))
+    const pairs = [1, 2, 3, 4, 5, 6, 7, 8, 9].reduce<any[]>(
+        (acc, curr) => [...acc, ...makeRoomFacilityPairs(curr, f)],
+        []
     )
-    await knex('bed').insert(beds)
-    const user_id = uuid()
-    await knex('user')
+    await knex('room_facility_pair').insert(pairs)
+
+    // create guest account
+    const guest_id = uuid()
+    await knex('guest')
         .returning(['id'])
         .insert({
-            id: user_id,
+            id: guest_id,
             email: 'yamarashi@email.com',
             password: await hash('YamaKung69', 10),
             firstname: 'F',
@@ -371,6 +183,7 @@ export async function seed(knex: Knex): Promise<any> {
             phone: '000000000',
             address: 'here'
         })
+    // create reservation
     const check_in = moment().add(1, 'day')
     const check_out = moment().add(3, 'day')
     const reservation_id = shortid()
@@ -381,7 +194,6 @@ export async function seed(knex: Knex): Promise<any> {
             check_in,
             check_out
         })
-    await knex('reservation_member').insert({ reservation_id, user_id })
     return await knex('reserved_bed').insert([
         { reservation_id, bed_id: 1 },
         { reservation_id, bed_id: 2 },
