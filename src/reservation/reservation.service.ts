@@ -27,10 +27,22 @@ export class ReservationService implements IReservationService {
             check_in,
             check_out
         )
-
-        return rooms.map(({ beds, ...rest }) => ({
-            ...rest,
-            available: beds?.length ?? 0
-        }))
+        const availability = rooms.reduce((acc, cur) => {
+            const { type, beds, id, ...rest } = cur
+            const available = beds!.length
+            const old = acc[type] ?? { ...rest, availability: [] }
+            return {
+                ...acc,
+                [type]: {
+                    ...old,
+                    availability: [...old.availability, { id, available }]
+                }
+            }
+        }, {} as { [key: string]: Omit<RoomSearchPayload, 'type'> })
+        const result: RoomSearchPayload[] = []
+        for (const type in availability) {
+            result.push({ ...availability[type], type })
+        }
+        return result
     }
 }

@@ -26,6 +26,11 @@ export class ReservationRepository implements IReservationRepository {
                     .orWhere('reservations.check_in', '>', check_out)
                     .select('bed.id')
             })
+            .withGraphJoined('photos')
+            .modifyGraph('photos', photo => {
+                photo.select('photo_url', 'room_id')
+            })
+            .withGraphJoined('facilities')
             .orderBy('room.id')
     }
 
