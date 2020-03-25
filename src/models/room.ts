@@ -42,10 +42,10 @@ export default class RoomModel extends BaseModel implements Room {
                 from: 'room.id',
                 through: {
                     from: 'room_facility_pair.room_id',
-                    to: 'room_facility_pair.facility_id',
+                    to: 'room_facility_pair.facility_name',
                     extra: ['count']
                 },
-                to: 'facility.id'
+                to: 'facility.name'
             }
         },
         beds: {
