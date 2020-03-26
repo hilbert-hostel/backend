@@ -26,7 +26,7 @@ export const validatQuery = (schema: ObjectSchema): RequestHandler => async (
         const validated = await schema.validate(req.query, {
             stripUnknown: true
         })
-        req.body = validated
+        req.query = validated
         next()
     } catch (e) {
         next(e)
