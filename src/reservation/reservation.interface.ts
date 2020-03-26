@@ -20,3 +20,14 @@ export interface RoomSearchInput {
     checkOut: string
     guests: number
 }
+
+export interface SelectedRoom {
+    id: number
+    guests: number
+}
+export interface RoomReservationInput {
+    checkIn: string
+    checkOut: string
+    rooms: SelectedRoom[]
+    specialRequests: string
+}

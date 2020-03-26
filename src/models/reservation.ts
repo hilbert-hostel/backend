@@ -15,6 +15,7 @@ export interface Reservation {
     updated_at: Date
     beds?: Bed[]
     guest?: Guest
+    guest_id: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
     otp?: string
@@ -30,6 +31,9 @@ export class ReservationModel extends BaseModel implements Reservation {
     special_requests?: string
     created_at!: Date
     updated_at!: Date
+    beds?: Bed[]
+    guest?: Guest
+    guest_id!: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
     otp?: string

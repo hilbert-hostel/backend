@@ -11,3 +11,8 @@ export const timeoutPromise = <T>(
             }, time)
         })
     ])
+
+export const trace = <T>(i: T, ...message: any[]) => {
+    console.log(i, ...message)
+    return i
+}
