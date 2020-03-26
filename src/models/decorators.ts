@@ -14,25 +14,25 @@ export const GenID: ModelDecorator = <T>(idGenerator: () => T) => base =>
     }
 export const CreatedAt: ModelDecorator = () => base =>
     class extends base {
-        createdAt!: string
+        created_at!: string
 
         $beforeInsert(ctx: QueryContext) {
             super.$beforeInsert(ctx)
-            this.createdAt = new Date().toISOString()
+            this.created_at = new Date().toISOString()
         }
     }
 export const CreatedUpdatedAt: ModelDecorator = () => base =>
     class extends base {
-        updatedAt!: string
-        createdAt!: string
+        updated_at!: string
+        created_at!: string
 
         $beforeUpdate(opt: ModelOptions, ctx: QueryContext) {
             super.$beforeUpdate(opt, ctx)
-            this.updatedAt = new Date().toISOString()
+            this.updated_at = new Date().toISOString()
         }
 
         $beforeInsert(ctx: QueryContext) {
             super.$beforeInsert(ctx)
-            this.createdAt = new Date().toISOString()
+            this.created_at = new Date().toISOString()
         }
     }
