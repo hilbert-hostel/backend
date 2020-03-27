@@ -19,6 +19,7 @@ export const connectMqtt = ({ mqttClient }: Dependencies<MqttClient>) => () =>
             console.log('connecting to mqtt broker')
             mqttClient.on('connect', () => {
                 console.log('connected to mqtt broker')
+                mqttClient.publish('Backend', 'connected')
                 resolve()
             })
         }),
