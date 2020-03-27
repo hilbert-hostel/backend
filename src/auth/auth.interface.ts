@@ -1,21 +1,28 @@
-import { User } from '../models/user.model'
-import { CreateUser } from '../user/user.interface'
+import { CreateGuest } from '../guest/guest.interface'
+import { Guest } from '../models/guest'
 
 export type Token = string
 export interface TokenPayload {
     userID: string
 }
 
-export type RegisterInput = CreateUser
+export interface RegisterInput extends Omit<CreateGuest, 'national_id'> {
+    nationalID: string
+}
 
 export interface LoginInput {
-    username: string
+    email: string
     password: string
 }
 
 export interface RegisterPayload {
-    user: Omit<User, 'password'>
+    user: Omit<Guest, 'password'>
     token: string
 }
 
 export type LoginPayload = RegisterPayload
+
+export interface VerifyUserInput {
+    userID: string
+    token: string
+}

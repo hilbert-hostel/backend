@@ -7,10 +7,14 @@ export type InitializeDatabase = () => void
 export const makeInitializeDatabase = ({
     config
 }: Dependencies<Config>) => () => {
-    const knex = Knex({
-        client: config.DB,
-        connection: config.DB_URI
-    })
+    try {
+        const knex = Knex({
+            client: config.DB,
+            connection: config.DB_URI
+        })
 
-    Model.knex(knex)
+        Model.knex(knex)
+    } catch (e) {
+        console.log(e)
+    }
 }

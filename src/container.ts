@@ -1,31 +1,64 @@
-import { asClass, asFunction, asValue, createContainer, Resolver } from 'awilix'
+import {
+    asClass,
+    asFunction,
+    asValue,
+    createContainer,
+    Lifetime,
+    Resolver
+} from 'awilix'
+import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
+import {
+    IVerificationTokenRepository,
+    VerificationTokenRepository
+} from './auth/verificationToken.repository'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
-import { IUserRepository, UserRepository } from './user/user.repository'
-
+import { IMailService, MailService } from './email/email.service'
+import { GuestRepository, IGuestRepository } from './guest/guest.repository'
+import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
+import {
+    IReservationRepository,
+    ReservationRepository
+} from './reservation/reservation.repository'
+import {
+    IReservationService,
+    ReservationService
+} from './reservation/reservation.service'
 export interface AllDependencies {
     config: Config
-    userRepository: IUserRepository
+    initializeDatabase: InitializeDatabase
+    guestRepository: IGuestRepository
+    verificationTokenRepository: IVerificationTokenRepository
     jwtService: IJwtService
     authService: IAuthService
-    initializeDatabase: InitializeDatabase
+    reservationRepository: IReservationRepository
+    reservationService: IReservationService
+    mqttClient: MqttClient
+    connectMqtt: ConnectMqtt
+    mailService: IMailService
 }
 
 type RegisterDeps<T> = {
     [P in keyof T]: Resolver<T[P]>
 }
 
-export const dependencies: RegisterDeps<AllDependencies> = {
+const DIContainer = createContainer()
+
+const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
-    userRepository: asClass(UserRepository),
+    initializeDatabase: asFunction(makeInitializeDatabase),
+    guestRepository: asClass(GuestRepository),
+    verificationTokenRepository: asClass(VerificationTokenRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
-    initializeDatabase: asFunction(makeInitializeDatabase)
+    reservationRepository: asClass(ReservationRepository),
+    reservationService: asClass(ReservationService),
+    mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
+    connectMqtt: asFunction(connectMqtt),
+    mailService: asClass(MailService)
 }
-
-const DIContainer = createContainer()
 
 DIContainer.register(dependencies)
 
