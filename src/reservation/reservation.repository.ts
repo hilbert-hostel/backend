@@ -2,6 +2,9 @@ import { Reservation, ReservationModel } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
 
+export interface ReservationWithRoom extends Reservation {
+    rooms: Room[]
+}
 export interface IReservationRepository {
     findAvailableRooms(check_in: string, check_out: string): Promise<Room[]>
     findAvailableBeds(
@@ -16,6 +19,9 @@ export interface IReservationRepository {
         beds: { id: number }[],
         special_requests: string
     ): Promise<Reservation>
+    findRoomsInReservation(reservation_id: string): Promise<Room[]>
+    getReservation(reservation_id: string): Promise<ReservationWithRoom>
+    getReservationTransaction(reservation_id: string): Promise<Reservation>
 }
 
 export class ReservationRepository implements IReservationRepository {
@@ -50,6 +56,7 @@ export class ReservationRepository implements IReservationRepository {
                     .orWhere('reservations.check_out', '<=', check_in)
                     .orWhere('reservations.check_in', '>', check_out)
                     .select('bed.id')
+                    .orderBy('id', 'ASC')
             })
     }
     async makeReservation(
@@ -72,6 +79,35 @@ export class ReservationRepository implements IReservationRepository {
         await ReservedBedModel.query()
             .insert(reservedBeds)
             .returning('bed_id')
+        return reservation
+    }
+    findRoomsInReservation(reservation_id: string) {
+        return RoomModel.query()
+            .withGraphJoined('beds', {
+                joinOperation: 'rightJoin'
+            })
+            .modifyGraph('beds', bed => {
+                bed.innerJoinRelated('reservations').where(
+                    'reservations.id',
+                    '=',
+                    reservation_id
+                )
+            })
+    }
+    async getReservation(reservation_id: string) {
+        const reservation = await ReservationModel.query().findById(
+            reservation_id
+        )
+        const rooms = await this.findRoomsInReservation(reservation_id)
+        return {
+            ...reservation,
+            rooms
+        }
+    }
+    async getReservationTransaction(reservation_id: string) {
+        const reservation = await ReservationModel.query()
+            .findById(reservation_id)
+            .withGraphJoined('transaction')
         return reservation
     }
 }

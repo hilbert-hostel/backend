@@ -1,8 +1,13 @@
-import { append, concat, take } from 'ramda'
+import { append, concat, pick, take } from 'ramda'
 import { Dependencies } from '../container'
-import { BadRequestError } from '../error/HttpError'
+import { BadRequestError, UnauthorizedError } from '../error/HttpError'
 import { Reservation } from '../models/reservation'
-import { RoomSearchPayload, SelectedRoom } from './reservation.interface'
+import { renameKeys } from '../utils'
+import {
+    ReservationDetail,
+    RoomSearchPayload,
+    SelectedRoom
+} from './reservation.interface'
 import { IReservationRepository } from './reservation.repository'
 import { checkEnoughBeds, checkNoDuplicateRooms } from './reservation.utils'
 export interface IReservationService {
@@ -18,6 +23,14 @@ export interface IReservationService {
         rooms: SelectedRoom[],
         specialRequests: string
     ): Promise<Reservation>
+    getReservationDetails(
+        reservation_id: string,
+        guest_id: string
+    ): Promise<ReservationDetail>
+    getReservationPaymentStatus(
+        reservation_id: string,
+        guest_id: string
+    ): Promise<boolean>
 }
 
 export class ReservationService implements IReservationService {
@@ -97,12 +110,63 @@ export class ReservationService implements IReservationService {
             (acc, cur) => concat(acc, take(cur.guests, roomsMap[cur.id])),
             []
         )
-        return this.reservationRepository.makeReservation(
+        const reservation = await this.reservationRepository.makeReservation(
             check_in,
             check_out,
             guest_id,
             beds,
             specialRequests
         )
+        const r = await this.reservationRepository.findRoomsInReservation(
+            reservation.id
+        )
+        return {
+            ...reservation,
+            rooms: r
+        }
+    }
+    async getReservationDetails(reservation_id: string, guest_id: string) {
+        const reservation = await this.reservationRepository.getReservation(
+            reservation_id
+        )
+        if (!reservation) {
+            throw new BadRequestError('Reservation not found.')
+        }
+        if (reservation.guest_id !== guest_id) {
+            throw new UnauthorizedError(
+                'Can not get reservation details that is not your own.'
+            )
+        }
+        const details = pick(
+            ['id', 'check_in', 'check_out', 'special_requests', 'rooms'],
+            reservation
+        )
+        return renameKeys(
+            {
+                check_in: 'checkIn',
+                check_out: 'checkOut',
+                special_requests: 'specialRequests'
+            },
+            details
+        ) as ReservationDetail
+    }
+    async getReservationPaymentStatus(
+        reservation_id: string,
+        guest_id: string
+    ) {
+        const reservation = await this.reservationRepository.getReservationTransaction(
+            reservation_id
+        )
+        if (!reservation) {
+            throw new BadRequestError('Reservation not found.')
+        }
+        console.log(reservation.guest_id)
+        console.log(guest_id)
+        if (reservation.guest_id !== guest_id) {
+            throw new UnauthorizedError(
+                'Can not get reservation payment status that is not your own.'
+            )
+        }
+        return !!reservation.transaction
     }
 }

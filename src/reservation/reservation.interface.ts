@@ -1,4 +1,4 @@
-import { RoomFacility } from '../models/room'
+import { Room, RoomFacility } from '../models/room'
 import { RoomPhoto } from '../models/roomPhoto'
 
 export type Photo = Pick<RoomPhoto, 'photo_url' | 'photo_description'>
@@ -30,4 +30,12 @@ export interface RoomReservationInput {
     checkOut: string
     rooms: SelectedRoom[]
     specialRequests: string
+}
+
+export interface ReservationDetail {
+    id: string
+    checkIn: Date
+    checkOut: Date
+    specialRequests?: string
+    rooms: Room[]
 }

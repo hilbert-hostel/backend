@@ -55,7 +55,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 1,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-s',
             description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(6),
             photos: mixedDormPhotos
@@ -63,7 +63,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 2,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-s',
             description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(6),
             photos: mixedDormPhotos
@@ -71,7 +71,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 3,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-s',
             description: `Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(6),
             photos: mixedDormPhotos
@@ -79,7 +79,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 4,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-m',
             description: `Private room with twin-size bed with 10 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(10),
             photos: mixedDormPhotos
@@ -87,7 +87,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 5,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-m',
             description: `Private room with twin-size bed with 10 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(10),
             photos: mixedDormPhotos
@@ -103,7 +103,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 7,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-l',
             description: `Private room with twin-size bed with 15 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(15),
             photos: mixedDormPhotos
@@ -111,7 +111,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 8,
             price: 650,
-            type: 'women-dorm',
+            type: 'women-dorm-m',
             description: `Private women room with queen-size bed with 10 beds in a row. Comprising more social life, showers, room with multiple bunks and lastly, security for women. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(10),
             photos: womenDormPhotos
@@ -119,9 +119,9 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 9,
             price: 650,
-            type: 'women-dorm',
+            type: 'women-dorm-l',
             description: `Private women room with queen-size bed with 10 beds in a row. Comprising more social life, showers, room with multiple bunks and lastly, security for women. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
-            beds: makeBeds(10),
+            beds: makeBeds(20),
             photos: womenDormPhotos
         }
     ])

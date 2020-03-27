@@ -1,4 +1,11 @@
-import { asClass, asFunction, asValue, createContainer, Resolver } from 'awilix'
+import {
+    asClass,
+    asFunction,
+    asValue,
+    createContainer,
+    Lifetime,
+    Resolver
+} from 'awilix'
 import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
@@ -48,7 +55,7 @@ const dependencies: RegisterDeps<AllDependencies> = {
     authService: asClass(AuthService),
     reservationRepository: asClass(ReservationRepository),
     reservationService: asClass(ReservationService),
-    mqttClient: asFunction(mqttClient),
+    mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
     mailService: asClass(MailService)
 }
