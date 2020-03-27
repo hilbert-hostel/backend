@@ -1,7 +1,6 @@
 import { append, concat, pick, take } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
-import { Reservation } from '../models/reservation'
 import { renameKeys } from '../utils'
 import {
     ReservationDetail,
@@ -22,7 +21,7 @@ export interface IReservationService {
         guest_id: string,
         rooms: SelectedRoom[],
         specialRequests: string
-    ): Promise<Reservation>
+    ): Promise<ReservationDetail>
     getReservationDetails(
         reservation_id: string,
         guest_id: string
@@ -117,13 +116,7 @@ export class ReservationService implements IReservationService {
             beds,
             specialRequests
         )
-        const r = await this.reservationRepository.findRoomsInReservation(
-            reservation.id
-        )
-        return {
-            ...reservation,
-            rooms: r
-        }
+        return this.getReservationDetails(reservation.id, guest_id)
     }
     async getReservationDetails(reservation_id: string, guest_id: string) {
         const reservation = await this.reservationRepository.getReservation(
