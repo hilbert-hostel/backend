@@ -23,3 +23,15 @@ jobs:
                 - stage: docker build to docker hub
                   script:
                         - ./scripts/publish_docker_image.sh
+
+deploy:
+        provider: elasticbeanstalk
+        region: ap-southeast-1
+        app: hilbert-hotel-server
+        env: HilbertHotelServer-env
+        bucket_name: elasticbeanstalk-ap-southeast-1-887653784206
+        bucket_path: server-hilbert
+        on:
+                branch: master
+        access_key_id: $AWS_ACCESS_KEY
+        secret_access_key: $AWS_SECRET_KEY
