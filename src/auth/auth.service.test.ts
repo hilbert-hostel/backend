@@ -1,5 +1,4 @@
 import { hash } from 'bcryptjs'
-import { config } from '../config'
 import { IMailService } from '../email/email.service'
 import { IGuestRepository } from '../guest/guest.repository'
 import { RegisterInput } from './auth.interface'
@@ -83,7 +82,7 @@ describe('Auth Service', () => {
     const authService = new AuthService({
         guestRepository,
         verificationTokenRepository,
-        config,
+        config: {} as any,
         mailService
     })
     test('register', async () => {
@@ -107,7 +106,8 @@ describe('Auth Service', () => {
             phone: '0801234567',
             address: 'Earth',
             id: expect.any(String),
-            password: expect.any(String)
+            password: expect.any(String),
+            is_verified: false
         })
     })
     describe('login', () => {
