@@ -40,4 +40,5 @@ export interface ReservationDetail {
     checkOut: Date
     specialRequests?: string
     rooms: ReservedRoom[]
+    isPaid: boolean
 }

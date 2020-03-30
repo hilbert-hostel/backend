@@ -134,12 +134,25 @@ export class ReservationService implements IReservationService {
         }
 
         return pipe(
-            pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
-            evolve({ rooms: map(evolve({ beds: i => i.length })) }),
+            pick([
+                'id',
+                'check_in',
+                'check_out',
+                'special_requests',
+                'rooms',
+                'transaction'
+            ]),
+            evolve({
+                rooms: map(evolve({ beds: i => i.length })),
+                // TODO implement real payment system
+                // transaction: Boolean
+                transaction: t => true
+            }),
             renameKeys({
                 check_in: 'checkIn',
                 check_out: 'checkOut',
-                special_requests: 'specialRequests'
+                special_requests: 'specialRequests',
+                transaction: 'isPaid'
             })
         )(reservation) as ReservationDetail
     }
@@ -172,13 +185,20 @@ export class ReservationService implements IReservationService {
                     'check_in',
                     'check_out',
                     'special_requests',
-                    'rooms'
+                    'rooms',
+                    'transaction'
                 ]),
-                evolve({ rooms: map(evolve({ beds: i => i.length })) }),
+                evolve({
+                    rooms: map(evolve({ beds: i => i.length })),
+                    // TODO implement real payment system
+                    // transaction: t => !!t
+                    transaction: Boolean
+                }),
                 renameKeys({
                     check_in: 'checkIn',
                     check_out: 'checkOut',
-                    special_requests: 'specialRequests'
+                    special_requests: 'specialRequests',
+                    transaction: 'isPaid'
                 })
             ),
             reservation
