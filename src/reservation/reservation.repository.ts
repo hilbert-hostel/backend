@@ -81,9 +81,7 @@ export class ReservationRepository implements IReservationRepository {
             bed_id,
             reservation_id: reservation.id
         }))
-        await ReservedBedModel.query()
-            .insert(reservedBeds)
-            .returning('bed_id')
+        await ReservedBedModel.query().insert(reservedBeds)
         return reservation
     }
     findRoomsInReservation(reservation_id: string) {
