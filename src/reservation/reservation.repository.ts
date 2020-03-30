@@ -93,6 +93,12 @@ export class ReservationRepository implements IReservationRepository {
                     reservation_id
                 )
             })
+            .withGraphJoined('photos')
+            .modifyGraph('photos', photo => {
+                photo.select('photo_url', 'photo_description')
+            })
+            .withGraphJoined('facilities')
+            .orderBy('room.id')
     }
     async getReservation(reservation_id: string) {
         const reservation = await ReservationModel.query().findById(
