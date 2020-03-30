@@ -28,7 +28,7 @@ deploy:
         provider: elasticbeanstalk
         region: ap-southeast-1
         app: hilbert-hotel-server
-        env: HilbertHotelServer-env
+        env: HilbertHotelServer-env-1
         bucket_name: elasticbeanstalk-ap-southeast-1-887653784206
         bucket_path: server-hilbert
         on:
