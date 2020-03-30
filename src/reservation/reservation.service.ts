@@ -1,4 +1,4 @@
-import { append, concat, pick, take } from 'ramda'
+import { append, concat, map, pick, pipe, take } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
 import { renameKeys } from '../utils'
@@ -9,6 +9,7 @@ import {
 } from './reservation.interface'
 import { IReservationRepository } from './reservation.repository'
 import { checkEnoughBeds, checkNoDuplicateRooms } from './reservation.utils'
+
 export interface IReservationService {
     findAvailableRooms(
         check_in: string,
@@ -30,6 +31,7 @@ export interface IReservationService {
         reservation_id: string,
         guest_id: string
     ): Promise<boolean>
+    listGuestReservations(guest_id: string): Promise<ReservationDetail[]>
 }
 
 export class ReservationService implements IReservationService {
@@ -90,9 +92,9 @@ export class ReservationService implements IReservationService {
                 )
             )
         )
-        const roomsValidity = checkEnoughBeds(db_rooms, rooms)
+        const enoughBeds = checkEnoughBeds(db_rooms, rooms)
 
-        if (!roomsValidity) {
+        if (!enoughBeds) {
             throw new BadRequestError(
                 'Invalid Reservation. Some rooms do not have enough beds.'
             )
@@ -130,18 +132,15 @@ export class ReservationService implements IReservationService {
                 'Can not get reservation details that is not your own.'
             )
         }
-        const details = pick(
-            ['id', 'check_in', 'check_out', 'special_requests', 'rooms'],
-            reservation
-        )
-        return renameKeys(
-            {
+
+        return pipe(
+            pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
+            renameKeys({
                 check_in: 'checkIn',
                 check_out: 'checkOut',
                 special_requests: 'specialRequests'
-            },
-            details
-        ) as ReservationDetail
+            })
+        )(reservation) as ReservationDetail
     }
     async getReservationPaymentStatus(
         reservation_id: string,
@@ -153,13 +152,34 @@ export class ReservationService implements IReservationService {
         if (!reservation) {
             throw new BadRequestError('Reservation not found.')
         }
-        console.log(reservation.guest_id)
-        console.log(guest_id)
         if (reservation.guest_id !== guest_id) {
             throw new UnauthorizedError(
                 'Can not get reservation payment status that is not your own.'
             )
         }
         return !!reservation.transaction
+    }
+    async listGuestReservations(guest_id: string) {
+        const reservation = await this.reservationRepository.listReservations(
+            guest_id
+        )
+
+        return map(
+            pipe(
+                pick([
+                    'id',
+                    'check_in',
+                    'check_out',
+                    'special_requests',
+                    'rooms'
+                ]),
+                renameKeys({
+                    check_in: 'checkIn',
+                    check_out: 'checkOut',
+                    special_requests: 'specialRequests'
+                })
+            ),
+            reservation
+        ) as ReservationDetail[]
     }
 }
