@@ -43,6 +43,11 @@ router.post(
         res.send(reservation)
     }
 )
+router.get('/all', isAuthenticated, async (req, res) => {
+    const guestID = getUserID(res)
+    const reservation = await reservationService.listGuestReservations(guestID)
+    res.send(reservation)
+})
 router.get('/:id', isAuthenticated, async (req, res) => {
     const reservationID = req.params.id as string
     const guestID = getUserID(res)
@@ -52,6 +57,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     )
     res.send(reservation)
 })
+// TODO implement real payment system
 router.get('/:id/payment', isAuthenticated, async (req, res) => {
     const reservationID = req.params.id as string
     const guestID = getUserID(res)

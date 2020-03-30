@@ -22,11 +22,12 @@ export interface IReservationRepository {
     findRoomsInReservation(reservation_id: string): Promise<Room[]>
     getReservation(reservation_id: string): Promise<ReservationWithRoom>
     getReservationTransaction(reservation_id: string): Promise<Reservation>
+    listReservations(guest_id: string): Promise<ReservationWithRoom[]>
 }
 
 export class ReservationRepository implements IReservationRepository {
-    findAvailableRooms(check_in: string, check_out: string) {
-        return RoomModel.query()
+    async findAvailableRooms(check_in: string, check_out: string) {
+        const result = await RoomModel.query()
             .withGraphJoined('beds', { joinOperation: 'innerJoin' })
             .modifyGraph('beds', bed => {
                 bed.fullOuterJoinRelated('reservations')
@@ -41,13 +42,14 @@ export class ReservationRepository implements IReservationRepository {
             })
             .withGraphJoined('facilities')
             .orderBy('room.id')
+        return result
     }
     async findAvailableBeds(
         check_in: string,
         check_out: string,
         room_id: number
     ) {
-        return RoomModel.query()
+        const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
             .modifyGraph('beds', bed => {
@@ -58,6 +60,7 @@ export class ReservationRepository implements IReservationRepository {
                     .select('bed.id')
                     .orderBy('id', 'ASC')
             })
+        return result
     }
     async makeReservation(
         check_in: string,
@@ -100,20 +103,37 @@ export class ReservationRepository implements IReservationRepository {
             .withGraphJoined('facilities')
             .orderBy('room.id')
     }
+
     async getReservation(reservation_id: string) {
         const reservation = await ReservationModel.query().findById(
             reservation_id
         )
+
         const rooms = await this.findRoomsInReservation(reservation_id)
         return {
             ...reservation,
             rooms
         }
     }
+
     async getReservationTransaction(reservation_id: string) {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
             .withGraphJoined('transaction')
         return reservation
+    }
+
+    async listReservations(guest_id: string) {
+        const reservations = await ReservationModel.query().where({ guest_id })
+
+        return Promise.all(
+            reservations.map(async r => {
+                const rooms = await this.findRoomsInReservation(r.id)
+                return {
+                    ...r,
+                    rooms
+                }
+            })
+        )
     }
 }
