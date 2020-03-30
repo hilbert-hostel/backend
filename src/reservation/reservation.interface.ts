@@ -31,11 +31,13 @@ export interface RoomReservationInput {
     rooms: SelectedRoom[]
     specialRequests: string
 }
-
+export interface ReservedRoom extends Omit<Room, 'beds'> {
+    beds: number
+}
 export interface ReservationDetail {
     id: string
     checkIn: Date
     checkOut: Date
     specialRequests?: string
-    rooms: Room[]
+    rooms: ReservedRoom[]
 }

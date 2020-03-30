@@ -1,4 +1,4 @@
-import { append, concat, map, pick, pipe, take } from 'ramda'
+import { append, concat, evolve, map, pick, pipe, take } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
 import { renameKeys } from '../utils'
@@ -135,6 +135,7 @@ export class ReservationService implements IReservationService {
 
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
+            evolve({ rooms: map(evolve({ beds: i => i.length })) }),
             renameKeys({
                 check_in: 'checkIn',
                 check_out: 'checkOut',
@@ -173,6 +174,7 @@ export class ReservationService implements IReservationService {
                     'special_requests',
                     'rooms'
                 ]),
+                evolve({ rooms: map(evolve({ beds: i => i.length })) }),
                 renameKeys({
                     check_in: 'checkIn',
                     check_out: 'checkOut',
