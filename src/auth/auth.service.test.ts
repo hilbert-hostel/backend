@@ -1,6 +1,6 @@
 import { hash } from 'bcryptjs'
-import { IMailService } from '../email/email.service'
 import { IGuestRepository } from '../guest/guest.repository'
+import { IMailService } from '../mail/mail.service'
 import { RegisterInput } from './auth.interface'
 import { AuthService } from './auth.service'
 import { IVerificationTokenRepository } from './verificationToken.repository'

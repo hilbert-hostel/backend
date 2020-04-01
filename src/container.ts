@@ -15,8 +15,8 @@ import {
 } from './auth/verificationToken.repository'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
-import { IMailService, MailService } from './email/email.service'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
+import { IMailService, MailService } from './mail/mail.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
