@@ -13,6 +13,7 @@ import {
     IVerificationTokenRepository,
     VerificationTokenRepository
 } from './auth/verificationToken.repository'
+import { CheckInService, ICheckInService } from './checkIn/checkIn.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
@@ -38,6 +39,7 @@ export interface AllDependencies {
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
     mailService: IMailService
+    checkInService: ICheckInService
 }
 
 type RegisterDeps<T> = {
@@ -57,7 +59,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     reservationService: asClass(ReservationService),
     mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
-    mailService: asClass(MailService)
+    mailService: asClass(MailService),
+    checkInService: asClass(CheckInService)
 }
 
 DIContainer.register(dependencies)

@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import moment from 'moment'
 import multer from 'multer'
 import { container } from '../container'
 import { BadRequestError } from '../error/HttpError'
@@ -12,51 +11,26 @@ import {
     queryReservationDetailsValidator,
     verifyOTPValidator
 } from './checkIn.validation'
-const { jwtService } = container
+const { jwtService, checkInService } = container
 const router = Router()
 router.get(
     '/',
     validatQuery(queryReservationDetailsValidator),
     async (req, res) => {
         const { nationalID, date } = req.query as QueryReservationDetails
-        const checkOut = moment(date)
-            .add(3, 'day')
-            .toISOString()
-        res.send({
-            id: 'f7AEswTW8',
-            checkIn: date.toISOString(),
-            checkOut,
-            specialRequests: '',
-            rooms: [
-                {
-                    id: 3,
-                    price: 600,
-                    type: 'mixed-dorm-s',
-                    description:
-                        'Private room with twin-size bed with 6 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.',
-                    beds: 4,
-                    photos: [
-                        {
-                            photo_url:
-                                'https://www.myboutiquehotel.com/photos/106370/room-17553924-840x460.jpg',
-                            photo_description: null
-                        }
-                    ],
-                    facilities: [
-                        {
-                            name: 'bottled water',
-                            description: 'per person per night',
-                            count: 1
-                        }
-                    ]
-                }
-            ]
-        })
+        const reservation = await checkInService.getReservationForCheckIn(
+            nationalID,
+            date
+        )
+
+        res.send(reservation)
     }
 )
 
 router.post('/generate-otp/:id', async (req, res) => {
-    res.send({ ref: 'Yama69' })
+    const reservationID = req.params.id as string
+    const referenceCode = await checkInService.generateOtp(reservationID)
+    res.send(referenceCode)
 })
 router.post(
     '/verify-otp/:id',

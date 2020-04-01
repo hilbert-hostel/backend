@@ -1,4 +1,6 @@
-import { Reservation, ReservationModel } from '../models/reservation'
+import { Guest } from '../models/guest'
+import OtpModel, { Otp } from '../models/otp'
+import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
 import { Transaction } from '../models/transaction'
@@ -25,6 +27,16 @@ export interface IReservationRepository {
     getReservation(reservation_id: string): Promise<ReservationWithRoom>
     getReservationTransaction(reservation_id: string): Promise<Reservation>
     listReservations(guest_id: string): Promise<ReservationWithRoom[]>
+    getGuestReservation(
+        guest_id: string,
+        check_in: Date
+    ): Promise<ReservationWithRoom>
+    createOtp(
+        reservation_id: string,
+        password: string,
+        reference_code: string
+    ): Promise<Otp>
+    getReservationOwner(reservation_id: string): Promise<Guest>
 }
 
 export class ReservationRepository implements IReservationRepository {
@@ -137,5 +149,30 @@ export class ReservationRepository implements IReservationRepository {
                 } as ReservationWithRoom
             })
         )
+    }
+    async getGuestReservation(guest_id: string, check_in: Date) {
+        const reservation = await ReservationModel.query().findOne({
+            guest_id,
+            check_in
+        })
+        return this.getReservation(reservation.id)
+    }
+
+    createOtp(
+        reservation_id: string,
+        password: string,
+        reference_code: string
+    ) {
+        return OtpModel.query().insert({
+            id: reservation_id,
+            password,
+            reference_code
+        })
+    }
+    async getReservationOwner(reservation_id: string) {
+        return (await ReservationModel.query()
+            .innerJoinRelated('guest')
+            .findById(reservation_id)
+            .select('guest.*')) as any
     }
 }

@@ -57,6 +57,20 @@ describe('Auth Service', () => {
                 is_verified: false
             }
             return id === '1234' ? { ...user, ...update } : undefined
+        },
+        async findOneByNationalId(nid) {
+            const user = {
+                id: '1234',
+                email: 'email',
+                password: await hash('password', 10),
+                firstname: 'asd',
+                lastname: 'asd',
+                national_id: '1234567890123',
+                phone: '0801234567',
+                address: 'Earth',
+                is_verified: false
+            }
+            return nid === '1234567890123' ? user : undefined
         }
     }
     const verificationTokenRepository: IVerificationTokenRepository = {

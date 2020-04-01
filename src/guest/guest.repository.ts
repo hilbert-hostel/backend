@@ -9,6 +9,7 @@ export interface IGuestRepository {
         id: string,
         update: Partial<Guest>
     ): Promise<Guest | undefined>
+    findOneByNationalId(national_id: string): Promise<Guest | undefined>
 }
 export class GuestRepository implements IGuestRepository {
     create(data: CreateGuest) {
@@ -21,6 +22,10 @@ export class GuestRepository implements IGuestRepository {
 
     findOneById(id: string) {
         return GuestModel.query().findById(id)
+    }
+
+    findOneByNationalId(national_id: string) {
+        return GuestModel.query().findOne({ national_id })
     }
 
     updateOneById(id: string, update: Partial<Guest>) {

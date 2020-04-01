@@ -18,3 +18,7 @@ export interface CheckIn {
     expireDate: Date
     address: string
 }
+
+export interface OtpReference {
+    referenceCode: string
+}
