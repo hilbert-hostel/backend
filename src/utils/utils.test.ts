@@ -1,4 +1,4 @@
-import { randomNumString } from './auth.utils'
+import { randomNumString } from '.'
 
 describe('random num string', () => {
     test('correct length', () => {

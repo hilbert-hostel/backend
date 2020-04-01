@@ -6,8 +6,8 @@ import { BadRequestError } from '../error/HttpError'
 import { IGuestRepository } from '../guest/guest.repository'
 import { Guest } from '../models/guest'
 import { VerificationToken } from '../models/verificationToken'
+import { randomNumString } from '../utils'
 import { LoginInput, RegisterInput } from './auth.interface'
-import { randomNumString } from './auth.utils'
 import { IVerificationTokenRepository } from './verificationToken.repository'
 
 export interface IAuthService {
