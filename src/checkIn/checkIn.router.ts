@@ -5,7 +5,11 @@ import { BadRequestError } from '../error/HttpError'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validatQuery } from '../middlewares/validate'
 import { getUserID } from '../utils'
-import { QueryReservationDetails, VerifyOTP } from './checkIn.interface'
+import {
+    CheckIn,
+    QueryReservationDetails,
+    VerifyOTP
+} from './checkIn.interface'
 import {
     checkInValidator,
     queryReservationDetailsValidator,
@@ -37,7 +41,9 @@ router.post(
     validateBody(verifyOTPValidator),
     async (req, res) => {
         const { otp } = req.body as VerifyOTP
-        if (otp == '696969') {
+        const id = req.params.id
+        const valid = await checkInService.verifyOtp(id, otp)
+        if (valid) {
             res.send({ token: await jwtService.generateToken(req.params.id) })
         } else {
             throw new BadRequestError('Incorrect OTP')
@@ -53,10 +59,17 @@ router.post(
     ]),
     validateBody(checkInValidator),
     async (req, res) => {
-        const guestID = getUserID(res)
-        if ((req.files as any).kioskPhoto && (req.files as any).idCardPhoto)
-            res.send({ message: 'check in complete' })
-        else throw new BadRequestError('Photos missing.')
+        const id = getUserID(res)
+        const idCardDetails = req.body as CheckIn
+        if (!('kioskPhoto' in req.files) || !('idCardPhoto' in req.files))
+            throw new BadRequestError('Photos missing.')
+        const message = await checkInService.addCheckInRecord(
+            id,
+            req.files.kioskPhoto,
+            req.files.idCardPhoto,
+            idCardDetails
+        )
+        res.send({ message })
     }
 )
 

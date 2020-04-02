@@ -13,9 +13,14 @@ import {
     IVerificationTokenRepository,
     VerificationTokenRepository
 } from './auth/verificationToken.repository'
+import {
+    CheckInRepository,
+    ICheckInRepository
+} from './checkIn/checkIn.repository'
 import { CheckInService, ICheckInService } from './checkIn/checkIn.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import { FileService, IFileService } from './files/file.service'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
 import { IMailService, MailService } from './mail/mail.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
@@ -39,6 +44,8 @@ export interface AllDependencies {
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
     mailService: IMailService
+    fileService: IFileService
+    checkInRepository: ICheckInRepository
     checkInService: ICheckInService
 }
 
@@ -60,6 +67,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
     mailService: asClass(MailService),
+    fileService: asClass(FileService),
+    checkInRepository: asClass(CheckInRepository),
     checkInService: asClass(CheckInService)
 }
 
