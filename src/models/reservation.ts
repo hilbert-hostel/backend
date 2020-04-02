@@ -57,7 +57,7 @@ export default class ReservationModel extends BaseModel implements Reservation {
             modelClass: 'record',
             join: {
                 from: 'reservation.id',
-                to: 'record.reservation_id'
+                to: 'record.id'
             }
         },
         transaction: {
