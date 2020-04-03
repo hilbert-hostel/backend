@@ -93,7 +93,7 @@ export async function seed(knex: Knex): Promise<any> {
         {
             id: 6,
             price: 600,
-            type: 'mixed-dorm',
+            type: 'mixed-dorm-l',
             description: `Private room with twin-size bed with 15 beds in a row. Comprising more security, social life, showers, and room with multiple bunks. There is air conditioning provided in every room. Also, a private bathroom and free wifi.`,
             beds: makeBeds(15),
             photos: mixedDormPhotos

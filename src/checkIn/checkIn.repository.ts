@@ -42,17 +42,19 @@ export class CheckInRepository implements ICheckInRepository {
         })
         return this.reservationRepository.getReservation(reservation.id)
     }
-    createOtp(
+    async createOtp(
         reservation_id: string,
         password: string,
         reference_code: string
     ) {
-        return OtpModel.query().insert({
+        const otp = await OtpModel.query().findById(reservation_id)
+        return !!otp ? OtpModel.query().updateAndFetchById(reservation_id,{password,reference_code}) : OtpModel.query().insert({
             id: reservation_id,
             password,
             reference_code
         })
     }
+
     getReservationOwner(reservation_id: string) {
         return ReservationModel.query()
             .innerJoinRelated('guest')

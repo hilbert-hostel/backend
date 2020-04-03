@@ -1,7 +1,7 @@
-// import {
-//     roomAssignmentByPrice,
-//     roomAssignmentByRoomOccupancy
-// } from 'hilbert-room-assignment'
+import {
+    roomAssignmentByPrice,
+    roomAssignmentByRoomOccupancy
+} from 'hilbert-room-assignment'
 import {
     append,
     concat,
@@ -17,7 +17,7 @@ import {
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
 import { Room } from '../models/room'
-import { renameKeys } from '../utils'
+import { renameKeys, trace } from '../utils'
 import {
     ReservationDetail,
     RoomSearch,
@@ -104,25 +104,27 @@ export class ReservationService implements IReservationService {
                     ) as RoomSuggestion
             )
         })
-        // const lowestPrice = pipe(
-        //     roomAssignmentByPrice,
-        //     map(fillInRoomDetail)
-        // )({
-        //     roomList,
-        //     guests,
-        //     query: 3
-        // })
-        // const lowestNumberOfRooms = pipe(
-        //     roomAssignmentByRoomOccupancy,
-        //     map(fillInRoomDetail)
-        // )({
-        //     roomList,
-        //     guests,
-        //     query: 3
-        // })
+        const lowestPrice = pipe(
+            roomAssignmentByPrice,
+            map(fillInRoomDetail)
+        )({
+            roomList,
+            guests,
+            query: 3
+        })
+
+        const lowestNumberOfRooms = pipe(
+            roomAssignmentByRoomOccupancy,
+            map(fillInRoomDetail)
+        )({
+            roomList,
+            guests,
+            query: 3
+        })
+
         return {
             rooms: result,
-            suggestions: { lowestPrice: [], lowestNumberOfRooms: [] }
+            suggestions: { lowestPrice, lowestNumberOfRooms }
         }
     }
 
