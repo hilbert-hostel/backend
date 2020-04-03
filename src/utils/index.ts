@@ -16,7 +16,7 @@ export const timeoutPromise = <T>(
     ])
 
 export const trace = <T>(i: T, ...message: any[]) => {
-    console.log(i, ...message)
+    console.log(JSON.stringify(i, null, 2), ...message)
     return i
 }
 export const getUserID = (res: Response) => res.locals.userID as string
