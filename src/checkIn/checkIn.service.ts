@@ -100,12 +100,20 @@ export class CheckInService implements ICheckInService {
         idCardPhoto: any,
         idCardDetail: any
     ) {
-        const kioskPhotoUrl = await this.fileService.uploadFiles(kioskPhoto)
-        const idCardPhotoUrl = await this.fileService.uploadFiles(idCardPhoto)
+        const kioskPhotoName = `check-in-photo-${reservationID}`
+        const idCardPhotoName = `id-card-photo-${reservationID}`
+        const kioskPhotoUrl = await this.fileService.uploadFile(
+            kioskPhoto,
+            kioskPhotoName
+        )
+        const idCardPhotoUrl = await this.fileService.uploadFile(
+            idCardPhoto,
+            idCardPhotoName
+        )
         const record = await this.checkInRepository.createReservationRecord(
             reservationID,
-            kioskPhotoUrl,
-            { ...idCardDetail, idCardPhoto: idCardPhotoUrl }
+            kioskPhotoName,
+            { ...idCardDetail, idCardPhoto: idCardPhotoName }
         )
         await this.checkInRepository.addCheckInTime(reservationID, new Date())
         return 'success'
