@@ -2545,11 +2545,6 @@ hide-powered-by@1.1.0:
   resolved "https://registry.yarnpkg.com/hide-powered-by/-/hide-powered-by-1.1.0.tgz#be3ea9cab4bdb16f8744be873755ca663383fa7a"
   integrity sha512-Io1zA2yOA1YJslkr+AJlWSf2yWFkKjvkcL9Ni1XSUqnGLr/qRQe2UI3Cn/J9MsJht7yEVCe0SscY1HgVMujbgg==
 
-hilbert-room-assignment@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/hilbert-room-assignment/-/hilbert-room-assignment-2.0.1.tgz#f6b880b6ddddc197a0b731f87ba99b3100b636a5"
-  integrity sha512-DC8pQNMObmlHoqGGHtUZrzK2ROyMzLdIFlBLt0w9Ja5Rrf00KafjghTWfVy3KvemYEINuaSlr5vO+0/PEBEUrg==
-
 homedir-polyfill@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/homedir-polyfill/-/homedir-polyfill-1.0.3.tgz#743298cef4e5af3e194161fbadcc2151d3a058e8"
