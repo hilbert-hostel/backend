@@ -17,7 +17,7 @@ import {
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
 import { Room } from '../models/room'
-import { renameKeys, trace } from '../utils'
+import { renameKeys } from '../utils'
 import {
     ReservationDetail,
     RoomSearch,
@@ -204,7 +204,7 @@ export class ReservationService implements IReservationService {
                 rooms: map(evolve({ beds: i => i.length })),
                 // TODO implement real payment system
                 // transaction: Boolean
-                transaction: t => true
+                transaction: () => true
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -249,8 +249,8 @@ export class ReservationService implements IReservationService {
                 evolve({
                     rooms: map(evolve({ beds: i => i.length })),
                     // TODO implement real payment system
-                    // transaction: t => !!t
-                    transaction: Boolean
+                    // transaction: Boolean
+                    transaction: () => true
                 }),
                 renameKeys({
                     check_in: 'checkIn',
