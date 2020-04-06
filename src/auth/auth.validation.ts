@@ -38,3 +38,7 @@ export const verifyUserValidator = yup.object().shape<VerifyUserInput>({
         .required()
         .matches(/^\d{6}$/)
 })
+
+export const checkAvailableValidator = yup.object().shape({
+    input: yup.string().required()
+})

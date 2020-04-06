@@ -6,7 +6,7 @@ import { IGuestRepository } from '../guest/guest.repository'
 import { IMailService } from '../mail/mail.service'
 import { Guest } from '../models/guest'
 import { VerificationToken } from '../models/verificationToken'
-import { randomNumString } from '../utils'
+import { randomNumString, renameKeys } from '../utils'
 import { LoginInput, RegisterInput } from './auth.interface'
 import { IVerificationTokenRepository } from './verificationToken.repository'
 
@@ -16,6 +16,8 @@ export interface IAuthService {
     createVerificationToken(guestID: string): Promise<VerificationToken>
     verifyGuest(guestID: string, token: string): Promise<Guest>
     sendVerificationEmail(user: Guest, token: string): Promise<any>
+    checkEmailAvailable(email: string): Promise<boolean>
+    checkNationalIDAvailable(nationalID: string): Promise<boolean>
 }
 
 export class AuthService implements IAuthService {
@@ -76,10 +78,23 @@ ${link}`
 
     async registerUser(input: RegisterInput) {
         const hashed = await hash(input.password, 10)
-        const { nationalID, ...rest } = input
+        // const { nationalID, ...rest } = input
+        const emailTaken = await this.checkEmailAvailable(input.email)
+        if (!emailTaken) {
+            throw new BadRequestError('This email is already taken.')
+        }
+        const nationalID = await this.checkNationalIDAvailable(input.nationalID)
+        if (!nationalID) {
+            throw new BadRequestError(
+                'This national id number is already taken.'
+            )
+        }
+        const formattedInput = renameKeys(
+            { nationalID: 'national_id' },
+            input
+        ) as Guest
         const user = await this.guestRepository.create({
-            ...rest,
-            national_id: nationalID,
+            ...formattedInput,
             password: hashed
         })
         return user
@@ -93,5 +108,14 @@ ${link}`
         const correct = await compare(input.password, user.password)
         if (!correct) throw new BadRequestError('Wrong email or password.')
         return user
+    }
+    async checkEmailAvailable(email: string) {
+        const guest = await this.guestRepository.findOne({ email })
+        console.log(guest)
+        return !guest
+    }
+    async checkNationalIDAvailable(nationalID: string) {
+        const guest = await this.guestRepository.findOneByNationalId(nationalID)
+        return !guest
     }
 }

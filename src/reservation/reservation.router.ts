@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { container } from '../container'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
-import { validateBody, validatQuery } from '../middlewares/validate'
+import { validateBody, validateQuery } from '../middlewares/validate'
 import { getUserID } from '../utils'
 import { RoomReservationInput, RoomSearchInput } from './reservation.interface'
 import {
@@ -11,7 +11,7 @@ import {
 
 const router = Router()
 const { reservationService } = container
-router.get('/', validatQuery(roomSearchValidator), async (req, res) => {
+router.get('/', validateQuery(roomSearchValidator), async (req, res) => {
     const { checkIn, checkOut, guests } = req.query as RoomSearchInput
     const payload = await reservationService.findAvailableRooms(
         checkIn,

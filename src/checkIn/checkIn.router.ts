@@ -3,7 +3,7 @@ import multer from 'multer'
 import { container } from '../container'
 import { BadRequestError } from '../error/HttpError'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
-import { validateBody, validatQuery } from '../middlewares/validate'
+import { validateBody, validateQuery } from '../middlewares/validate'
 import { getUserID } from '../utils'
 import {
     CheckIn,
@@ -19,7 +19,7 @@ const { jwtService, checkInService } = container
 const router = Router()
 router.get(
     '/',
-    validatQuery(queryReservationDetailsValidator),
+    validateQuery(queryReservationDetailsValidator),
     async (req, res) => {
         const { nationalID, date } = req.query as QueryReservationDetails
         const reservation = await checkInService.getReservationForCheckIn(

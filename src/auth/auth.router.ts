@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { omit } from 'ramda'
 import { container } from '../container'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
-import { validateBody, validatQuery } from '../middlewares/validate'
+import { validateBody, validateQuery } from '../middlewares/validate'
 import {
     LoginInput,
     LoginPayload,
@@ -13,7 +13,8 @@ import {
 import {
     loginValidator,
     registerValidator,
-    verifyUserValidator
+    verifyUserValidator,
+    checkAvailableValidator
 } from './auth.validation'
 
 const router = Router()
@@ -44,10 +45,30 @@ router.get('/ping', isAuthenticated, async (req, res) => {
     res.json(omit(['password'], user))
 })
 
-router.get('/verify', validatQuery(verifyUserValidator), async (req, res) => {
+router.get('/verify', validateQuery(verifyUserValidator), async (req, res) => {
     const { userID, token } = req.query as VerifyUserInput
     const user = await authService.verifyGuest(userID, token)
     res.send(user)
 })
+
+router.get(
+    '/check/email',
+    validateQuery(checkAvailableValidator),
+    async (req, res) => {
+        const email = req.query.input as string
+        const available = await authService.checkEmailAvailable(email)
+        res.send({ available })
+    }
+)
+
+router.get(
+    '/check/id',
+    validateQuery(checkAvailableValidator),
+    async (req, res) => {
+        const id = req.query.input as string
+        const available = await authService.checkNationalIDAvailable(id)
+        res.send({ available })
+    }
+)
 
 export { router as AuthRouter }
