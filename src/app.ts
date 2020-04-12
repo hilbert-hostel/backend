@@ -11,13 +11,11 @@ import { isCheckedIn } from './middlewares/isCheckedIn'
 import { isInRoom } from './middlewares/isInRoom'
 import { Router } from './router'
 import { timeoutPromise } from './utils'
-
-function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
+import { validateQR, checkTopic } from './doorlock/door'
 
 const main = async () => {
     const { mqttClient, initializeDatabase, connectMqtt } = container
+
     initializeDatabase()
     await connectMqtt()
     const app = express()
@@ -61,27 +59,12 @@ const main = async () => {
             res.send('eyy')
         }
     )
-    mqttClient.subscribe('qrCode', err => {
-        if (err) console.log('qrCode sub err : ' + err)
+    mqttClient.subscribe(['qrCode', 'doorStatus'], (err) => {
+        if (err) console.log('sub err : ' + err)
     })
 
-    mqttClient.subscribe('doorStatus', err => {
-        if (err) console.log('doorStatus sub err : ' + err)
-    })
-
-    mqttClient.on('message', (topic, message) => {
-        switch (topic) {
-            //Door1
-            case 'qrCode': {
-                //Validate QR code
-                if (message.toString() == '20021603185150') {
-                    console.log('door : unlock')
-                    mqttClient.publish('door', 'unlock')
-                }
-            }
-            default:
-                console.log(topic, message.toString())
-        }
+    mqttClient.on('message', async (topic, message) => {
+        checkTopic(topic, message.toString())
     })
 
     app.use(errorHandler)

@@ -22,6 +22,7 @@
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
+    "netcat": "^1.5.0",
     "nodemailer": "^6.4.5",
     "objection": "^2.1.2",
     "permit": "^0.2.4",

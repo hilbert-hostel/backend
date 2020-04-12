@@ -21,6 +21,7 @@ services:
       DB: pg
       PORT: 3000
       SECRET: SECRET
+      BASE_URL: BASE_URL
     working_dir: /app
     command: yarn dev
 
