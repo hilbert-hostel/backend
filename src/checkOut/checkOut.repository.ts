@@ -5,8 +5,8 @@ export interface ICheckOutRepository {
 }
 export class CheckOutRepository {
     addCheckOutTime(reservation_id: string, time: Date) {
-        return ReservationModel.query()
-            .patch({ check_out_exit_time: time })
-            .findById(reservation_id)
+        return ReservationModel.query().patchAndFetchById(reservation_id, {
+            check_out_exit_time: time
+        })
     }
 }
