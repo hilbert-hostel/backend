@@ -32,8 +32,13 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
-import { ICheckOutRepository, CheckOutRepository } from './checkOut/checkOut.repository'
+import {
+    ICheckOutRepository,
+    CheckOutRepository
+} from './checkOut/checkOut.repository'
 import { ICheckOutService, CheckOutService } from './checkOut/checkOut.service'
+import { IAdminRespository, AdminRepository } from './admin/admin.repository'
+import { IAdminService, AdminService } from './admin/admin.service'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -49,8 +54,10 @@ export interface AllDependencies {
     fileService: IFileService
     checkInRepository: ICheckInRepository
     checkInService: ICheckInService
-    checkOutRespository:ICheckOutRepository
+    checkOutRespository: ICheckOutRepository
     checkOutService: ICheckOutService
+    adminRepository: IAdminRespository
+    adminService: IAdminService
 }
 
 type RegisterDeps<T> = {
@@ -75,7 +82,9 @@ const dependencies: RegisterDeps<AllDependencies> = {
     checkInRepository: asClass(CheckInRepository),
     checkInService: asClass(CheckInService),
     checkOutRespository: asClass(CheckOutRepository),
-    checkOutService: asClass(CheckOutService)
+    checkOutService: asClass(CheckOutService),
+    adminRepository: asClass(AdminRepository),
+    adminService: asClass(AdminService)
 }
 
 DIContainer.register(dependencies)
