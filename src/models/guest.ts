@@ -14,7 +14,6 @@ export interface Guest {
     phone: string
     address: string
     reservation_made?: Reservation[]
-    reservation_in?: Reservation[]
     is_verified: boolean
 }
 @GenID(uuid)
@@ -36,18 +35,6 @@ export default class GuestModel extends BaseModel implements Guest {
             join: {
                 from: 'user.id',
                 to: 'reservation.user'
-            }
-        },
-        reservation_in: {
-            relation: Model.ManyToManyRelation,
-            modelClass: 'reservation',
-            join: {
-                from: 'user.id',
-                through: {
-                    from: 'reservation_member.user_id',
-                    to: 'reservation_member.reservation_id'
-                },
-                to: 'reservation.id'
             }
         }
     }

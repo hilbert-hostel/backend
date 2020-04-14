@@ -11,10 +11,10 @@ import {
     VerifyUserInput
 } from './auth.interface'
 import {
+    checkAvailableValidator,
     loginValidator,
     registerValidator,
-    verifyUserValidator,
-    checkAvailableValidator
+    verifyUserValidator
 } from './auth.validation'
 
 const router = Router()
@@ -70,5 +70,4 @@ router.get(
         res.send({ available })
     }
 )
-
 export { router as AuthRouter }

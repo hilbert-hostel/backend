@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcryptjs'
+import { omit, pipe } from 'ramda'
 import { Config } from '../config'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
@@ -7,15 +8,18 @@ import { IMailService } from '../mail/mail.service'
 import { Guest } from '../models/guest'
 import { VerificationToken } from '../models/verificationToken'
 import { randomNumString, renameKeys } from '../utils'
-import { LoginInput, RegisterInput } from './auth.interface'
+import { GuestDetails, LoginInput, RegisterInput } from './auth.interface'
 import { IVerificationTokenRepository } from './verificationToken.repository'
 
 export interface IAuthService {
-    registerUser(input: RegisterInput): Promise<Guest>
-    login(input: LoginInput): Promise<Guest>
+    registerUser(input: RegisterInput): Promise<GuestDetails>
+    login(input: LoginInput): Promise<GuestDetails>
     createVerificationToken(guestID: string): Promise<VerificationToken>
-    verifyGuest(guestID: string, token: string): Promise<Guest>
-    sendVerificationEmail(user: Guest, token: string): Promise<any>
+    verifyGuest(guestID: string, token: string): Promise<GuestDetails>
+    sendVerificationEmail(
+        user: { email: string; id: string },
+        token: string
+    ): Promise<any>
     checkEmailAvailable(email: string): Promise<boolean>
     checkNationalIDAvailable(nationalID: string): Promise<boolean>
 }
@@ -71,14 +75,14 @@ ${link}`
             throw new BadRequestError(
                 'Verification failed. User ID or token is invalid.'
             )
-        return this.guestRepository.updateOneById(guest_id, {
+        const guest = (await this.guestRepository.updateOneById(guest_id, {
             is_verified: true
-        }) as Promise<Guest>
+        })) as Guest
+        return renameKeys({ national_id: 'nationalID' }, guest) as GuestDetails
     }
 
     async registerUser(input: RegisterInput) {
         const hashed = await hash(input.password, 10)
-        // const { nationalID, ...rest } = input
         const emailTaken = await this.checkEmailAvailable(input.email)
         if (!emailTaken) {
             throw new BadRequestError('This email is already taken.')
@@ -93,25 +97,30 @@ ${link}`
             { nationalID: 'national_id' },
             input
         ) as Guest
-        const user = await this.guestRepository.create({
+        const guest = await this.guestRepository.create({
             ...formattedInput,
             password: hashed
         })
-        return user
+        return pipe(
+            omit(['password']),
+            renameKeys({ national_id: 'nationalID' })
+        )(guest) as GuestDetails
     }
 
     async login(input: LoginInput) {
-        const user = await this.guestRepository.findOne({
+        const guest = await this.guestRepository.findOne({
             email: input.email
         })
-        if (!user) throw new BadRequestError('Wrong email or password.')
-        const correct = await compare(input.password, user.password)
+        if (!guest) throw new BadRequestError('Wrong email or password.')
+        const correct = await compare(input.password, guest.password)
         if (!correct) throw new BadRequestError('Wrong email or password.')
-        return user
+        return pipe(
+            omit(['password']),
+            renameKeys({ national_id: 'nationalID' })
+        )(guest) as GuestDetails
     }
     async checkEmailAvailable(email: string) {
         const guest = await this.guestRepository.findOne({ email })
-        console.log(guest)
         return !guest
     }
     async checkNationalIDAvailable(nationalID: string) {
