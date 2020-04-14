@@ -16,7 +16,7 @@ export const timeoutPromise = <T>(
     ])
 
 export const trace = <T>(i: T, ...message: any[]) => {
-    console.log(i, ...message)
+    console.log(JSON.stringify(i, null, 2), ...message)
     return i
 }
 export const getUserID = (res: Response) => res.locals.userID as string
@@ -28,3 +28,11 @@ export const renameKeys = curry(
             keys(obj)
         )
 )
+export const randomNumString = (length: number) => {
+    if (length <= 0) throw new Error('Number length must be more than 0.')
+    let result = ''
+    for (let i = 0; i < length; i++) {
+        result += Math.floor(Math.random() * 10)
+    }
+    return result
+}

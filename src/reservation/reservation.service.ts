@@ -1,21 +1,38 @@
-import { append, concat, map, pick, pipe, take } from 'ramda'
+import {
+    roomAssignmentByPrice,
+    roomAssignmentByRoomOccupancy
+} from 'hilbert-room-assignment'
+import {
+    append,
+    concat,
+    evolve,
+    map,
+    mergeLeft,
+    mergeRight,
+    omit,
+    pick,
+    pipe,
+    take
+} from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, UnauthorizedError } from '../error/HttpError'
+import { Room } from '../models/room'
 import { renameKeys } from '../utils'
 import {
     ReservationDetail,
+    RoomSearch,
     RoomSearchPayload,
+    RoomSuggestion,
     SelectedRoom
 } from './reservation.interface'
 import { IReservationRepository } from './reservation.repository'
 import { checkEnoughBeds, checkNoDuplicateRooms } from './reservation.utils'
-
 export interface IReservationService {
     findAvailableRooms(
         check_in: string,
         check_out: string,
         guests: number
-    ): Promise<RoomSearchPayload[]>
+    ): Promise<RoomSearchPayload>
     makeReservation(
         check_in: string,
         check_out: string,
@@ -51,6 +68,7 @@ export class ReservationService implements IReservationService {
             check_in,
             check_out
         )
+
         const availability = rooms.reduce((acc, cur) => {
             const { type, beds, id, ...rest } = cur
             const available = beds!.length
@@ -62,12 +80,52 @@ export class ReservationService implements IReservationService {
                     availability: append({ id, available }, old.availability)
                 }
             }
-        }, {} as { [key: string]: Omit<RoomSearchPayload, 'type'> })
-        const result: RoomSearchPayload[] = []
+        }, {} as { [key: string]: Omit<RoomSearch, 'type'> })
+        const result: RoomSearch[] = []
         for (const type in availability) {
             result.push({ ...availability[type], type })
         }
-        return result
+        const roomDetails: { [key: number]: Room } = rooms.reduce(
+            (acc, cur) => {
+                return mergeRight(acc, { [cur.id]: cur })
+            },
+            {}
+        )
+        const roomList = map(
+            ({ id, price, beds }) => ({ id, price, available: beds!.length }),
+            rooms
+        )
+        const fillInRoomDetail = evolve({
+            roomConfig: map(
+                (config: { id: number; price: number; guests: number }) =>
+                    omit(
+                        ['beds'],
+                        mergeLeft(config, roomDetails[config.id])
+                    ) as RoomSuggestion
+            )
+        })
+        const lowestPrice = pipe(
+            roomAssignmentByPrice,
+            map(fillInRoomDetail)
+        )({
+            roomList,
+            guests,
+            query: 3
+        })
+
+        const lowestNumberOfRooms = pipe(
+            roomAssignmentByRoomOccupancy,
+            map(fillInRoomDetail)
+        )({
+            roomList,
+            guests,
+            query: 3
+        })
+
+        return {
+            rooms: result,
+            suggestions: { lowestPrice, lowestNumberOfRooms }
+        }
     }
 
     async makeReservation(
@@ -134,11 +192,25 @@ export class ReservationService implements IReservationService {
         }
 
         return pipe(
-            pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
+            pick([
+                'id',
+                'check_in',
+                'check_out',
+                'special_requests',
+                'rooms',
+                'transaction'
+            ]),
+            evolve({
+                rooms: map(evolve({ beds: i => i.length })),
+                // TODO implement real payment system
+                // transaction: Boolean
+                transaction: () => true
+            }),
             renameKeys({
                 check_in: 'checkIn',
                 check_out: 'checkOut',
-                special_requests: 'specialRequests'
+                special_requests: 'specialRequests',
+                transaction: 'isPaid'
             })
         )(reservation) as ReservationDetail
     }
@@ -171,12 +243,20 @@ export class ReservationService implements IReservationService {
                     'check_in',
                     'check_out',
                     'special_requests',
-                    'rooms'
+                    'rooms',
+                    'transaction'
                 ]),
+                evolve({
+                    rooms: map(evolve({ beds: i => i.length })),
+                    // TODO implement real payment system
+                    // transaction: Boolean
+                    transaction: () => true
+                }),
                 renameKeys({
                     check_in: 'checkIn',
                     check_out: 'checkOut',
-                    special_requests: 'specialRequests'
+                    special_requests: 'specialRequests',
+                    transaction: 'isPaid'
                 })
             ),
             reservation

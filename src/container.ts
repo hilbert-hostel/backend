@@ -13,10 +13,16 @@ import {
     IVerificationTokenRepository,
     VerificationTokenRepository
 } from './auth/verificationToken.repository'
+import {
+    CheckInRepository,
+    ICheckInRepository
+} from './checkIn/checkIn.repository'
+import { CheckInService, ICheckInService } from './checkIn/checkIn.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
-import { IMailService, MailService } from './email/email.service'
+import { FileService, IFileService } from './files/file.service'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
+import { IMailService, MailService } from './mail/mail.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
@@ -26,6 +32,8 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
+import { ICheckOutRepository, CheckOutRepository } from './checkOut/checkOut.repository'
+import { ICheckOutService, CheckOutService } from './checkOut/checkOut.service'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -38,6 +46,11 @@ export interface AllDependencies {
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
     mailService: IMailService
+    fileService: IFileService
+    checkInRepository: ICheckInRepository
+    checkInService: ICheckInService
+    checkOutRespository:ICheckOutRepository
+    checkOutService: ICheckOutService
 }
 
 type RegisterDeps<T> = {
@@ -57,7 +70,12 @@ const dependencies: RegisterDeps<AllDependencies> = {
     reservationService: asClass(ReservationService),
     mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
-    mailService: asClass(MailService)
+    mailService: asClass(MailService),
+    fileService: asClass(FileService),
+    checkInRepository: asClass(CheckInRepository),
+    checkInService: asClass(CheckInService),
+    checkOutRespository: asClass(CheckOutRepository),
+    checkOutService: asClass(CheckOutService)
 }
 
 DIContainer.register(dependencies)

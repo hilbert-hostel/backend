@@ -10,6 +10,6 @@ export const errorHandler: ErrorRequestHandler = async (err, _, res, __) => {
     } else if (err instanceof HttpError) {
         return res.status(err.code).json({ message })
     } else {
-        return res.status(500).json(err)
+        return res.status(500).json({ message })
     }
 }

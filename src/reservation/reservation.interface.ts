@@ -6,7 +6,7 @@ export interface RoomAvailability {
     id: number
     available: number
 }
-export interface RoomSearchPayload {
+export interface RoomSearch {
     type: string
     description?: string
     price: number
@@ -14,7 +14,28 @@ export interface RoomSearchPayload {
     facilities?: RoomFacility[]
     availability: RoomAvailability[]
 }
-
+export interface RoomSuggestion {
+    id: number
+    type: string
+    description?: string
+    price: number
+    photos?: Photo[]
+    facilities?: RoomFacility[]
+    guests: number
+}
+export interface RoomSearchPayload {
+    rooms: RoomSearch[]
+    suggestions: {
+        lowestPrice: {
+            roomConfig: RoomSuggestion[]
+            totalPrice: number
+        }[]
+        lowestNumberOfRooms: {
+            roomConfig: RoomSuggestion[]
+            totalPrice: number
+        }[]
+    }
+}
 export interface RoomSearchInput {
     checkIn: string
     checkOut: string
@@ -31,11 +52,14 @@ export interface RoomReservationInput {
     rooms: SelectedRoom[]
     specialRequests: string
 }
-
+export interface ReservedRoom extends Omit<Room, 'beds'> {
+    beds: number
+}
 export interface ReservationDetail {
     id: string
     checkIn: Date
     checkOut: Date
     specialRequests?: string
-    rooms: Room[]
+    rooms: ReservedRoom[]
+    isPaid: boolean
 }

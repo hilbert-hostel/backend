@@ -1,9 +1,11 @@
-import { Reservation, ReservationModel } from '../models/reservation'
+import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
+import { Transaction } from '../models/transaction'
 
 export interface ReservationWithRoom extends Reservation {
     rooms: Room[]
+    transaction: Transaction
 }
 export interface IReservationRepository {
     findAvailableRooms(check_in: string, check_out: string): Promise<Room[]>
@@ -79,9 +81,7 @@ export class ReservationRepository implements IReservationRepository {
             bed_id,
             reservation_id: reservation.id
         }))
-        await ReservedBedModel.query()
-            .insert(reservedBeds)
-            .returning('bed_id')
+        await ReservedBedModel.query().insert(reservedBeds)
         return reservation
     }
     findRoomsInReservation(reservation_id: string) {
@@ -105,15 +105,15 @@ export class ReservationRepository implements IReservationRepository {
     }
 
     async getReservation(reservation_id: string) {
-        const reservation = await ReservationModel.query().findById(
-            reservation_id
-        )
+        const reservation = await ReservationModel.query()
+            .findById(reservation_id)
+            .withGraphJoined('transaction')
 
         const rooms = await this.findRoomsInReservation(reservation_id)
         return {
             ...reservation,
             rooms
-        }
+        } as ReservationWithRoom
     }
 
     async getReservationTransaction(reservation_id: string) {
@@ -124,7 +124,9 @@ export class ReservationRepository implements IReservationRepository {
     }
 
     async listReservations(guest_id: string) {
-        const reservations = await ReservationModel.query().where({ guest_id })
+        const reservations = await ReservationModel.query()
+            .where({ guest_id })
+            .withGraphJoined('transaction')
 
         return Promise.all(
             reservations.map(async r => {
@@ -132,7 +134,7 @@ export class ReservationRepository implements IReservationRepository {
                 return {
                     ...r,
                     rooms
-                }
+                } as ReservationWithRoom
             })
         )
     }
