@@ -6,6 +6,7 @@ import { hasRole } from '../middlewares/hasRole'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
 import { StaffRole } from '../models/staff'
+import { getUserID } from '../utils'
 import {
     CreateStaff,
     LoginStaffPayload,
@@ -77,6 +78,17 @@ router.get(
     async (req, res) => {
         const rooms = await adminService.getAllRooms()
         res.send(rooms)
+    }
+)
+
+router.get(
+    '/ping',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const id = getUserID(res)
+        const staff = await adminService.getStaff(id)
+        res.send(staff)
     }
 )
 

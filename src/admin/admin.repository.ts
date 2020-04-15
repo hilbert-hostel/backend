@@ -15,6 +15,7 @@ export interface IAdminRespository {
     listCheckIns(page: number, size: number): Promise<ReservationWithGuest[]>
     listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
     getAllRooms(): Promise<Room[]>
+    findStaffById(id: string): Promise<Staff>
 }
 
 export class AdminRepository implements IAdminRespository {
@@ -76,5 +77,8 @@ export class AdminRepository implements IAdminRespository {
         return RoomModel.query()
             .withGraphJoined('beds')
             .modifyGraph('beds', (bed) => bed.select('bed.id'))
+    }
+    findStaffById(id: string) {
+        return StaffModel.query().findById(id)
     }
 }

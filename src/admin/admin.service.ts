@@ -19,12 +19,13 @@ import {
 import { IAdminRespository } from './admin.repository'
 
 export interface IAdminService {
-    listReservations(from: Date, to: Date): Promise<ReservationInfo[]>
+    listReservations(from?: Date, to?: Date): Promise<ReservationInfo[]>
     registerStaff(data: CreateStaff): Promise<StaffDetails>
     loginStaff(data: LoginInput): Promise<StaffDetails>
     listGuests(page: number, size: number): Promise<GuestDetails[]>
     listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
     getAllRooms(): Promise<AdminRoomSearch[]>
+    getStaff(id: string): Promise<StaffDetails>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -33,10 +34,10 @@ export class AdminService implements IAdminService {
     constructor({ adminRepository }: Dependencies<IAdminRespository>) {
         this.adminRepository = adminRepository
     }
-    async listReservations(from: Date, to: Date) {
+    async listReservations(from?: Date, to?: Date) {
         const reservations = await this.adminRepository.listReservations(
-            from,
-            to
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
         )
         return map(
             pipe(
@@ -153,5 +154,12 @@ export class AdminService implements IAdminService {
             result.push({ ...roomsByType[type], type })
         }
         return result
+    }
+    async getStaff(id: string) {
+        const staff = await this.adminRepository.findStaffById(id)
+        if (!staff) {
+            throw new BadRequestError('Invalid ID.')
+        }
+        return omit(['password'], staff)
     }
 }
