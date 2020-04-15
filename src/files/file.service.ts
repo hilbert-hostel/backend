@@ -5,7 +5,7 @@ import * as AWS from 'aws-sdk'
 
 export interface IFileService {
     uploadFile(file: any, name: string): Promise<string>
-    getFile(name: string): Promise<string>
+    getFile(name: string): string
 }
 
 // TODO implement real file service with S3
@@ -41,18 +41,7 @@ export class FileService implements IFileService {
         })
     }
 
-    getFile(name: string): Promise<any> {
-        const params = {
-            Bucket: this.BUCKET_NAME,
-            Key: name,
-        }
-        return new Promise((resolve, reject) => {
-            this.s3.getObject(params, function (err: any, data: any) {
-                if (err) {
-                    return reject(err)
-                }
-                return resolve(data.Body)
-            })
-        })
+    getFile(name: string) {
+        return 'https://' + this.BUCKET_NAME + '.s3.amazonaws.com/' + name
     }
 }
