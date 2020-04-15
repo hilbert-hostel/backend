@@ -11,7 +11,11 @@ import {
     LoginStaffPayload,
     RegisterStaffPayload
 } from './admin.interface'
-import { listGuestsValidator, registerValidator } from './admin.validation'
+import {
+    listCheckInCheckOutValidator,
+    listGuestsValidator,
+    registerValidator
+} from './admin.validation'
 
 const router = Router()
 const { adminService, jwtService } = container
@@ -43,13 +47,25 @@ router.post('/login', validateBody(loginValidator), async (req, res) => {
 })
 
 router.get(
-    '/guests',
+    '/guest',
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
     validateQuery(listGuestsValidator),
     async (req, res) => {
         const { page, size } = req.query
         const results = await adminService.listGuests(page, size)
+        res.send(results)
+    }
+)
+
+router.get(
+    '/checkIn',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    validateQuery(listCheckInCheckOutValidator),
+    async (req, res) => {
+        const { page, size } = req.query
+        const results = await adminService.listCheckInCheckOut(page, size)
         res.send(results)
     }
 )

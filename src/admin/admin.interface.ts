@@ -1,4 +1,5 @@
 import { GuestDetails } from '../auth/auth.interface'
+import { Guest } from '../models/guest'
 import { Staff } from '../models/staff'
 
 export interface ReservationInfo {
@@ -14,7 +15,7 @@ export interface ReservationInfoDatabase {
     check_in: Date
     check_out: Date
     specialRequests?: string
-    guest?: GuestDetails
+    guest: Guest
     rooms: ReservedRooms[]
 }
 
@@ -39,7 +40,28 @@ export interface RegisterStaffPayload {
 
 export type LoginStaffPayload = RegisterStaffPayload
 
-export interface ListGuests {
+export interface ListGuestsInput {
     page: number
     size: number
+}
+
+export interface CheckInInfo {
+    id: string
+    checkInTime: Date
+    nights: number
+    beds: number
+    guest: GuestDetails
+}
+
+export interface CheckOutInfo {
+    id: string
+    checkOutTime: Date
+    nights: number
+    beds: number
+    guest: GuestDetails
+}
+
+export interface checkInOutSummary {
+    checkIn: CheckInInfo[]
+    checkOut: CheckOutInfo[]
 }

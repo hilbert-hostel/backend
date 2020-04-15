@@ -23,6 +23,9 @@ export interface Reservation {
     record?: Record
     transaction?: Transaction
 }
+export interface ReservationWithGuest extends Reservation {
+    guest: Guest
+}
 @GenID(shortid)
 @CreatedUpdatedAt()
 export default class ReservationModel extends BaseModel implements Reservation {

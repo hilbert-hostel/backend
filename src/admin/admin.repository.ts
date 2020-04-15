@@ -1,7 +1,9 @@
+import { Dependencies } from '../container'
 import GuestModel, { Guest } from '../models/guest'
-import ReservationModel from '../models/reservation'
+import ReservationModel, { ReservationWithGuest } from '../models/reservation'
 import RoomModel, { Room } from '../models/room'
 import StaffModel, { Staff } from '../models/staff'
+import { IReservationRepository } from '../reservation/reservation.repository'
 import { CreateStaff, ReservationInfoDatabase } from './admin.interface'
 
 export interface IAdminRespository {
@@ -10,9 +12,17 @@ export interface IAdminRespository {
     createStaff(input: CreateStaff): Promise<Staff>
     findStaff(input: Partial<Staff>): Promise<Staff>
     listGuests(page: number, size: number): Promise<Guest[]>
+    listCheckIns(page: number, size: number): Promise<ReservationWithGuest[]>
+    listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
 }
 
 export class AdminRepository implements IAdminRespository {
+    reservationRepository: IReservationRepository
+    constructor({
+        reservationRepository
+    }: Dependencies<IReservationRepository>) {
+        this.reservationRepository = reservationRepository
+    }
     findRoomsInReservation(reservation_id: string) {
         return RoomModel.query()
             .withGraphJoined('beds', {
@@ -30,15 +40,9 @@ export class AdminRepository implements IAdminRespository {
             .whereBetween('check_in', [from, to])
             .orWhereBetween('check_out', [from, to])
             .withGraphJoined('guest')
-        return Promise.all(
-            reservations.map(async (r) => {
-                const rooms = await this.findRoomsInReservation(r.id)
-                return {
-                    ...r,
-                    rooms
-                } as ReservationInfoDatabase
-            })
-        )
+        return (await this.reservationRepository.mapRoomsToReservations(
+            reservations
+        )) as ReservationInfoDatabase[]
     }
     createStaff(input: CreateStaff) {
         return StaffModel.query().insert(input)
@@ -49,5 +53,23 @@ export class AdminRepository implements IAdminRespository {
     async listGuests(page: number, size: number) {
         const result = await GuestModel.query().page(page, size)
         return result.results
+    }
+
+    async listCheckIns(page: number, size: number) {
+        const reservations = await ReservationModel.query()
+            .whereNotNull('check_in_enter_time')
+            .withGraphJoined('guest')
+            .withGraphJoined('beds')
+            .page(page, size)
+            .orderBy('check_in_enter_time', 'DESC')
+        return reservations.results as any
+    }
+    async listCheckOuts(page: number, size: number) {
+        const reservations = await ReservationModel.query()
+            .whereNotNull('check_out_exit_time')
+            .withGraphJoined('guest')
+            .page(page, size)
+            .orderBy('check_out_exit_time', 'DESC')
+        return reservations.results as any
     }
 }

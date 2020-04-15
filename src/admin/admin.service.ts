@@ -1,10 +1,19 @@
 import { compare, hash } from 'bcryptjs'
+import moment from 'moment'
 import { evolve, map, omit, pick, pipe } from 'ramda'
 import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
+import { getGuestDetails } from '../guest/guest.utils'
 import { renameKeys } from '../utils'
-import { CreateStaff, ReservationInfo, StaffDetails } from './admin.interface'
+import {
+    CheckInInfo,
+    checkInOutSummary,
+    CheckOutInfo,
+    CreateStaff,
+    ReservationInfo,
+    StaffDetails
+} from './admin.interface'
 import { IAdminRespository } from './admin.repository'
 
 export interface IAdminService {
@@ -12,8 +21,10 @@ export interface IAdminService {
     registerStaff(data: CreateStaff): Promise<StaffDetails>
     loginStaff(data: LoginInput): Promise<StaffDetails>
     listGuests(page: number, size: number): Promise<GuestDetails[]>
+    listCheckInCheckOut(page: number, size: number): Promise<checkInOutSummary>
 }
-
+export const stayDuration = (checkIn: Date, checkOut: Date) =>
+    moment(checkOut).diff(moment(checkIn), 'days')
 export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
     constructor({ adminRepository }: Dependencies<IAdminRespository>) {
@@ -35,13 +46,7 @@ export class AdminService implements IAdminService {
                     'special_requests'
                 ]),
                 evolve({
-                    guest: pipe(
-                        omit(['password']),
-                        renameKeys({
-                            national_id: 'nationalID',
-                            is_verified: 'isVerified'
-                        })
-                    )
+                    guest: getGuestDetails
                 }),
                 renameKeys({
                     check_in: 'checkIn',
@@ -72,14 +77,59 @@ export class AdminService implements IAdminService {
     }
     async listGuests(page: number = 0, size: number = 25) {
         const guests = await this.adminRepository.listGuests(page, size)
-        return map(
-            pipe(
-                omit(['password']),
-                renameKeys({
-                    national_id: 'nationalID',
-                    is_verified: 'isVerified'
-                })
+        return map(getGuestDetails)(guests) as GuestDetails[]
+    }
+
+    async listCheckInCheckOut(page: number = 0, size: number = 25) {
+        const [checkIn, checkOut] = await Promise.all([
+            this.adminRepository.listCheckIns(page, size).then(
+                map(
+                    (r): CheckInInfo => {
+                        const {
+                            check_in,
+                            check_out,
+                            check_in_enter_time,
+                            id,
+                            guest
+                        } = r
+                        const nights = stayDuration(check_in, check_out)
+                        const beds = r.beds!.length
+                        return {
+                            id,
+                            beds,
+                            nights,
+                            guest: getGuestDetails(guest),
+                            checkInTime: check_in_enter_time
+                        } as CheckInInfo
+                    }
+                )
+            ),
+            this.adminRepository.listCheckOuts(page, size).then(
+                map(
+                    (r): CheckOutInfo => {
+                        const {
+                            check_in,
+                            check_out,
+                            check_out_exit_time,
+                            id,
+                            guest
+                        } = r
+                        const nights = stayDuration(check_in, check_out)
+                        const beds = r.beds!.length
+                        return {
+                            id,
+                            beds,
+                            nights,
+                            guest: getGuestDetails(guest),
+                            checkOutTime: check_out_exit_time
+                        } as CheckOutInfo
+                    }
+                )
             )
-        )(guests) as GuestDetails[]
+        ])
+        return {
+            checkIn,
+            checkOut
+        }
     }
 }
