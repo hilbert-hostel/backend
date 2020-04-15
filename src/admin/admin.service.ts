@@ -1,14 +1,16 @@
 import { compare, hash } from 'bcryptjs'
 import moment from 'moment'
-import { evolve, map, omit, pick, pipe } from 'ramda'
+import { append, evolve, map, omit, pick, pipe } from 'ramda'
 import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
+import { Bed } from '../models/bed'
 import { renameKeys } from '../utils'
 import {
+    AdminRoomSearch,
     CheckInInfo,
-    checkInOutSummary,
+    CheckInOutSummary,
     CheckOutInfo,
     CreateStaff,
     ReservationInfo,
@@ -21,7 +23,8 @@ export interface IAdminService {
     registerStaff(data: CreateStaff): Promise<StaffDetails>
     loginStaff(data: LoginInput): Promise<StaffDetails>
     listGuests(page: number, size: number): Promise<GuestDetails[]>
-    listCheckInCheckOut(page: number, size: number): Promise<checkInOutSummary>
+    listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
+    getAllRooms(): Promise<AdminRoomSearch[]>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -131,5 +134,24 @@ export class AdminService implements IAdminService {
             checkIn,
             checkOut
         }
+    }
+    async getAllRooms() {
+        const rooms = await this.adminRepository.getAllRooms()
+        const roomsByType = rooms.reduce((acc, cur) => {
+            const { type, id, beds, ...rest } = cur
+            const old = acc[type] ?? { ...rest, rooms: [] }
+            return {
+                ...acc,
+                [type]: {
+                    ...old,
+                    rooms: append({ id, beds: beds as Bed[] }, old.rooms)
+                }
+            }
+        }, {} as { [key: string]: Omit<AdminRoomSearch, 'type'> })
+        const result: AdminRoomSearch[] = []
+        for (const type in roomsByType) {
+            result.push({ ...roomsByType[type], type })
+        }
+        return result
     }
 }

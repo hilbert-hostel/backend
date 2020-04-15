@@ -61,7 +61,20 @@ export interface CheckOutInfo {
     guest: GuestDetails
 }
 
-export interface checkInOutSummary {
+export interface CheckInOutSummary {
     checkIn: CheckInInfo[]
     checkOut: CheckOutInfo[]
+}
+
+export interface RoomInfo {
+    id: number
+    beds: {
+        id: number
+    }[]
+}
+export interface AdminRoomSearch {
+    type: string
+    description?: string
+    price: number
+    rooms: RoomInfo[]
 }

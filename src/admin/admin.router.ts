@@ -69,4 +69,15 @@ router.get(
         res.send(results)
     }
 )
+
+router.get(
+    '/room',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const rooms = await adminService.getAllRooms()
+        res.send(rooms)
+    }
+)
+
 export { router as AdminRouter }

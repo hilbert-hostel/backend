@@ -14,6 +14,7 @@ export interface IAdminRespository {
     listGuests(page: number, size: number): Promise<Guest[]>
     listCheckIns(page: number, size: number): Promise<ReservationWithGuest[]>
     listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
+    getAllRooms(): Promise<Room[]>
 }
 
 export class AdminRepository implements IAdminRespository {
@@ -54,7 +55,6 @@ export class AdminRepository implements IAdminRespository {
         const result = await GuestModel.query().page(page, size)
         return result.results
     }
-
     async listCheckIns(page: number, size: number) {
         const reservations = await ReservationModel.query()
             .whereNotNull('check_in_enter_time')
@@ -71,5 +71,10 @@ export class AdminRepository implements IAdminRespository {
             .page(page, size)
             .orderBy('check_out_exit_time', 'DESC')
         return reservations.results as any
+    }
+    getAllRooms() {
+        return RoomModel.query()
+            .withGraphJoined('beds')
+            .modifyGraph('beds', (bed) => bed.select('bed.id'))
     }
 }
