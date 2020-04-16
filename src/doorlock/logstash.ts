@@ -2,6 +2,7 @@ const NetcatClient = require('netcat/client')
 
 export const log = (topic: string, message: string) => {
     const nc = new NetcatClient()
+    // Address to send log
     nc.addr('127.0.0.1').port(5000).connect().wait(10).retry(5000)
 
     if (topic === 'doorStatus') {
