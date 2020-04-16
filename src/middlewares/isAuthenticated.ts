@@ -11,12 +11,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const err = new UnauthorizedError(`Authentication is required!`)
         return next(err)
     }
-    const { userID, role } = await container.jwtService.verifyToken(token)
+    const { userID, role, email } = await container.jwtService.verifyToken(
+        token
+    )
     if (!userID) {
         permit.fail(res)
         return next(new UnauthorizedError(`Authentication is required!`))
     }
     res.locals.userID = userID
     res.locals.role = role
+    res.locals.email = email
     next()
 }

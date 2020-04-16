@@ -3,8 +3,19 @@ import { omit } from 'ramda'
 import { container } from '../container'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
-import { LoginInput, LoginPayload, RegisterInput, RegisterPayload, VerifyUserInput } from './auth.interface'
-import { checkAvailableValidator, loginValidator, registerValidator, verifyUserValidator } from './auth.validation'
+import {
+    LoginInput,
+    LoginPayload,
+    RegisterInput,
+    RegisterPayload,
+    VerifyUserInput
+} from './auth.interface'
+import {
+    checkAvailableValidator,
+    loginValidator,
+    registerValidator,
+    verifyUserValidator
+} from './auth.validation'
 
 const router = Router()
 const { authService, jwtService, guestRepository } = container
@@ -12,7 +23,7 @@ const { authService, jwtService, guestRepository } = container
 router.post('/register', validateBody(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
     const user = await authService.registerUser(input)
-    const token = await jwtService.generateToken(user.id)
+    const token = await jwtService.generateToken(user.id, user.email)
     const verificationToken = await authService.createVerificationToken(user.id)
     authService
         .sendVerificationEmail(user, verificationToken.token)
@@ -24,7 +35,7 @@ router.post('/register', validateBody(registerValidator), async (req, res) => {
 router.post('/login', validateBody(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
     const user = await authService.login(input)
-    const token = await jwtService.generateToken(user.id)
+    const token = await jwtService.generateToken(user.id, user.email)
     const payload: LoginPayload = { user: omit(['password'], user), token }
     res.json(payload)
 })
@@ -60,4 +71,3 @@ router.get(
     }
 )
 export { router as AuthRouter }
-
