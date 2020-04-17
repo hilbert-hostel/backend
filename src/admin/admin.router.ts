@@ -8,6 +8,7 @@ import { validateBody, validateQuery } from '../middlewares/validate'
 import { StaffRole } from '../models/staff'
 import { getUserID } from '../utils'
 import {
+    AdminCheckIn,
     CreateStaff,
     LoginStaffPayload,
     RegisterStaffPayload
@@ -19,7 +20,7 @@ import {
 } from './admin.validation'
 
 const router = Router()
-const { adminService, jwtService } = container
+const { adminService, jwtService, checkInService } = container
 router.get(
     '/reservation',
     isAuthenticated,
@@ -106,6 +107,23 @@ router.post(
     async (req, res) => {
         adminService.unlockDoor(req.query.roomID)
         res.send({ message: 'unlocked' })
+    }
+)
+
+router.post(
+    '/checkIn',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const fakePicture = new Buffer('picture')
+        const { reservationID } = req.body as AdminCheckIn
+        const result = await checkInService.addCheckInRecord(
+            reservationID,
+            fakePicture,
+            fakePicture,
+            {}
+        )
+        res.send({ message: result })
     }
 )
 

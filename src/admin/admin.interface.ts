@@ -78,3 +78,7 @@ export interface AdminRoomSearch {
     price: number
     rooms: RoomInfo[]
 }
+
+export interface AdminCheckIn {
+    reservationID: string
+}
