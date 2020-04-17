@@ -12,6 +12,7 @@ export interface log {
     from: string
     function: string
     message: string
+    timestamp: number
 }
 
 export class LogService implements ILogService {
@@ -26,6 +27,7 @@ export class LogService implements ILogService {
                 from: 'mqtt',
                 function: topic,
                 message: message,
+                timestamp: Date.now(),
             }
             request.post(this.log_url, { json: body })
         }
@@ -34,6 +36,7 @@ export class LogService implements ILogService {
                 from: 'raspberryPi',
                 function: topic,
                 message: message,
+                timestamp: Date.now(),
             }
             request.post(this.log_url, { json: body })
         }
