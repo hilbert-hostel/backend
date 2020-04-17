@@ -1,12 +1,14 @@
 import { Model } from 'objection'
 import BaseModel from './base'
 import { Reservation } from './reservation'
+import { Room } from './room'
 
 export interface GuestReservationRoom {
     guest_email: string
     reservation_id: string
     room_id: number
     reservation?: Reservation
+    room?: Room
 }
 export default class GuestReservationRoomModel extends BaseModel
     implements GuestReservationRoom {
@@ -14,6 +16,7 @@ export default class GuestReservationRoomModel extends BaseModel
     reservation_id!: string
     room_id!: number
     reservation?: Reservation
+    room?: Room
 
     static tableName = 'guest_reservation_room'
     static idColumn = ['guest_email', 'reservation_id', 'room_id']
