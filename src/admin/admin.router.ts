@@ -1,4 +1,6 @@
 import { Router } from 'express'
+import * as fs from 'fs'
+import { join } from 'path'
 import { LoginInput } from '../auth/auth.interface'
 import { loginValidator } from '../auth/auth.validation'
 import { container } from '../container'
@@ -9,18 +11,20 @@ import { StaffRole } from '../models/staff'
 import { getUserID } from '../utils'
 import {
     AdminCheckIn,
+    AdminCheckOut,
     CreateStaff,
     LoginStaffPayload,
     RegisterStaffPayload
 } from './admin.interface'
 import {
+    adminCheckInValidator,
+    adminCheckOutValidator,
     listCheckInCheckOutValidator,
     listGuestsValidator,
     registerValidator
 } from './admin.validation'
-
 const router = Router()
-const { adminService, jwtService, checkInService } = container
+const { adminService, jwtService, checkInService, checkOutService } = container
 router.get(
     '/reservation',
     isAuthenticated,
@@ -114,17 +118,31 @@ router.post(
     '/checkIn',
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
+    validateBody(adminCheckInValidator),
     async (req, res) => {
-        const fakePicture = new Buffer('picture')
-        const { reservationID } = req.body as AdminCheckIn
+        const { reservationID, date } = req.body as AdminCheckIn
+        const fakePicture = await fs.promises.readFile(
+            join(__dirname, 'profile.jpeg')
+        )
         const result = await checkInService.addCheckInRecord(
             reservationID,
             fakePicture,
             fakePicture,
-            {}
+            {},
+            date
         )
         res.send({ message: result })
     }
 )
-
+router.post(
+    '/checkOut',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    validateBody(adminCheckOutValidator),
+    async (req, res) => {
+        const { reservationID, date } = req.body as AdminCheckOut
+        const result = await checkOutService.checkOut(reservationID, date)
+        res.send({ message: result })
+    }
+)
 export { router as AdminRouter }

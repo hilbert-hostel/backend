@@ -81,4 +81,7 @@ export interface AdminRoomSearch {
 
 export interface AdminCheckIn {
     reservationID: string
+    date: Date
 }
+
+export type AdminCheckOut = AdminCheckIn
