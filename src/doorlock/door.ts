@@ -13,7 +13,7 @@ export const checkTopic = async (topic: string, message: string) => {
     if (topic === 'qrCode') {
         if (await validateQR(message.toString())) {
             logService.log(topic, message.toString())
-            mqttClient.publish('door', 'unlock')
+            mqttClient.publish('door/1', 'unlock')
         } else {
             console.log('validate failed')
         }
