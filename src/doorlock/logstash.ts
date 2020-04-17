@@ -1,18 +1,41 @@
-const NetcatClient = require('netcat/client')
+import { string } from 'yup'
+import { Config } from '../config'
+import { Dependencies } from '../container'
 
-export const log = (topic: string, message: string) => {
-    const nc = new NetcatClient()
-    // Address to send log
-    nc.addr('127.0.0.1').port(5000).connect().wait(10).retry(5000)
+const request = require('request')
 
-    if (topic === 'doorStatus') {
-        const s = 'main | mqtt | doorStatus | - ' + message
-        console.log(s)
-        nc.send(s)
+export interface ILogService {
+    log(topic: string, message: string): any
+}
+
+export interface log {
+    from: string
+    function: string
+    message: string
+}
+
+export class LogService implements ILogService {
+    private log_url: string
+    constructor({ config }: Dependencies<Config>) {
+        this.log_url = config.LOG_URL
     }
-    if (topic === 'qrCode') {
-        const s = 'main | raspberryPi | qrCode | - ' + message
-        console.log(s)
-        nc.send(s)
+
+    log = (topic: string, message: string) => {
+        if (topic === 'doorStatus') {
+            const body: log = {
+                from: 'mqtt',
+                function: topic,
+                message: message,
+            }
+            request.post(this.log_url, { json: body })
+        }
+        if (topic === 'qrCode') {
+            const body: log = {
+                from: 'raspberryPi',
+                function: topic,
+                message: message,
+            }
+            request.post(this.log_url, { json: body })
+        }
     }
 }

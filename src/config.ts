@@ -9,7 +9,7 @@ const env = new Proxy(process.env as Record<string, string>, {
             throw new Error(`${prop} is not set in environment variables.`)
         }
         return variable
-    }
+    },
 })
 export const config = {
     PORT: env.PORT,
@@ -25,7 +25,8 @@ export const config = {
     MAILER_CLIENT_ID: env.MAILER_CLIENT_ID,
     MAILER_CLIENT_SECRET: env.MAILER_CLIENT_SECRET,
     MAILER_REFRESH_TOKEN: env.MAILER_REFRESH_TOKEN,
-    BASE_URL: env.BASE_URL
+    BASE_URL: env.BASE_URL,
+    LOG_URL: env.LOG_URL,
 }
 
 export type Config = typeof config

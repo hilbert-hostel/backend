@@ -6,7 +6,7 @@ import { getUserID } from '../utils'
 import { RoomReservationInput, RoomSearchInput } from './reservation.interface'
 import {
     roomReservationValidator,
-    roomSearchValidator
+    roomSearchValidator,
 } from './reservation.validation'
 
 const router = Router()
@@ -30,7 +30,7 @@ router.post(
             checkIn,
             checkOut,
             rooms,
-            specialRequests
+            specialRequests,
         } = req.body as RoomReservationInput
         const guestID = getUserID(res)
         const reservation = await reservationService.makeReservation(

@@ -4,14 +4,14 @@ import {
     asValue,
     createContainer,
     Lifetime,
-    Resolver
+    Resolver,
 } from 'awilix'
 import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
 import {
     IVerificationTokenRepository,
-    VerificationTokenRepository
+    VerificationTokenRepository,
 } from './auth/verificationToken.repository'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
@@ -20,12 +20,14 @@ import { GuestRepository, IGuestRepository } from './guest/guest.repository'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
-    ReservationRepository
+    ReservationRepository,
 } from './reservation/reservation.repository'
 import {
     IReservationService,
-    ReservationService
+    ReservationService,
 } from './reservation/reservation.service'
+import { ILogService, LogService } from './doorlock/logstash'
+
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -38,6 +40,7 @@ export interface AllDependencies {
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
     mailService: IMailService
+    logService: ILogService
 }
 
 type RegisterDeps<T> = {
@@ -57,7 +60,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     reservationService: asClass(ReservationService),
     mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
-    mailService: asClass(MailService)
+    mailService: asClass(MailService),
+    logService: asClass(LogService),
 }
 
 DIContainer.register(dependencies)
