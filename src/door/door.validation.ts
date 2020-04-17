@@ -1,13 +1,18 @@
 import * as yup from 'yup'
-import { DoorLockCodeEncodeInput, DoorLockCodeDecodeInput } from './door.interface'
+import { DoorLockCodeDecodeInput, ShareRoomInput } from './door.interface'
 
 export const generateDoorLockCodeValidator = yup.object().shape({
-	userID: yup.string().required(),
-	roomID: yup.string().required(),
-	nationalID: yup.string().required(),
-	secret: yup.string().required(),
+    roomID: yup.number().integer().required()
 })
 
-export const doorlockCodeDecodeValidator = yup.object().shape<DoorLockCodeDecodeInput>({
-	encoded: yup.string()
+export const doorlockCodeDecodeValidator = yup
+    .object()
+    .shape<DoorLockCodeDecodeInput>({
+        encoded: yup.string()
+    })
+
+export const shareRoomValidator = yup.object().shape<ShareRoomInput>({
+    email: yup.string().email().required(),
+    reservationID: yup.string().required(),
+    roomID: yup.number().integer()
 })
