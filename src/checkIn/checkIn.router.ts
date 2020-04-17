@@ -67,7 +67,8 @@ router.post(
             id,
             req.files.kioskPhoto,
             req.files.idCardPhoto,
-            idCardDetails
+            idCardDetails,
+            new Date()
         )
         res.send({ message })
     }

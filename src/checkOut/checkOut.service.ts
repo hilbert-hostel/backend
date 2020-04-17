@@ -1,15 +1,26 @@
-import { ICheckOutRepository } from './checkOut.repository'
+import moment from 'moment'
 import { Dependencies } from '../container'
+import { BadRequestError } from '../error/HttpError'
 import { Reservation } from '../models/reservation'
+import { ICheckOutRepository } from './checkOut.repository'
 export interface ICheckOutService {
-    checkOut(reservationID: string): Promise<Reservation>
+    checkOut(reservationID: string, date: Date): Promise<Reservation>
 }
 export class CheckOutService implements ICheckOutService {
     checkOutRepository: ICheckOutRepository
     constructor({ checkOutRespository }: Dependencies<ICheckOutRepository>) {
         this.checkOutRepository = checkOutRespository
     }
-    checkOut(reservationID:string) {
-        return this.checkOutRepository.addCheckOutTime(reservationID, new Date())
+    async checkOut(reservationID: string, date: Date) {
+        const reservation = await this.checkOutRepository.findReservationById(
+            reservationID
+        )
+        if (!this.validDate(date, reservation.check_out)) {
+            throw new BadRequestError('Can not check out today.')
+        }
+        return this.checkOutRepository.addCheckOutTime(reservationID, date)
+    }
+    validDate(date: Date, checkOutDate: Date) {
+        return moment(date).isSame(moment(checkOutDate), 'day')
     }
 }

@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { evolve, map, pick, pipe } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
@@ -20,7 +21,8 @@ export interface ICheckInService {
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,
-        idCardDetail: any
+        idCardDetail: any,
+        date: Date
     ): Promise<string>
 }
 
@@ -57,7 +59,7 @@ export class CheckInService implements ICheckInService {
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({
-                rooms: map(evolve({ beds: i => i.length }))
+                rooms: map(evolve({ beds: (i) => i.length }))
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -98,24 +100,34 @@ export class CheckInService implements ICheckInService {
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,
-        idCardDetail: any
+        idCardDetail: any,
+        date: Date
     ) {
+        const reservation = await this.checkInRepository.findReservationById(
+            reservationID
+        )
+        if (!this.validDate(date, reservation.check_in)) {
+            throw new BadRequestError(`Can not chech in this day ${date}.`)
+        }
         const kioskPhotoName = `check-in-photo-${reservationID}`
         const idCardPhotoName = `id-card-photo-${reservationID}`
-        const kioskPhotoUrl = await this.fileService.uploadFile(
-            kioskPhoto,
-            kioskPhotoName
-        )
-        const idCardPhotoUrl = await this.fileService.uploadFile(
-            idCardPhoto,
-            idCardPhotoName
-        )
+        // const kioskPhotoKey = await this.fileService.uploadFile(
+        //     kioskPhoto,
+        //     kioskPhotoName
+        // )
+        // const idCardPhotoKey = await this.fileService.uploadFile(
+        //     idCardPhoto,
+        //     idCardPhotoName
+        // )
         const record = await this.checkInRepository.createReservationRecord(
             reservationID,
             kioskPhotoName,
             { ...idCardDetail, idCardPhoto: idCardPhotoName }
         )
-        await this.checkInRepository.addCheckInTime(reservationID, new Date())
+        await this.checkInRepository.addCheckInTime(reservationID, date)
         return 'success'
+    }
+    validDate(date: Date, checkOutDate: Date) {
+        return moment(date).isSame(moment(checkOutDate), 'day')
     }
 }
