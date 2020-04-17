@@ -7,16 +7,8 @@ import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
 import { StaffRole } from '../models/staff'
 import { getUserID } from '../utils'
-import {
-    CreateStaff,
-    LoginStaffPayload,
-    RegisterStaffPayload
-} from './admin.interface'
-import {
-    listCheckInCheckOutValidator,
-    listGuestsValidator,
-    registerValidator
-} from './admin.validation'
+import { CreateStaff, LoginStaffPayload, RegisterStaffPayload } from './admin.interface'
+import { listCheckInCheckOutValidator, listGuestsValidator, registerValidator } from './admin.validation'
 
 const router = Router()
 const { adminService, jwtService } = container
@@ -34,7 +26,7 @@ router.get(
 router.post('/register', validateBody(registerValidator), async (req, res) => {
     const input = req.body as CreateStaff
     const staff = await adminService.registerStaff(input)
-    const token = await jwtService.generateToken(staff.id, staff.role)
+    const token = await jwtService.generateToken(staff.id, staff.email, staff.role)
     const payload: RegisterStaffPayload = { user: staff, token }
     res.json(payload)
 })
@@ -42,7 +34,7 @@ router.post('/register', validateBody(registerValidator), async (req, res) => {
 router.post('/login', validateBody(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
     const staff = await adminService.loginStaff(input)
-    const token = await jwtService.generateToken(staff.id, staff.role)
+    const token = await jwtService.generateToken(staff.id, staff.email, staff.role)
     const payload: LoginStaffPayload = { user: staff, token }
     res.json(payload)
 })
@@ -93,3 +85,4 @@ router.get(
 )
 
 export { router as AdminRouter }
+
