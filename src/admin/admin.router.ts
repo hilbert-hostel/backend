@@ -99,5 +99,14 @@ router.get(
         res.send(staff)
     }
 )
+router.post(
+    '/unlock',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        adminService.unlockDoor(req.query.roomID)
+        res.send({ message: 'unlocked' })
+    }
+)
 
 export { router as AdminRouter }
