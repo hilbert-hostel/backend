@@ -1,6 +1,6 @@
 import GuestReservationRoomModel, {
     GuestReservationRoom
-} from '../models/guestReservationRoom'
+} from '../models/guest_reservation_room'
 import ReservationModel, { Reservation } from '../models/reservation'
 
 export interface IRoomRepository {
@@ -37,10 +37,12 @@ export class RoomRepository implements IRoomRepository {
         return ReservationModel.query().findById(reservation_id)
     }
     findGuestRoomReservation(guest_email: string, reservation_id: string) {
-        return GuestReservationRoomModel.query().findOne({
-            guest_email,
-            reservation_id
-        })
+        return GuestReservationRoomModel.query()
+            .findOne({
+                guest_email,
+                reservation_id
+            })
+            .withGraphJoined('room')
     }
     async findReservationIn(guest_id: string, guest_email: string, date: Date) {
         const reservationMade = await ReservationModel.query()

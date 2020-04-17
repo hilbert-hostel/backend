@@ -1,6 +1,7 @@
 import { Dependencies } from '../container'
 import { BadRequestError, ForbiddenError } from '../error/HttpError'
-import { GuestReservationRoom } from '../models/guestReservationRoom'
+import { GuestReservationRoom } from '../models/guest_reservation_room'
+import { Room } from '../models/room'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { IRoomRepository } from './room.repository'
 
@@ -15,7 +16,7 @@ export interface IRoomService {
         guestID: string,
         email: string,
         date: Date
-    ): Promise<number[]>
+    ): Promise<Room[]>
     hasPermissionToEnterRoom(
         guestID: string,
         email: string,
@@ -87,8 +88,7 @@ export class RoomService implements IRoomService {
         const reservation = await this.reservationRepository.getReservation(
             reservationID
         )
-        const rooms = reservation.rooms.map(({ id }) => id)
-        return rooms
+        return reservation.rooms
     }
 
     async roomShared(email: string, reservationID: string) {
@@ -96,7 +96,7 @@ export class RoomService implements IRoomService {
             email,
             reservationID
         )
-        return shared.room_id
+        return shared.room as Room
     }
 
     async hasPermissionToEnterRoom(
@@ -115,15 +115,9 @@ export class RoomService implements IRoomService {
         }
         if (reservation.guest_id === guestID) {
             const rooms = await this.allRoomsInReservation(reservation.id)
-            console.log(rooms)
-            console.log(roomID)
-            console.log(rooms.includes(roomID))
-            console.log(typeof rooms[0])
-            console.log(typeof roomID)
-            console.log(rooms[0] === roomID)
-            return rooms.includes(roomID)
+            return rooms.some((r) => r.id === roomID)
         }
         const room = await this.roomShared(email, reservation.id)
-        return room === roomID
+        return room.id === roomID
     }
 }
