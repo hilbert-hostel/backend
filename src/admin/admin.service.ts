@@ -1,5 +1,6 @@
 import { compare, hash } from 'bcryptjs'
 import moment from 'moment'
+import { MqttClient } from 'mqtt'
 import { append, evolve, map, omit, pick, pipe } from 'ramda'
 import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { Dependencies } from '../container'
@@ -26,13 +27,19 @@ export interface IAdminService {
     listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
     getAllRooms(): Promise<AdminRoomSearch[]>
     getStaff(id: string): Promise<StaffDetails>
+    unlockDoor(roomID: string): void
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
 export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
-    constructor({ adminRepository }: Dependencies<IAdminRespository>) {
+    mqttClient: MqttClient
+    constructor({
+        adminRepository,
+        mqttClient
+    }: Dependencies<IAdminRespository | MqttClient>) {
         this.adminRepository = adminRepository
+        this.mqttClient = mqttClient
     }
     async listReservations(from?: Date, to?: Date) {
         const reservations = await this.adminRepository.listReservations(
@@ -161,5 +168,8 @@ export class AdminService implements IAdminService {
             throw new BadRequestError('Invalid ID.')
         }
         return omit(['password'], staff)
+    }
+    unlockDoor(roomID: string) {
+        this.mqttClient.publish(`door/${roomID}`, 'unlock')
     }
 }

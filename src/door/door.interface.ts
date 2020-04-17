@@ -6,7 +6,7 @@ export interface DoorLockCodeEncodeInput {
 }
 
 export interface DoorLockCodeDecodeInput {
-	encoded: string
+	code: string
 }
 
 export interface ShareRoomInput {

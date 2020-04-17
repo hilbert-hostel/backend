@@ -45,7 +45,7 @@ router.get(
     validateQuery(doorlockCodeDecodeValidator),
     async (req, res) => {
         const isValid = doorlockCodeService.verify({
-            encoded: req.query.encoded
+            code: req.query.code
         })
         res.json(isValid)
     }

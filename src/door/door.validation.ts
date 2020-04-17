@@ -8,7 +8,7 @@ export const generateDoorLockCodeValidator = yup.object().shape({
 export const doorlockCodeDecodeValidator = yup
     .object()
     .shape<DoorLockCodeDecodeInput>({
-        encoded: yup.string()
+        code: yup.string()
     })
 
 export const shareRoomValidator = yup.object().shape<ShareRoomInput>({
