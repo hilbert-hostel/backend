@@ -18,6 +18,9 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         permit.fail(res)
         return next(new UnauthorizedError(`Authentication is required!`))
     }
+    if (!userID || !role || !email) {
+        return next(new UnauthorizedError(`Invalid Token!`))
+    }
     res.locals.userID = userID
     res.locals.role = role
     res.locals.email = email
