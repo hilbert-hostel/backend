@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<any> {
     await knex('guest').del()
     await knex('reservation').del()
     await knex('facility').del()
+    await knex('staff').del()
     Model.knex(knex)
     // create facilities
     const facilities: Facility[] = [
