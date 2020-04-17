@@ -17,7 +17,7 @@ export async function up(knex: Knex): Promise<any> {
             .references('room.id')
             .onDelete('CASCADE')
             .notNullable()
-        table.primary(['guest', 'reservation', 'room'])
+        table.primary(['guest_email', 'reservation_id', 'room_id'])
     })
 }
 
