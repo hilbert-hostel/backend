@@ -109,7 +109,7 @@ router.post(
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
-        adminService.unlockDoor(req.query.roomID)
+        adminService.unlockDoor(req.body.roomID)
         res.send({ message: 'unlocked' })
     }
 )
