@@ -1,4 +1,5 @@
 import { ErrorRequestHandler } from 'express'
+import { JsonWebTokenError } from 'jsonwebtoken'
 import { ValidationError } from 'yup'
 import { HttpError } from './HttpError'
 
@@ -7,6 +8,8 @@ export const errorHandler: ErrorRequestHandler = async (err, _, res, __) => {
     const { message } = err
     if (err instanceof ValidationError) {
         return res.status(400).json({ message })
+    } else if (err instanceof JsonWebTokenError) {
+        return res.status(401).json({ message })
     } else if (err instanceof HttpError) {
         return res.status(err.code).json({ message })
     } else {

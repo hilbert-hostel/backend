@@ -3,6 +3,7 @@ import { CreateGuest } from '../guest/guest.interface'
 export type Token = string
 export interface TokenPayload {
     userID: string
+    email: string
     role: string
 }
 

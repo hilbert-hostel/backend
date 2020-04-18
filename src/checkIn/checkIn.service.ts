@@ -8,6 +8,7 @@ import { ReservationDetail } from '../reservation/reservation.interface'
 import { randomNumString, renameKeys } from '../utils'
 import { OtpReference } from './checkIn.interface'
 import { ICheckInRepository } from './checkIn.repository'
+import { sameDay } from './checkIn.utils'
 
 export interface ICheckInService {
     getReservationForCheckIn(
@@ -16,11 +17,12 @@ export interface ICheckInService {
     ): Promise<ReservationDetail>
     generateOtp(reservationID: string): Promise<OtpReference>
     verifyOtp(reservationID: string, password: string): Promise<boolean>
-    addCheckInRecord(
+    checkIn(
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,
-        idCardDetail: any
+        idCardDetail: any,
+        date: Date
     ): Promise<string>
 }
 
@@ -57,7 +59,7 @@ export class CheckInService implements ICheckInService {
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({
-                rooms: map(evolve({ beds: i => i.length }))
+                rooms: map(evolve({ beds: (i) => i.length }))
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -94,28 +96,35 @@ export class CheckInService implements ICheckInService {
         }
         return otp.password === password
     }
-    async addCheckInRecord(
+    async checkIn(
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,
-        idCardDetail: any
+        idCardDetail: any,
+        date: Date
     ) {
+        const reservation = await this.checkInRepository.findReservationById(
+            reservationID
+        )
+        if (!sameDay(date, reservation.check_in)) {
+            throw new BadRequestError(`Can not chech in this day ${date}.`)
+        }
         const kioskPhotoName = `check-in-photo-${reservationID}`
         const idCardPhotoName = `id-card-photo-${reservationID}`
-        const kioskPhotoUrl = await this.fileService.uploadFile(
+        const kioskPhotoKey = await this.fileService.uploadFile(
             kioskPhoto,
             kioskPhotoName
         )
-        const idCardPhotoUrl = await this.fileService.uploadFile(
+        const idCardPhotoKey = await this.fileService.uploadFile(
             idCardPhoto,
             idCardPhotoName
         )
         const record = await this.checkInRepository.createReservationRecord(
             reservationID,
-            kioskPhotoName,
-            { ...idCardDetail, idCardPhoto: idCardPhotoName }
+            kioskPhotoKey,
+            { ...idCardDetail, idCardPhoto: idCardPhotoKey }
         )
-        await this.checkInRepository.addCheckInTime(reservationID, new Date())
+        await this.checkInRepository.addCheckInTime(reservationID, date)
         return 'success'
     }
 }

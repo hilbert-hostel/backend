@@ -25,6 +25,7 @@ export interface ICheckInRepository {
         photo: string,
         id_card_data: any
     ): Promise<Record>
+    findReservationById(id: string): Promise<Reservation>
     addCheckInTime(reservation_id: string, time: Date): Promise<Reservation>
 }
 
@@ -82,9 +83,12 @@ export class CheckInRepository implements ICheckInRepository {
             id_card_data
         })
     }
+    findReservationById(id: string): Promise<Reservation> {
+        return ReservationModel.query().findById(id)
+    }
     async addCheckInTime(reservation_id: string, time: Date) {
-        return ReservationModel.query()
-            .patch({ check_in_enter_time: time })
-            .findById(reservation_id)
+        return ReservationModel.query().patchAndFetchById(reservation_id, {
+            check_in_enter_time: time
+        })
     }
 }

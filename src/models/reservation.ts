@@ -16,12 +16,16 @@ export interface Reservation {
     updated_at: Date
     beds?: Bed[]
     guest?: Guest
+    followers?: Guest[]
     guest_id: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
     otp?: Otp
     record?: Record
     transaction?: Transaction
+}
+export interface ReservationWithGuest extends Reservation {
+    guest: Guest
 }
 @GenID(shortid)
 @CreatedUpdatedAt()
@@ -34,6 +38,7 @@ export default class ReservationModel extends BaseModel implements Reservation {
     updated_at!: Date
     beds?: Bed[]
     guest?: Guest
+    followers?: Guest[]
     guest_id!: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
@@ -50,6 +55,18 @@ export default class ReservationModel extends BaseModel implements Reservation {
             join: {
                 from: 'reservation.guest_id',
                 to: 'guest.id'
+            }
+        },
+        followers: {
+            relation: Model.ManyToManyRelation,
+            modelClass: 'guest',
+            join: {
+                from: 'reservation.id',
+                through: {
+                    from: 'guest_reservation_room.reservation_id',
+                    to: 'guest_reservation_room.guest_email'
+                },
+                to: 'guest.email'
             }
         },
         record: {

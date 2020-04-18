@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<any> {
     await knex('guest').del()
     await knex('reservation').del()
     await knex('facility').del()
+    await knex('staff').del()
     Model.knex(knex)
     // create facilities
     const facilities: Facility[] = [
@@ -126,7 +127,7 @@ export async function seed(knex: Knex): Promise<any> {
 
     // connect rooms and facilities
     const makeRoomFacilityPairs = (room_id: number, facilities: any[]) =>
-        facilities.map(f => ({ ...f, room_id }))
+        facilities.map((f) => ({ ...f, room_id }))
     const f = [
         {
             count: 1,
@@ -179,6 +180,18 @@ export async function seed(knex: Knex): Promise<any> {
         phone: '000000000',
         address: 'here'
     })
+    //create admin account
+    const admin_id = uuid()
+    await knex('staff').insert({
+        id: admin_id,
+        email: 'yamarashi@email.com',
+        password: await hash('YamaKung69', 10),
+        firstname: 'F',
+        lastname: 'W',
+        phone: '000000000',
+        address: 'here',
+        role: 'ADMIN'
+    })
     // create reservation
     const check_in = moment().add(1, 'day')
     const check_out = moment().add(3, 'day')
@@ -186,7 +199,8 @@ export async function seed(knex: Knex): Promise<any> {
     await knex('reservation').insert({
         id: reservation_id,
         check_in,
-        check_out
+        check_out,
+        guest_id
     })
     return await knex('reserved_bed').insert([
         { reservation_id, bed_id: 1 },

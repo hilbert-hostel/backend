@@ -7,7 +7,8 @@
     "dev": "nodemon --exec ts-node ./src/app.ts",
     "build": "tsc",
     "start": "node ./dist/app.js",
-    "test": "jest"
+    "test": "jest",
+    "seed": "./scripts/seed.sh"
   },
   "dependencies": {
     "awilix": "^4.2.3",

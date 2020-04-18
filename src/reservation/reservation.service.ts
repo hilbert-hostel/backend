@@ -26,16 +26,20 @@ import {
     SelectedRoom
 } from './reservation.interface'
 import { IReservationRepository } from './reservation.repository'
-import { checkEnoughBeds, checkNoDuplicateRooms } from './reservation.utils'
+import {
+    checkEnoughBeds,
+    checkNoDuplicateRooms,
+    validCheckInCheckOutDate
+} from './reservation.utils'
 export interface IReservationService {
     findAvailableRooms(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         guests: number
     ): Promise<RoomSearchPayload>
     makeReservation(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         guest_id: string,
         rooms: SelectedRoom[],
         specialRequests: string
@@ -59,11 +63,10 @@ export class ReservationService implements IReservationService {
         this.reservationRepository = reservationRepository
     }
 
-    async findAvailableRooms(
-        check_in: string,
-        check_out: string,
-        guests: number
-    ) {
+    async findAvailableRooms(check_in: Date, check_out: Date, guests: number) {
+        if (!validCheckInCheckOutDate(check_in, check_out)) {
+            throw new BadRequestError('Invalid check in and check out date.')
+        }
         const rooms = await this.reservationRepository.findAvailableRooms(
             check_in,
             check_out
@@ -129,8 +132,8 @@ export class ReservationService implements IReservationService {
     }
 
     async makeReservation(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         guest_id: string,
         rooms: SelectedRoom[],
         specialRequests: string = ''
@@ -141,8 +144,11 @@ export class ReservationService implements IReservationService {
                 'Invalid Reservation. Can not reserve one room multiple times.'
             )
         }
+        if (!validCheckInCheckOutDate(check_in, check_out)) {
+            throw new BadRequestError('Invalid check in and check out date.')
+        }
         const db_rooms = await Promise.all(
-            rooms.map(r =>
+            rooms.map((r) =>
                 this.reservationRepository.findAvailableBeds(
                     check_in,
                     check_out,
@@ -201,7 +207,7 @@ export class ReservationService implements IReservationService {
                 'transaction'
             ]),
             evolve({
-                rooms: map(evolve({ beds: i => i.length })),
+                rooms: map(evolve({ beds: (i) => i.length })),
                 // TODO implement real payment system
                 // transaction: Boolean
                 transaction: () => true
@@ -247,7 +253,7 @@ export class ReservationService implements IReservationService {
                     'transaction'
                 ]),
                 evolve({
-                    rooms: map(evolve({ beds: i => i.length })),
+                    rooms: map(evolve({ beds: (i) => i.length })),
                     // TODO implement real payment system
                     // transaction: Boolean
                     transaction: () => true

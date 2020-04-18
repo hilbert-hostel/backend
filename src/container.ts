@@ -7,6 +7,8 @@ import {
     Resolver
 } from 'awilix'
 import { MqttClient } from 'mqtt'
+import { AdminRepository, IAdminRespository } from './admin/admin.repository'
+import { AdminService, IAdminService } from './admin/admin.service'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
 import {
@@ -18,8 +20,16 @@ import {
     ICheckInRepository
 } from './checkIn/checkIn.repository'
 import { CheckInService, ICheckInService } from './checkIn/checkIn.service'
+import {
+    CheckOutRepository,
+    ICheckOutRepository
+} from './checkOut/checkOut.repository'
+import { CheckOutService, ICheckOutService } from './checkOut/checkOut.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
+import { DoorLockCodeService } from './door/door.service'
+import { IRoomRepository, RoomRepository } from './door/room.repository'
+import { IRoomService, RoomService } from './door/room.service'
 import { FileService, IFileService } from './files/file.service'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
 import { IMailService, MailService } from './mail/mail.service'
@@ -32,8 +42,6 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
-import { ICheckOutRepository, CheckOutRepository } from './checkOut/checkOut.repository'
-import { ICheckOutService, CheckOutService } from './checkOut/checkOut.service'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -49,8 +57,13 @@ export interface AllDependencies {
     fileService: IFileService
     checkInRepository: ICheckInRepository
     checkInService: ICheckInService
-    checkOutRespository:ICheckOutRepository
+    checkOutRespository: ICheckOutRepository
     checkOutService: ICheckOutService
+    adminRepository: IAdminRespository
+    adminService: IAdminService
+    doorlockCodeService: DoorLockCodeService
+    roomRepository: IRoomRepository
+    roomService: IRoomService
 }
 
 type RegisterDeps<T> = {
@@ -75,7 +88,12 @@ const dependencies: RegisterDeps<AllDependencies> = {
     checkInRepository: asClass(CheckInRepository),
     checkInService: asClass(CheckInService),
     checkOutRespository: asClass(CheckOutRepository),
-    checkOutService: asClass(CheckOutService)
+    checkOutService: asClass(CheckOutService),
+    adminRepository: asClass(AdminRepository),
+    adminService: asClass(AdminService),
+    doorlockCodeService: asClass(DoorLockCodeService),
+    roomRepository: asClass(RoomRepository),
+    roomService: asClass(RoomService)
 }
 
 DIContainer.register(dependencies)

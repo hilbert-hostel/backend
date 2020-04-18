@@ -23,7 +23,7 @@ const { authService, jwtService, guestRepository } = container
 router.post('/register', validateBody(registerValidator), async (req, res) => {
     const input = req.body as RegisterInput
     const user = await authService.registerUser(input)
-    const token = await jwtService.generateToken(user.id)
+    const token = await jwtService.generateToken(user.id, user.email)
     const verificationToken = await authService.createVerificationToken(user.id)
     authService
         .sendVerificationEmail(user, verificationToken.token)
@@ -35,7 +35,7 @@ router.post('/register', validateBody(registerValidator), async (req, res) => {
 router.post('/login', validateBody(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
     const user = await authService.login(input)
-    const token = await jwtService.generateToken(user.id)
+    const token = await jwtService.generateToken(user.id, user.email)
     const payload: LoginPayload = { user: omit(['password'], user), token }
     res.json(payload)
 })
@@ -45,8 +45,8 @@ router.get('/ping', isAuthenticated, async (req, res) => {
     res.json(omit(['password'], user))
 })
 
-router.get('/verify', validateQuery(verifyUserValidator), async (req, res) => {
-    const { userID, token } = req.query as VerifyUserInput
+router.post('/verify', validateBody(verifyUserValidator), async (req, res) => {
+    const { userID, token } = req.body as VerifyUserInput
     const user = await authService.verifyGuest(userID, token)
     res.send(user)
 })

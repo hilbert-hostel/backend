@@ -37,8 +37,8 @@ export interface RoomSearchPayload {
     }
 }
 export interface RoomSearchInput {
-    checkIn: string
-    checkOut: string
+    checkIn: Date
+    checkOut: Date
     guests: number
 }
 
@@ -47,8 +47,8 @@ export interface SelectedRoom {
     guests: number
 }
 export interface RoomReservationInput {
-    checkIn: string
-    checkOut: string
+    checkIn: Date
+    checkOut: Date
     rooms: SelectedRoom[]
     specialRequests: string
 }
