@@ -2,30 +2,19 @@ import * as yup from 'yup'
 import { RoomReservationInput, RoomSearchInput } from './reservation.interface'
 
 export const roomSearchValidator = yup.object().shape<RoomSearchInput>({
-    checkIn: yup.string().required(),
-    checkOut: yup.string().required(),
-    guests: yup
-        .number()
-        .integer()
-        .positive()
-        .required()
+    checkIn: yup.date().required(),
+    checkOut: yup.date().required(),
+    guests: yup.number().integer().positive().required()
 })
 export const roomReservationValidator = yup
     .object()
     .shape<RoomReservationInput>({
-        checkIn: yup.string().required(),
-        checkOut: yup.string().required(),
+        checkIn: yup.date().required(),
+        checkOut: yup.date().required(),
         rooms: yup.array(
             yup.object().shape({
-                id: yup
-                    .number()
-                    .integer()
-                    .required(),
-                guests: yup
-                    .number()
-                    .integer()
-                    .positive()
-                    .required()
+                id: yup.number().integer().required(),
+                guests: yup.number().integer().positive().required()
             })
         ),
         specialRequests: yup.string()

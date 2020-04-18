@@ -8,15 +8,15 @@ export interface ReservationWithRoom extends Reservation {
     transaction: Transaction
 }
 export interface IReservationRepository {
-    findAvailableRooms(check_in: string, check_out: string): Promise<Room[]>
+    findAvailableRooms(check_in: Date, check_out: Date): Promise<Room[]>
     findAvailableBeds(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         room_id: number
     ): Promise<Room>
     makeReservation(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         guest_id: string,
         beds: { id: number }[],
         special_requests: string
@@ -31,7 +31,7 @@ export interface IReservationRepository {
 }
 
 export class ReservationRepository implements IReservationRepository {
-    async findAvailableRooms(check_in: string, check_out: string) {
+    async findAvailableRooms(check_in: Date, check_out: Date) {
         const result = await RoomModel.query()
             .withGraphJoined('beds', { joinOperation: 'innerJoin' })
             .modifyGraph('beds', (bed) => {
@@ -49,11 +49,7 @@ export class ReservationRepository implements IReservationRepository {
             .orderBy('room.id')
         return result
     }
-    async findAvailableBeds(
-        check_in: string,
-        check_out: string,
-        room_id: number
-    ) {
+    async findAvailableBeds(check_in: Date, check_out: Date, room_id: number) {
         const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
@@ -68,15 +64,15 @@ export class ReservationRepository implements IReservationRepository {
         return result
     }
     async makeReservation(
-        check_in: string,
-        check_out: string,
+        check_in: Date,
+        check_out: Date,
         guest_id: string,
         beds: { id: number }[],
         special_requests: string
     ) {
         const reservation = await ReservationModel.query().insert({
-            check_in: new Date(check_in),
-            check_out: new Date(check_out),
+            check_in: check_in,
+            check_out: check_out,
             guest_id,
             special_requests
         })

@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { Room } from '../models/room'
 import { SelectedRoom } from './reservation.interface'
 
@@ -8,7 +9,7 @@ export const checkEnoughBeds = (actual: Room[], expected: SelectedRoom[]) => {
             [cur.id]: cur.beds!.length
         }
     }, {})
-    const valid = expected.every(e => a[e.id] >= e.guests)
+    const valid = expected.every((e) => a[e.id] >= e.guests)
     return valid
 }
 
@@ -20,4 +21,8 @@ export const checkNoDuplicateRooms = (rooms: SelectedRoom[]) => {
         else map[id] = true
     }
     return true
+}
+
+export const validCheckInCheckOutDate = (checkIn: Date, checkOut: Date) => {
+    return moment(checkOut).isAfter(checkIn, 'day')
 }
