@@ -1,6 +1,6 @@
 import { JwtService } from './jwt.service'
 test('jwt', async () => {
-    expect.assertions(2)
+    expect.assertions(4)
     const fakeConfig = {
         config: {
             SECRET: '1234'
