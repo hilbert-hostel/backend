@@ -7,7 +7,8 @@ import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { ICheckInRepository } from '../checkIn/checkIn.repository'
 import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
-import { DoorLockCodeDecodeInput, DoorLockCodeEncodeInput } from '../door/door.interface';
+import { DoorLockCodeEncodeInput } from '../door/door.interface';
+import { DoorLockCodeService } from '../door/door.service'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
 import { Bed } from '../models/bed'
@@ -36,10 +37,6 @@ export interface IAdminService {
     getDoorLockInput(
         staffID: string,
     ): Promise<DoorLockCodeEncodeInput>
-    dynamicTruncationFn(hmacValue: Buffer): number
-    generateHOTP(secret: string, counter: number): number
-    generateTOTP(secret: string, window: number): number
-    encode(input: DoorLockCodeEncodeInput): string
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
     createRoomMaintenance(
@@ -57,14 +54,17 @@ export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
     mqttClient: MqttClient
     checkInRepository: ICheckInRepository
+    doorlockCodeService: DoorLockCodeService
     constructor({
         adminRepository,
         mqttClient,
-        checkInRepository
-    }: Dependencies<IAdminRespository | MqttClient | ICheckInRepository>) {
+        checkInRepository,
+        doorlockCodeService
+    }: Dependencies<IAdminRespository | MqttClient | ICheckInRepository | DoorLockCodeService>) {
         this.adminRepository = adminRepository
         this.mqttClient = mqttClient
         this.checkInRepository = checkInRepository
+        this.doorlockCodeService = doorlockCodeService
     }
     async listReservations(from: Date, to: Date) {
         const validDate = moment(from).isBefore(to, 'day')
@@ -199,43 +199,13 @@ export class AdminService implements IAdminService {
         return omit(['password'], staff)
     }
 
-    dynamicTruncationFn(hmacValue: Buffer) {
-        const offset = hmacValue[hmacValue.length - 1] & 0xf
-
-        return (
-            ((hmacValue[offset] & 0x7f) << 24) |
-            ((hmacValue[offset + 1] & 0xff) << 16) |
-            ((hmacValue[offset + 2] & 0xff) << 8) |
-            (hmacValue[offset + 3] & 0xff)
-        )
-    }
-
-    generateHOTP(secret: string, counter: number) {
-        const decodedSecret = Buffer.from(secret, 'base64')
-        const buffer = Buffer.alloc(8)
-        for (let i = 0; i < 8; i++) {
-            buffer[7 - i] = counter & 0xff
-            counter = counter >> 8
-        }
-        const hmac = crypto.createHmac('sha1', Buffer.from(decodedSecret))
-        hmac.update(buffer)
-        const hmacResult = hmac.digest()
-        const code = this.dynamicTruncationFn(hmacResult)
-        return code % 10 ** 6 // 6 digit HOTP
-    }
-
-    generateTOTP(secret: string, window = 0) {
-        const counter = Math.floor(Date.now() / 1000) // new code generated every 1 second per window
-        return this.generateHOTP(secret, counter + window)
-    }
-
     async getDoorLockInput(staffID: string) {
         const staff = await this.adminRepository.findStaffById(staffID)
         if (!staff)
             throw new BadRequestError('Request failed. Staff ID is invalid.')
         const dummyRoomID = '9999';
         const dummyStaffNationalID = '1234567890123';
-        const secret = this.generateTOTP(
+        const secret = this.doorlockCodeService.generateTOTP(
             staffID + dummyRoomID + dummyStaffNationalID,
             300
         ).toString() // valid for 300 windows
@@ -245,18 +215,6 @@ export class AdminService implements IAdminService {
             nationalID: dummyStaffNationalID,
             secret: secret.padStart(6, '0')
         }
-    }
-
-    encode(input: DoorLockCodeEncodeInput) {
-        return (
-            input.userID +
-            '|' +
-            input.roomID +
-            '|' +
-            input.nationalID +
-            '|' +
-            input.secret
-        )
     }
 
     unlockDoor(roomID: string) {

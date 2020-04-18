@@ -198,7 +198,7 @@ router.get(
         const input = (await adminService.getDoorLockInput(
             staffID,
         )) as DoorLockCodeEncodeInput
-        const encodedInput = adminService.encode(input)
+        const encodedInput = doorlockCodeService.encode(input)
         res.json({ code: encodedInput })
     }
 )
