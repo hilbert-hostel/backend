@@ -1,3 +1,4 @@
+import * as crypto from 'crypto'
 import { compare, hash } from 'bcryptjs'
 import moment from 'moment'
 import { MqttClient } from 'mqtt'
@@ -6,6 +7,7 @@ import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { ICheckInRepository } from '../checkIn/checkIn.repository'
 import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
+import { DoorLockCodeDecodeInput, DoorLockCodeEncodeInput } from '../door/door.interface';
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
 import { Bed } from '../models/bed'
@@ -31,6 +33,14 @@ export interface IAdminService {
     listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
     getAllRooms(): Promise<AdminRoomSearch[]>
     getStaff(id: string): Promise<StaffDetails>
+    getDoorLockInput(
+        staffID: string,
+    ): Promise<DoorLockCodeEncodeInput>
+    dynamicTruncationFn(hmacValue: Buffer): number
+    generateHOTP(secret: string, counter: number): number
+    generateTOTP(secret: string, window: number): number
+    encode(input: DoorLockCodeEncodeInput): string
+    verify(input: DoorLockCodeDecodeInput): boolean
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
     createRoomMaintenance(
@@ -189,6 +199,80 @@ export class AdminService implements IAdminService {
         }
         return omit(['password'], staff)
     }
+
+    dynamicTruncationFn(hmacValue: Buffer) {
+        const offset = hmacValue[hmacValue.length - 1] & 0xf
+
+        return (
+            ((hmacValue[offset] & 0x7f) << 24) |
+            ((hmacValue[offset + 1] & 0xff) << 16) |
+            ((hmacValue[offset + 2] & 0xff) << 8) |
+            (hmacValue[offset + 3] & 0xff)
+        )
+    }
+
+    generateHOTP(secret: string, counter: number) {
+        const decodedSecret = Buffer.from(secret, 'base64')
+        const buffer = Buffer.alloc(8)
+        for (let i = 0; i < 8; i++) {
+            buffer[7 - i] = counter & 0xff
+            counter = counter >> 8
+        }
+        const hmac = crypto.createHmac('sha1', Buffer.from(decodedSecret))
+        hmac.update(buffer)
+        const hmacResult = hmac.digest()
+        const code = this.dynamicTruncationFn(hmacResult)
+        return code % 10 ** 6 // 6 digit HOTP
+    }
+
+    generateTOTP(secret: string, window = 0) {
+        const counter = Math.floor(Date.now() / 1000) // new code generated every 1 second per window
+        return this.generateHOTP(secret, counter + window)
+    }
+
+    async getDoorLockInput(staffID: string) {
+        const staff = await this.adminRepository.findStaffById(staffID)
+        if (!staff)
+            throw new BadRequestError('Request failed. Staff ID is invalid.')
+        const dummyRoomID = '9999';
+        const dummyStaffNationalID = '1234567890123';
+        const secret = this.generateTOTP(
+            staffID + dummyRoomID + dummyStaffNationalID,
+            300
+        ).toString() // valid for 300 windows
+        return {
+            userID: staffID,
+            roomID: dummyRoomID,
+            nationalID: dummyStaffNationalID,
+            secret: secret.padStart(6, '0')
+        }
+    }
+
+    encode(input: DoorLockCodeEncodeInput) {
+        return (
+            input.userID +
+            '|' +
+            input.roomID +
+            '|' +
+            input.nationalID +
+            '|' +
+            input.secret
+        )
+    }
+
+    verify(input: DoorLockCodeDecodeInput) {
+        const [staffID, roomID, nationalID, totp] = input.code.split('|')
+        const totpNumber = Number(totp)
+        const secret = staffID + roomID + nationalID
+        for (let errorWindow = 1; errorWindow <= 300; errorWindow++) {
+            const calculatedTotp = this.generateTOTP(secret, errorWindow)
+            if (calculatedTotp === totpNumber) {
+                return true
+            }
+        }
+        return false
+    }
+
     unlockDoor(roomID: string) {
         this.mqttClient.publish(`door/${roomID}`, 'unlock')
     }

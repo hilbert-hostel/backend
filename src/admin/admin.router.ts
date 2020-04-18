@@ -24,8 +24,10 @@ import {
     listGuestsValidator,
     registerValidator
 } from './admin.validation'
+import { generateDoorLockCodeValidator, doorlockCodeDecodeValidator } from '../door/door.validation';
+import { DoorLockCodeEncodeInput } from '../door/door.interface';
 const router = Router()
-const { adminService, jwtService, checkInService, checkOutService } = container
+const { adminService, jwtService, checkInService, checkOutService, doorlockCodeService } = container
 router.get(
     '/reservation',
     isAuthenticated,
@@ -186,4 +188,30 @@ router.delete(
         res.send(maintenance)
     }
 )
+
+router.get(
+    '/generate',
+    hasRole('admin'),
+    validateQuery(generateDoorLockCodeValidator),
+    async (req, res) => {
+        const { staffID } = res.locals
+        const input = (await adminService.getDoorLockInput(
+            staffID,
+        )) as DoorLockCodeEncodeInput
+        const encodedInput = adminService.encode(input)
+        res.json({ code: encodedInput })
+    }
+)
+
+router.get(
+    '/verify',
+    validateQuery(doorlockCodeDecodeValidator),
+    async (req, res) => {
+        const isValid = adminService.verify({
+            code: req.query.code
+        })
+        res.json(isValid)
+    }
+)
+
 export { router as AdminRouter }
