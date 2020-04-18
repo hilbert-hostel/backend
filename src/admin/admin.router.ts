@@ -10,6 +10,7 @@ import { getUserID } from '../utils'
 import {
     AdminCheckIn,
     AdminCheckOut,
+    CreateRoomMaintenanceInput,
     CreateStaff,
     LoginStaffPayload,
     RegisterStaffPayload
@@ -17,6 +18,7 @@ import {
 import {
     adminCheckInValidator,
     adminCheckOutValidator,
+    createRoomMaintenanceValidator,
     listCheckInCheckOutValidator,
     listGuestsValidator,
     registerValidator
@@ -134,6 +136,27 @@ router.post(
         const { reservationID, date } = req.body as AdminCheckOut
         const result = await checkOutService.checkOut(reservationID, date)
         res.send({ message: result })
+    }
+)
+router.post(
+    '/maintenance',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    validateBody(createRoomMaintenanceValidator),
+    async (req, res) => {
+        const {
+            roomID,
+            from,
+            to,
+            description
+        } = req.body as CreateRoomMaintenanceInput
+        const maintenance = await adminService.createRoomMaintenance(
+            roomID,
+            from,
+            to,
+            description
+        )
+        res.send(maintenance)
     }
 )
 export { router as AdminRouter }

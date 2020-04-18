@@ -1,5 +1,6 @@
 import { Dependencies } from '../container'
 import GuestModel, { Guest } from '../models/guest'
+import MaintenanceModel, { Maintenance } from '../models/maintenance'
 import ReservationModel, { ReservationWithGuest } from '../models/reservation'
 import RoomModel, { Room } from '../models/room'
 import StaffModel, { Staff } from '../models/staff'
@@ -16,6 +17,12 @@ export interface IAdminRespository {
     listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
     getAllRooms(): Promise<Room[]>
     findStaffById(id: string): Promise<Staff>
+    createMaintenance(
+        room_id: number,
+        from: Date,
+        to: Date,
+        description?: string
+    ): Promise<Maintenance>
 }
 
 export class AdminRepository implements IAdminRespository {
@@ -80,5 +87,18 @@ export class AdminRepository implements IAdminRespository {
     }
     findStaffById(id: string) {
         return StaffModel.query().findById(id)
+    }
+    createMaintenance(
+        room_id: number,
+        from: Date,
+        to: Date,
+        description?: string
+    ) {
+        return MaintenanceModel.query().insert({
+            room_id,
+            from,
+            to,
+            description
+        })
     }
 }

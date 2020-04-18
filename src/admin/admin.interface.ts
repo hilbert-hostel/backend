@@ -85,3 +85,18 @@ export interface AdminCheckIn {
 }
 
 export type AdminCheckOut = AdminCheckIn
+
+export interface CreateRoomMaintenanceInput {
+    roomID: number
+    from: Date
+    to: Date
+    description?: string
+}
+
+export interface RoomMaintenance {
+    id: number
+    roomID: number
+    from: Date
+    to: Date
+    description?: string
+}

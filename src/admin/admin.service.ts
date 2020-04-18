@@ -18,6 +18,7 @@ import {
     CheckOutInfo,
     CreateStaff,
     ReservationInfo,
+    RoomMaintenance,
     StaffDetails
 } from './admin.interface'
 import { IAdminRespository } from './admin.repository'
@@ -32,6 +33,12 @@ export interface IAdminService {
     getStaff(id: string): Promise<StaffDetails>
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
+    createRoomMaintenance(
+        roomID: number,
+        from: Date,
+        to: Date,
+        description?: string
+    ): Promise<RoomMaintenance>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -197,5 +204,26 @@ export class AdminService implements IAdminService {
             date
         )
         return updated
+    }
+    async createRoomMaintenance(
+        roomID: number,
+        from: Date,
+        to: Date,
+        description?: string
+    ) {
+        const validDate = moment(to).isAfter(from, 'day')
+        if (!validDate) {
+            throw new BadRequestError(`Invalid Date.`)
+        }
+        const roomMaintenance = await this.adminRepository.createMaintenance(
+            roomID,
+            from,
+            to,
+            description
+        )
+        return renameKeys(
+            { room_id: 'roomID' },
+            roomMaintenance
+        ) as RoomMaintenance
     }
 }

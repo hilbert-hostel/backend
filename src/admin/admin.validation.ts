@@ -1,6 +1,11 @@
 import * as yup from 'yup'
 import { StaffRole } from '../models/staff'
-import { AdminCheckIn, CreateStaff, ListGuestsInput } from './admin.interface'
+import {
+    AdminCheckIn,
+    CreateRoomMaintenanceInput,
+    CreateStaff,
+    ListGuestsInput
+} from './admin.interface'
 
 export const registerValidator = yup.object().shape<CreateStaff>({
     email: yup.string().email().required(),
@@ -40,3 +45,12 @@ export const adminCheckInValidator = yup.object().shape<AdminCheckIn>({
 })
 
 export const adminCheckOutValidator = adminCheckInValidator
+
+export const createRoomMaintenanceValidator = yup
+    .object()
+    .shape<CreateRoomMaintenanceInput>({
+        roomID: yup.number().integer().required(),
+        from: yup.date().required(),
+        to: yup.date().required(),
+        description: yup.string()
+    })
