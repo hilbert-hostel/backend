@@ -1,4 +1,4 @@
-import moment from 'moment'
+import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
 import { Reservation } from '../models/reservation'
@@ -15,12 +15,9 @@ export class CheckOutService implements ICheckOutService {
         const reservation = await this.checkOutRepository.findReservationById(
             reservationID
         )
-        if (!this.validDate(date, reservation.check_out)) {
+        if (!sameDay(date, reservation.check_out)) {
             throw new BadRequestError('Can not check out today.')
         }
         return this.checkOutRepository.addCheckOutTime(reservationID, date)
-    }
-    validDate(date: Date, checkOutDate: Date) {
-        return moment(date).isSame(moment(checkOutDate), 'day')
     }
 }

@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { evolve, map, pick, pipe } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
@@ -9,6 +8,7 @@ import { ReservationDetail } from '../reservation/reservation.interface'
 import { randomNumString, renameKeys } from '../utils'
 import { OtpReference } from './checkIn.interface'
 import { ICheckInRepository } from './checkIn.repository'
+import { sameDay } from './checkIn.utils'
 
 export interface ICheckInService {
     getReservationForCheckIn(
@@ -106,28 +106,25 @@ export class CheckInService implements ICheckInService {
         const reservation = await this.checkInRepository.findReservationById(
             reservationID
         )
-        if (!this.validDate(date, reservation.check_in)) {
+        if (!sameDay(date, reservation.check_in)) {
             throw new BadRequestError(`Can not chech in this day ${date}.`)
         }
         const kioskPhotoName = `check-in-photo-${reservationID}`
         const idCardPhotoName = `id-card-photo-${reservationID}`
-        // const kioskPhotoKey = await this.fileService.uploadFile(
-        //     kioskPhoto,
-        //     kioskPhotoName
-        // )
-        // const idCardPhotoKey = await this.fileService.uploadFile(
-        //     idCardPhoto,
-        //     idCardPhotoName
-        // )
+        const kioskPhotoKey = await this.fileService.uploadFile(
+            kioskPhoto,
+            kioskPhotoName
+        )
+        const idCardPhotoKey = await this.fileService.uploadFile(
+            idCardPhoto,
+            idCardPhotoName
+        )
         const record = await this.checkInRepository.createReservationRecord(
             reservationID,
-            kioskPhotoName,
-            { ...idCardDetail, idCardPhoto: idCardPhotoName }
+            kioskPhotoKey,
+            { ...idCardDetail, idCardPhoto: idCardPhotoKey }
         )
         await this.checkInRepository.addCheckInTime(reservationID, date)
         return 'success'
-    }
-    validDate(date: Date, checkOutDate: Date) {
-        return moment(date).isSame(moment(checkOutDate), 'day')
     }
 }
