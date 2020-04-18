@@ -24,6 +24,7 @@ export interface IAdminRespository {
         description?: string
     ): Promise<Maintenance>
     listMaintenance(from: Date, to: Date): Promise<Maintenance[]>
+    deleteMainenance(maintenance_id: number): Promise<Maintenance>
 }
 
 export class AdminRepository implements IAdminRespository {
@@ -106,5 +107,10 @@ export class AdminRepository implements IAdminRespository {
         return MaintenanceModel.query()
             .whereBetween('from', [from, to])
             .orWhereBetween('to', [from, to])
+    }
+    deleteMainenance(maintenance_id: number) {
+        return MaintenanceModel.query()
+            .deleteById(maintenance_id)
+            .returning('*') as any
     }
 }

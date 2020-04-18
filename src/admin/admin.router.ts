@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import moment from 'moment'
 import { LoginInput } from '../auth/auth.interface'
 import { loginValidator } from '../auth/auth.validation'
 import { container } from '../container'
@@ -31,7 +32,10 @@ router.get(
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
         const { from, to } = req.query
-        const reservation = await adminService.listReservations(from, to)
+        const reservation = await adminService.listReservations(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
         res.send(reservation)
     }
 )
@@ -165,7 +169,20 @@ router.get(
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
         const { from, to } = req.query
-        const maintenance = await adminService.listRoomMaintenance(from, to)
+        const maintenance = await adminService.listRoomMaintenance(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
+        res.send(maintenance)
+    }
+)
+router.delete(
+    '/maintenance/:id',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const id = Number(req.params.id)
+        const maintenance = await adminService.deleteRoomMaintenance(id)
         res.send(maintenance)
     }
 )

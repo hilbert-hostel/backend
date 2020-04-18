@@ -24,7 +24,7 @@ import {
 import { IAdminRespository } from './admin.repository'
 
 export interface IAdminService {
-    listReservations(from?: Date, to?: Date): Promise<ReservationInfo[]>
+    listReservations(from: Date, to: Date): Promise<ReservationInfo[]>
     registerStaff(data: CreateStaff): Promise<StaffDetails>
     loginStaff(data: LoginInput): Promise<StaffDetails>
     listGuests(page: number, size: number): Promise<GuestDetails[]>
@@ -39,7 +39,8 @@ export interface IAdminService {
         to: Date,
         description?: string
     ): Promise<RoomMaintenance>
-    listRoomMaintenance(from?: Date, to?: Date): Promise<RoomMaintenance[]>
+    listRoomMaintenance(from: Date, to: Date): Promise<RoomMaintenance[]>
+    deleteRoomMaintenance(maintenanceID: number): Promise<RoomMaintenance>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -56,10 +57,14 @@ export class AdminService implements IAdminService {
         this.mqttClient = mqttClient
         this.checkInRepository = checkInRepository
     }
-    async listReservations(from?: Date, to?: Date) {
+    async listReservations(from: Date, to: Date) {
+        const validDate = moment(from).isBefore(to, 'day')
+        if (!validDate) {
+            throw new BadRequestError(`Invalid Date.`)
+        }
         const reservations = await this.adminRepository.listReservations(
-            from ?? moment().toDate(),
-            to ?? moment().add(1, 'week').toDate()
+            from,
+            to
         )
         return map(
             pipe(
@@ -212,9 +217,16 @@ export class AdminService implements IAdminService {
         to: Date,
         description?: string
     ) {
-        const validDate = moment(to).isAfter(from, 'day')
+        const validDate = moment(from).isBefore(to, 'day')
         if (!validDate) {
             throw new BadRequestError(`Invalid Date.`)
+        }
+        const reservations = await this.listReservations(from, to)
+        const hasReservations = reservations.length > 0
+        if (hasReservations) {
+            throw new BadRequestError(
+                'Invalid date. There are reservations in this range of date.'
+            )
         }
         const roomMaintenance = await this.adminRepository.createMaintenance(
             roomID,
@@ -222,23 +234,27 @@ export class AdminService implements IAdminService {
             to,
             description
         )
+
         return renameKeys(
             { room_id: 'roomID' },
             roomMaintenance
         ) as RoomMaintenance
     }
-    async listRoomMaintenance(from?: Date, to?: Date) {
-        const validDate = moment(to).isAfter(from, 'day')
+    async listRoomMaintenance(from: Date, to: Date) {
+        const validDate = moment(from).isBefore(to, 'day')
         if (!validDate) {
             throw new BadRequestError(`Invalid Date.`)
         }
-        const maintenance = await this.adminRepository.listMaintenance(
-            from ?? moment().toDate(),
-            to ?? moment().add(1, 'week').toDate()
-        )
+        const maintenance = await this.adminRepository.listMaintenance(from, to)
         return map(
             renameKeys({ room_id: 'roomID' }),
             maintenance
         ) as RoomMaintenance[]
+    }
+    async deleteRoomMaintenance(maintenanceID: number) {
+        const maintenance = await this.adminRepository.deleteMainenance(
+            maintenanceID
+        )
+        return renameKeys({ room_id: 'roomID' }, maintenance) as RoomMaintenance
     }
 }

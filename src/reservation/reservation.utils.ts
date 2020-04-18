@@ -24,5 +24,5 @@ export const checkNoDuplicateRooms = (rooms: SelectedRoom[]) => {
 }
 
 export const validCheckInCheckOutDate = (checkIn: Date, checkOut: Date) => {
-    return moment(checkOut).isAfter(checkIn, 'day')
+    return moment(checkIn).isBefore(checkOut, 'day')
 }

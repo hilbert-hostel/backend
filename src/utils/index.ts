@@ -20,6 +20,7 @@ export const trace = <T>(i: T, ...message: any[]) => {
     return i
 }
 export const getUserID = (res: Response) => res.locals.userID as string
+
 export const renameKeys = curry(
     (keysMap: Record<string, string>, obj: Record<string, any>) =>
         reduce<string, Record<string, any>>(
