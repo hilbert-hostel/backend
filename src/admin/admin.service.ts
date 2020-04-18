@@ -40,7 +40,6 @@ export interface IAdminService {
     generateHOTP(secret: string, counter: number): number
     generateTOTP(secret: string, window: number): number
     encode(input: DoorLockCodeEncodeInput): string
-    verify(input: DoorLockCodeDecodeInput): boolean
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
     createRoomMaintenance(
@@ -258,19 +257,6 @@ export class AdminService implements IAdminService {
             '|' +
             input.secret
         )
-    }
-
-    verify(input: DoorLockCodeDecodeInput) {
-        const [staffID, roomID, nationalID, totp] = input.code.split('|')
-        const totpNumber = Number(totp)
-        const secret = staffID + roomID + nationalID
-        for (let errorWindow = 1; errorWindow <= 300; errorWindow++) {
-            const calculatedTotp = this.generateTOTP(secret, errorWindow)
-            if (calculatedTotp === totpNumber) {
-                return true
-            }
-        }
-        return false
     }
 
     unlockDoor(roomID: string) {

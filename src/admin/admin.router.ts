@@ -203,15 +203,4 @@ router.get(
     }
 )
 
-router.get(
-    '/verify',
-    validateQuery(doorlockCodeDecodeValidator),
-    async (req, res) => {
-        const isValid = adminService.verify({
-            code: req.query.code
-        })
-        res.json(isValid)
-    }
-)
-
 export { router as AdminRouter }
