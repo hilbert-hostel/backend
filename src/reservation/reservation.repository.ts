@@ -1,3 +1,5 @@
+import { ref } from 'objection'
+import MaintenanceModel from '../models/maintenance'
 import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
@@ -41,6 +43,15 @@ export class ReservationRepository implements IReservationRepository {
                     .orWhere('reservations.check_in', '>', check_out)
                     .select('bed.id')
             })
+            .whereNotExists(
+                MaintenanceModel.query()
+                    .where('room_id', '=', ref('room.id'))
+                    .where((builder) => {
+                        builder
+                            .whereBetween('from', [check_in, check_out])
+                            .orWhereBetween('to', [check_in, check_out])
+                    })
+            )
             .withGraphJoined('photos')
             .modifyGraph('photos', (photo) => {
                 photo.select('photo_url', 'photo_description')

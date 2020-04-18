@@ -2,6 +2,7 @@ import { Model } from 'objection'
 import BaseModel from './base'
 import { Bed } from './bed'
 import { Facility } from './facility'
+import { Maintenance } from './maintenance'
 import { RoomPhoto } from './roomPhoto'
 
 export interface RoomFacility extends Facility {
@@ -15,6 +16,7 @@ export interface Room {
     facilities: RoomFacility[]
     photos?: RoomPhoto[]
     beds?: Bed[]
+    maintenance?: Maintenance[]
 }
 export default class RoomModel extends BaseModel implements Room {
     id!: number
@@ -24,6 +26,7 @@ export default class RoomModel extends BaseModel implements Room {
     facilities!: RoomFacility[]
     photos?: RoomPhoto[]
     beds?: Bed[]
+    maintenance?: Maintenance[]
 
     static tableName = 'room'
     static relationMappings = {
@@ -54,6 +57,14 @@ export default class RoomModel extends BaseModel implements Room {
             join: {
                 from: 'room.id',
                 to: 'bed.room_id'
+            }
+        },
+        maintenance: {
+            relation: Model.HasManyRelation,
+            modelClass: 'maintenance',
+            join: {
+                from: 'room.id',
+                to: 'maintenance.room_id'
             }
         }
     }
