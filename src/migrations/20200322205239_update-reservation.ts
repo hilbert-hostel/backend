@@ -12,10 +12,7 @@ export async function up(knex: Knex): Promise<any> {
     })
     await knex.schema.createTable('room_facility_pair', table => {
         table.integer('count')
-        table
-            .integer('room_id')
-            .references('room.id')
-            .onDelete('CASCADE')
+        table.integer('room_id').references('room.id').onDelete('CASCADE')
         table
             .string('facility_name')
             .references('facility.name')
@@ -29,27 +26,18 @@ export async function up(knex: Knex): Promise<any> {
         table.increments('id').primary()
         table.string('photo_url').notNullable()
         table.string('photo_description').nullable()
-        table
-            .integer('room_id')
-            .references('room.id')
-            .onDelete('CASCADE')
+        table.integer('room_id').references('room.id').onDelete('CASCADE')
     })
     await knex.schema.renameTable('user', 'guest')
     await knex.schema.alterTable('reservation', table => {
         table.dropForeign(['user'])
         table.renameColumn('user', 'guest_id')
-        table
-            .foreign('guest_id')
-            .references('guest.id')
-            .onDelete('CASCADE')
+        table.foreign('guest_id').references('guest.id').onDelete('CASCADE')
     })
     await knex.schema.alterTable('verification_token', table => {
         table.dropForeign(['user_id'])
         table.renameColumn('user_id', 'guest_id')
-        table
-            .foreign('guest_id')
-            .references('guest.id')
-            .onDelete('CASCADE')
+        table.foreign('guest_id').references('guest.id').onDelete('CASCADE')
     })
     await knex.schema.alterTable('reservation', table => {
         table.dropColumn('add_ons')
@@ -88,18 +76,12 @@ export async function down(knex: Knex): Promise<any> {
         table.string('add_ons')
         table.dropForeign(['guest'])
         table.renameColumn('guest', 'user')
-        table
-            .foreign('user')
-            .references('user.id')
-            .onDelete('CASCADE')
+        table.foreign('user').references('user.id').onDelete('CASCADE')
     })
     await knex.schema.alterTable('verification_token', table => {
         table.dropForeign(['guest_id'])
         table.renameColumn('guest_id', 'user_id')
-        table
-            .foreign('user_id')
-            .references('user.id')
-            .onDelete('CASCADE')
+        table.foreign('user_id').references('user.id').onDelete('CASCADE')
     })
     await knex.schema.dropTableIfExists('room_photo')
     await knex.schema.alterTable('room', table => {
@@ -114,10 +96,7 @@ export async function down(knex: Knex): Promise<any> {
             .references('reservation.id')
             .onDelete('CASCADE')
         table.uuid('user_id')
-        table
-            .foreign('user_id')
-            .references('user.id')
-            .onDelete('CASCADE')
+        table.foreign('user_id').references('user.id').onDelete('CASCADE')
         table.dateTime('created_at')
         table.dateTime('updated_at')
     })

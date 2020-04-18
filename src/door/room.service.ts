@@ -115,7 +115,7 @@ export class RoomService implements IRoomService {
         }
         if (reservation.guest_id === guestID) {
             const rooms = await this.allRoomsInReservation(reservation.id)
-            return rooms.some((r) => r.id === roomID)
+            return rooms.some(r => r.id === roomID)
         }
         const room = await this.roomShared(email, reservation.id)
         return room.id === roomID

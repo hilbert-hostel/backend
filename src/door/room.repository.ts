@@ -57,7 +57,7 @@ export class RoomRepository implements IRoomRepository {
         const reservationFollower = await GuestReservationRoomModel.query()
             .where({ guest_email })
             .withGraphJoined('reservation')
-            .modifyGraph('reservation', (reservation) => {
+            .modifyGraph('reservation', reservation => {
                 reservation
                     .where('check_in', '<=', date)
                     .where('check_out', '>=', date)

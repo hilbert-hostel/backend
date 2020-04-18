@@ -148,7 +148,7 @@ export class ReservationService implements IReservationService {
             throw new BadRequestError('Invalid check in and check out date.')
         }
         const db_rooms = await Promise.all(
-            rooms.map((r) =>
+            rooms.map(r =>
                 this.reservationRepository.findAvailableBeds(
                     check_in,
                     check_out,
@@ -207,7 +207,7 @@ export class ReservationService implements IReservationService {
                 'transaction'
             ]),
             evolve({
-                rooms: map(evolve({ beds: (i) => i.length })),
+                rooms: map(evolve({ beds: i => i.length })),
                 // TODO implement real payment system
                 // transaction: Boolean
                 transaction: () => true
@@ -253,7 +253,7 @@ export class ReservationService implements IReservationService {
                     'transaction'
                 ]),
                 evolve({
-                    rooms: map(evolve({ beds: (i) => i.length })),
+                    rooms: map(evolve({ beds: i => i.length })),
                     // TODO implement real payment system
                     // transaction: Boolean
                     transaction: () => true

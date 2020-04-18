@@ -1,7 +1,7 @@
 import * as Knex from 'knex'
 
 export async function up(knex: Knex): Promise<any> {
-    return knex.schema.createTable('maintenance', (table) => {
+    return knex.schema.createTable('maintenance', table => {
         table.increments('id').primary()
         table.dateTime('created_at').notNullable()
         table.dateTime('from').notNullable()

@@ -36,7 +36,7 @@ export class ReservationRepository implements IReservationRepository {
     async findAvailableRooms(check_in: Date, check_out: Date) {
         const result = await RoomModel.query()
             .withGraphJoined('beds', { joinOperation: 'innerJoin' })
-            .modifyGraph('beds', (bed) => {
+            .modifyGraph('beds', bed => {
                 bed.fullOuterJoinRelated('reservations')
                     .whereNull('reservations.id')
                     .orWhere('reservations.check_out', '<=', check_in)
@@ -46,14 +46,14 @@ export class ReservationRepository implements IReservationRepository {
             .whereNotExists(
                 MaintenanceModel.query()
                     .where('room_id', '=', ref('room.id'))
-                    .where((builder) => {
+                    .where(builder => {
                         builder
                             .whereBetween('from', [check_in, check_out])
                             .orWhereBetween('to', [check_in, check_out])
                     })
             )
             .withGraphJoined('photos')
-            .modifyGraph('photos', (photo) => {
+            .modifyGraph('photos', photo => {
                 photo.select('photo_url', 'photo_description')
             })
             .withGraphJoined('facilities')
@@ -64,7 +64,7 @@ export class ReservationRepository implements IReservationRepository {
         const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
-            .modifyGraph('beds', (bed) => {
+            .modifyGraph('beds', bed => {
                 bed.fullOuterJoinRelated('reservations')
                     .whereNull('reservations.id')
                     .orWhere('reservations.check_out', '<=', check_in)
@@ -99,7 +99,7 @@ export class ReservationRepository implements IReservationRepository {
             .withGraphJoined('beds', {
                 joinOperation: 'rightJoin'
             })
-            .modifyGraph('beds', (bed) => {
+            .modifyGraph('beds', bed => {
                 bed.innerJoinRelated('reservations').where(
                     'reservations.id',
                     '=',
@@ -107,7 +107,7 @@ export class ReservationRepository implements IReservationRepository {
                 )
             })
             .withGraphJoined('photos')
-            .modifyGraph('photos', (photo) => {
+            .modifyGraph('photos', photo => {
                 photo.select('photo_url', 'photo_description')
             })
             .withGraphJoined('facilities')
@@ -115,7 +115,7 @@ export class ReservationRepository implements IReservationRepository {
     }
     mapRoomsToReservations(reservations: Reservation[]) {
         return Promise.all(
-            reservations.map(async (r) => {
+            reservations.map(async r => {
                 const rooms = await this.findRoomsInReservation(r.id)
                 return {
                     ...r,

@@ -9,7 +9,7 @@ export const checkEnoughBeds = (actual: Room[], expected: SelectedRoom[]) => {
             [cur.id]: cur.beds!.length
         }
     }, {})
-    const valid = expected.every((e) => a[e.id] >= e.guests)
+    const valid = expected.every(e => a[e.id] >= e.guests)
     return valid
 }
 

@@ -127,7 +127,7 @@ export async function seed(knex: Knex): Promise<any> {
 
     // connect rooms and facilities
     const makeRoomFacilityPairs = (room_id: number, facilities: any[]) =>
-        facilities.map((f) => ({ ...f, room_id }))
+        facilities.map(f => ({ ...f, room_id }))
     const f = [
         {
             count: 1,

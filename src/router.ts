@@ -4,8 +4,8 @@ import { CheckInRouter } from './checkIn/checkIn.router'
 import { ReservationRouter } from './reservation/reservation.router'
 import { CheckOutRouter } from './checkOut/checkOut.router'
 import { AdminRouter } from './admin/admin.router'
-import { DoorLockCodeRouter } from './door/door.router';
-import { RoomRouter } from './room/room.router';
+import { DoorLockCodeRouter } from './door/door.router'
+import { RoomRouter } from './room/room.router'
 
 const router = Router()
 

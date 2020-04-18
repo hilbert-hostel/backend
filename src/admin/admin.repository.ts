@@ -39,7 +39,7 @@ export class AdminRepository implements IAdminRespository {
             .withGraphJoined('beds', {
                 joinOperation: 'rightJoin'
             })
-            .modifyGraph('beds', (bed) => {
+            .modifyGraph('beds', bed => {
                 bed.innerJoinRelated('reservations')
                     .where('reservations.id', '=', reservation_id)
                     .select('bed.id')
@@ -85,7 +85,7 @@ export class AdminRepository implements IAdminRespository {
     getAllRooms() {
         return RoomModel.query()
             .withGraphJoined('beds')
-            .modifyGraph('beds', (bed) => bed.select('bed.id'))
+            .modifyGraph('beds', bed => bed.select('bed.id'))
     }
     findStaffById(id: string) {
         return StaffModel.query().findById(id)

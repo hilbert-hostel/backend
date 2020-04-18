@@ -3,14 +3,8 @@ import * as Knex from 'knex'
 export async function up(knex: Knex): Promise<any> {
     await knex.schema.createTable('user', table => {
         table.uuid('id').primary()
-        table
-            .text('username')
-            .unique()
-            .notNullable()
-        table
-            .text('email')
-            .unique()
-            .notNullable()
+        table.text('username').unique().notNullable()
+        table.text('email').unique().notNullable()
         table.text('password').notNullable()
         table.text('firstname').notNullable()
         table.text('lastname').notNullable()
@@ -28,10 +22,7 @@ export async function up(knex: Knex): Promise<any> {
     await knex.schema.createTable('bed', table => {
         table.increments('id').primary()
         table.integer('room_id')
-        table
-            .foreign('room_id')
-            .references('room.id')
-            .onDelete('CASCADE')
+        table.foreign('room_id').references('room.id').onDelete('CASCADE')
     })
 
     await knex.schema.createTable('reservation', table => {
@@ -43,10 +34,7 @@ export async function up(knex: Knex): Promise<any> {
         table.dateTime('created_at')
         table.dateTime('updated_at')
         table.uuid('user')
-        table
-            .foreign('user')
-            .references('user.id')
-            .onDelete('CASCADE')
+        table.foreign('user').references('user.id').onDelete('CASCADE')
     })
 
     await knex.schema.createTable('reserved_bed', table => {
@@ -56,10 +44,7 @@ export async function up(knex: Knex): Promise<any> {
             .references('reservation.id')
             .onDelete('CASCADE')
         table.integer('bed_id')
-        table
-            .foreign('bed_id')
-            .references('bed.id')
-            .onDelete('CASCADE')
+        table.foreign('bed_id').references('bed.id').onDelete('CASCADE')
         table.dateTime('created_at')
         table.dateTime('updated_at')
     })
@@ -71,10 +56,7 @@ export async function up(knex: Knex): Promise<any> {
             .references('reservation.id')
             .onDelete('CASCADE')
         table.uuid('user_id')
-        table
-            .foreign('user_id')
-            .references('user.id')
-            .onDelete('CASCADE')
+        table.foreign('user_id').references('user.id').onDelete('CASCADE')
         table.dateTime('created_at')
         table.dateTime('updated_at')
     })

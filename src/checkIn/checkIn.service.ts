@@ -59,7 +59,7 @@ export class CheckInService implements ICheckInService {
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({
-                rooms: map(evolve({ beds: (i) => i.length }))
+                rooms: map(evolve({ beds: i => i.length }))
             }),
             renameKeys({
                 check_in: 'checkIn',

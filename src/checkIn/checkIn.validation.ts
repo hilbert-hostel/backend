@@ -17,10 +17,7 @@ export const queryReservationDetailsValidator = yup
     })
 
 export const verifyOTPValidator = yup.object().shape<VerifyOTP>({
-    otp: yup
-        .string()
-        .length(6)
-        .required()
+    otp: yup.string().length(6).required()
 })
 
 export const checkInValidator = yup.object().shape<CheckIn>({
