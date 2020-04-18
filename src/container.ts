@@ -4,18 +4,18 @@ import {
     asValue,
     createContainer,
     Lifetime,
-    Resolver
+    Resolver,
 } from 'awilix'
 import { MqttClient } from 'mqtt'
 import { AuthService, IAuthService } from './auth/auth.service'
 import { IJwtService, JwtService } from './auth/jwt.service'
 import {
     IVerificationTokenRepository,
-    VerificationTokenRepository
+    VerificationTokenRepository,
 } from './auth/verificationToken.repository'
 import {
     CheckInRepository,
-    ICheckInRepository
+    ICheckInRepository,
 } from './checkIn/checkIn.repository'
 import { CheckInService, ICheckInService } from './checkIn/checkIn.service'
 import { config, Config } from './config'
@@ -26,13 +26,16 @@ import { IMailService, MailService } from './mail/mail.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
 import {
     IReservationRepository,
-    ReservationRepository
+    ReservationRepository,
 } from './reservation/reservation.repository'
 import {
     IReservationService,
-    ReservationService
+    ReservationService,
 } from './reservation/reservation.service'
-import { ICheckOutRepository, CheckOutRepository } from './checkOut/checkOut.repository'
+import {
+    ICheckOutRepository,
+    CheckOutRepository,
+} from './checkOut/checkOut.repository'
 import { ICheckOutService, CheckOutService } from './checkOut/checkOut.service'
 export interface AllDependencies {
     config: Config
@@ -49,7 +52,7 @@ export interface AllDependencies {
     fileService: IFileService
     checkInRepository: ICheckInRepository
     checkInService: ICheckInService
-    checkOutRespository:ICheckOutRepository
+    checkOutRespository: ICheckOutRepository
     checkOutService: ICheckOutService
 }
 
@@ -75,7 +78,7 @@ const dependencies: RegisterDeps<AllDependencies> = {
     checkInRepository: asClass(CheckInRepository),
     checkInService: asClass(CheckInService),
     checkOutRespository: asClass(CheckOutRepository),
-    checkOutService: asClass(CheckOutService)
+    checkOutService: asClass(CheckOutService),
 }
 
 DIContainer.register(dependencies)

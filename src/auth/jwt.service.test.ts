@@ -3,8 +3,8 @@ test('jwt', async () => {
     expect.assertions(2)
     const fakeConfig = {
         config: {
-            SECRET: '1234'
-        }
+            SECRET: '1234',
+        },
     } as any
     const jwtService = new JwtService(fakeConfig)
     const jwt = await jwtService.generateToken('1234')
