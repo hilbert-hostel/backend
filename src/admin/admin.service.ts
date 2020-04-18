@@ -39,6 +39,7 @@ export interface IAdminService {
         to: Date,
         description?: string
     ): Promise<RoomMaintenance>
+    listRoomMaintenance(from?: Date, to?: Date): Promise<RoomMaintenance[]>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -225,5 +226,19 @@ export class AdminService implements IAdminService {
             { room_id: 'roomID' },
             roomMaintenance
         ) as RoomMaintenance
+    }
+    async listRoomMaintenance(from?: Date, to?: Date) {
+        const validDate = moment(to).isAfter(from, 'day')
+        if (!validDate) {
+            throw new BadRequestError(`Invalid Date.`)
+        }
+        const maintenance = await this.adminRepository.listMaintenance(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
+        return map(
+            renameKeys({ room_id: 'roomID' }),
+            maintenance
+        ) as RoomMaintenance[]
     }
 }

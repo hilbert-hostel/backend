@@ -30,7 +30,7 @@ router.get(
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
-        const { from = new Date(), to } = req.query
+        const { from, to } = req.query
         const reservation = await adminService.listReservations(from, to)
         res.send(reservation)
     }
@@ -156,6 +156,16 @@ router.post(
             to,
             description
         )
+        res.send(maintenance)
+    }
+)
+router.get(
+    '/maintenance',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const { from, to } = req.query
+        const maintenance = await adminService.listRoomMaintenance(from, to)
         res.send(maintenance)
     }
 )

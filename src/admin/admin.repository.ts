@@ -23,6 +23,7 @@ export interface IAdminRespository {
         to: Date,
         description?: string
     ): Promise<Maintenance>
+    listMaintenance(from: Date, to: Date): Promise<Maintenance[]>
 }
 
 export class AdminRepository implements IAdminRespository {
@@ -100,5 +101,10 @@ export class AdminRepository implements IAdminRespository {
             to,
             description
         })
+    }
+    listMaintenance(from: Date, to: Date) {
+        return MaintenanceModel.query()
+            .whereBetween('from', [from, to])
+            .orWhereBetween('to', [from, to])
     }
 }
