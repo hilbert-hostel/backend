@@ -63,7 +63,7 @@ router.post(
         const idCardDetails = req.body as CheckIn
         if (!('kioskPhoto' in req.files) || !('idCardPhoto' in req.files))
             throw new BadRequestError('Photos missing.')
-        const message = await checkInService.addCheckInRecord(
+        const message = await checkInService.checkIn(
             id,
             req.files.kioskPhoto,
             req.files.idCardPhoto,

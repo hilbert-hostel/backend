@@ -36,7 +36,7 @@ export const listCheckInCheckOutValidator = listGuestsValidator
 
 export const adminCheckInValidator = yup.object().shape<AdminCheckIn>({
     reservationID: yup.string().required(),
-    date: yup.date()
+    date: yup.date().required()
 })
 
 export const adminCheckOutValidator = adminCheckInValidator

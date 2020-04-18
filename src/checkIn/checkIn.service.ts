@@ -17,7 +17,7 @@ export interface ICheckInService {
     ): Promise<ReservationDetail>
     generateOtp(reservationID: string): Promise<OtpReference>
     verifyOtp(reservationID: string, password: string): Promise<boolean>
-    addCheckInRecord(
+    checkIn(
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,
@@ -96,7 +96,7 @@ export class CheckInService implements ICheckInService {
         }
         return otp.password === password
     }
-    async addCheckInRecord(
+    async checkIn(
         reservationID: string,
         kioskPhoto: any,
         idCardPhoto: any,

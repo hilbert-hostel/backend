@@ -1,6 +1,4 @@
 import { Router } from 'express'
-import * as fs from 'fs'
-import { join } from 'path'
 import { LoginInput } from '../auth/auth.interface'
 import { loginValidator } from '../auth/auth.validation'
 import { container } from '../container'
@@ -104,6 +102,7 @@ router.get(
         res.send(staff)
     }
 )
+
 router.post(
     '/unlock',
     isAuthenticated,
@@ -121,19 +120,11 @@ router.post(
     validateBody(adminCheckInValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckIn
-        const fakePicture = await fs.promises.readFile(
-            join(__dirname, 'profile.jpeg')
-        )
-        const result = await checkInService.addCheckInRecord(
-            reservationID,
-            fakePicture,
-            fakePicture,
-            {},
-            date
-        )
+        const result = await adminService.checkIn(reservationID, date)
         res.send({ message: result })
     }
 )
+
 router.post(
     '/checkOut',
     isAuthenticated,

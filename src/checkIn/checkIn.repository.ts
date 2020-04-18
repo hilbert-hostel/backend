@@ -87,8 +87,8 @@ export class CheckInRepository implements ICheckInRepository {
         return ReservationModel.query().findById(id)
     }
     async addCheckInTime(reservation_id: string, time: Date) {
-        return ReservationModel.query()
-            .patch({ check_in_enter_time: time })
-            .findById(reservation_id)
+        return ReservationModel.query().patchAndFetchById(reservation_id, {
+            check_in_enter_time: time
+        })
     }
 }

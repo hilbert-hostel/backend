@@ -3,10 +3,13 @@ import moment from 'moment'
 import { MqttClient } from 'mqtt'
 import { append, evolve, map, omit, pick, pipe } from 'ramda'
 import { GuestDetails, LoginInput } from '../auth/auth.interface'
+import { ICheckInRepository } from '../checkIn/checkIn.repository'
+import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
 import { Bed } from '../models/bed'
+import { Reservation } from '../models/reservation'
 import { renameKeys } from '../utils'
 import {
     AdminRoomSearch,
@@ -28,18 +31,22 @@ export interface IAdminService {
     getAllRooms(): Promise<AdminRoomSearch[]>
     getStaff(id: string): Promise<StaffDetails>
     unlockDoor(roomID: string): void
+    checkIn(reservationID: string, date: Date): Promise<Reservation>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
 export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
     mqttClient: MqttClient
+    checkInRepository: ICheckInRepository
     constructor({
         adminRepository,
-        mqttClient
-    }: Dependencies<IAdminRespository | MqttClient>) {
+        mqttClient,
+        checkInRepository
+    }: Dependencies<IAdminRespository | MqttClient | ICheckInRepository>) {
         this.adminRepository = adminRepository
         this.mqttClient = mqttClient
+        this.checkInRepository = checkInRepository
     }
     async listReservations(from?: Date, to?: Date) {
         const reservations = await this.adminRepository.listReservations(
@@ -171,5 +178,24 @@ export class AdminService implements IAdminService {
     }
     unlockDoor(roomID: string) {
         this.mqttClient.publish(`door/${roomID}`, 'unlock')
+    }
+    async checkIn(reservationID: string, date: Date) {
+        const reservation = await this.checkInRepository.findReservationById(
+            reservationID
+        )
+        if (!sameDay(date, reservation.check_in)) {
+            throw new BadRequestError(`Can not chech in this day ${date}.`)
+        }
+        const photo = 'profile.jpeg'
+        const record = await this.checkInRepository.createReservationRecord(
+            reservationID,
+            photo,
+            { idCardPhoto: photo }
+        )
+        const updated = await this.checkInRepository.addCheckInTime(
+            reservationID,
+            date
+        )
+        return updated
     }
 }
