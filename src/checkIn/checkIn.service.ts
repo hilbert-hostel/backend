@@ -106,6 +106,9 @@ export class CheckInService implements ICheckInService {
         const reservation = await this.checkInRepository.findReservationById(
             reservationID
         )
+        if (!reservation) {
+            throw new BadRequestError('Invalid Reservation ID')
+        }
         if (!sameDay(date, reservation.check_in)) {
             throw new BadRequestError(`Can not chech in this day ${date}.`)
         }
