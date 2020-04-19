@@ -1,5 +1,6 @@
+import moment from 'moment'
 import { ref } from 'objection'
-import MaintenanceModel from '../models/maintenance'
+import MaintenanceModel, { Maintenance } from '../models/maintenance'
 import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
@@ -16,6 +17,11 @@ export interface IReservationRepository {
         check_out: Date,
         room_id: number
     ): Promise<Room>
+    listRoomMaintenance(
+        room_id: number,
+        from: Date,
+        to: Date
+    ): Promise<Maintenance[]>
     makeReservation(
         check_in: Date,
         check_out: Date,
@@ -48,8 +54,14 @@ export class ReservationRepository implements IReservationRepository {
                     .where('room_id', '=', ref('room.id'))
                     .where(builder => {
                         builder
-                            .whereBetween('from', [check_in, check_out])
-                            .orWhereBetween('to', [check_in, check_out])
+                            .whereBetween('from', [
+                                check_in,
+                                moment(check_out).subtract(1, 'day').toDate()
+                            ])
+                            .orWhereBetween('to', [
+                                moment(check_in).add(1, 'day').toDate(),
+                                check_out
+                            ])
                     })
             )
             .withGraphJoined('photos')
@@ -73,6 +85,21 @@ export class ReservationRepository implements IReservationRepository {
                     .orderBy('id', 'ASC')
             })
         return result
+    }
+    listRoomMaintenance(room_id: number, from: Date, to: Date) {
+        return MaintenanceModel.query()
+            .where({ room_id })
+            .where(builder => {
+                builder
+                    .whereBetween('from', [
+                        from,
+                        moment(to).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('to', [
+                        moment(from).add(1, 'day').toDate(),
+                        to
+                    ])
+            })
     }
     async makeReservation(
         check_in: Date,

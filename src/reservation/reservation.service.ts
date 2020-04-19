@@ -163,6 +163,19 @@ export class ReservationService implements IReservationService {
                 'Invalid Reservation. Some rooms do not have enough beds.'
             )
         }
+        for (const room of rooms) {
+            const existingMaitenance = await this.reservationRepository.listRoomMaintenance(
+                room.id,
+                check_in,
+                check_out
+            )
+            const hasMaintenance = existingMaitenance.length > 0
+            if (hasMaintenance) {
+                throw new BadRequestError(
+                    'Invalid date. There are maintenance in this range of date.'
+                )
+            }
+        }
         const roomsMap: {
             [key: number]: { id: number }[]
         } = db_rooms.reduce((acc, cur) => {
