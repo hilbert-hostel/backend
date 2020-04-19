@@ -1,6 +1,7 @@
 import { Config } from '../config'
 import { Dependencies } from '../container'
 import * as AWS from 'aws-sdk'
+import fileType from 'file-type'
 
 export interface IFileService {
     uploadFile(file: any, name: string): Promise<string>
@@ -24,22 +25,30 @@ export class FileService implements IFileService {
             accessKeyId: this.BUCKET_ID,
             secretAccessKey: this.BUCKET_SECRET,
         })
-        const params = {
-            Bucket: this.BUCKET_NAME,
-            Key: name,
-            Body: file,
-        }
 
         return new Promise((resolve: any, reject: any) => {
             try {
-                s3.upload(params, function (err: any, data: any) {
-                    if (err) {
-                        return reject(err)
-                    }
+                ;(async () => {
+                    const type = await fileType.fromBuffer(file)
+                    if (type != null && type.ext == 'jpg') {
+                        const params = {
+                            Bucket: this.BUCKET_NAME,
+                            Key: name + '.jpg',
+                            Body: file,
+                        }
+                        s3.upload(params, function (err: any, data: any) {
+                            if (err) {
+                                return reject(err)
+                            }
 
-                    return resolve(data.Location)
-                })
+                            return resolve(data.Location)
+                        })
+                    } else {
+                        //Log error file type
+                    }
+                })()
             } catch (err) {
+                console.log(err)
                 return reject(err)
             }
         })

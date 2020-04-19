@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/mime-types": "^2.1.0",
     "awilix": "^4.2.3",
     "aws-sdk": "^2.657.0",
     "bcryptjs": "^2.4.3",
@@ -17,10 +18,12 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
+    "file-type": "^14.1.4",
     "helmet": "^3.21.2",
     "hilbert-room-assignment": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.20.8",
+    "mime-types": "^2.1.26",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
