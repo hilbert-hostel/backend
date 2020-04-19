@@ -9,6 +9,7 @@ import RoomModel, { Room } from '../models/room'
 import StaffModel, { Staff } from '../models/staff'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { CreateStaff, ReservationInfoDatabase } from './admin.interface'
+import moment from 'moment'
 
 export interface IAdminRespository {
     listReservations(from: Date, to: Date): Promise<ReservationInfoDatabase[]>
@@ -72,8 +73,14 @@ export class AdminRepository implements IAdminRespository {
         return ReservationModel.query()
             .where(builder => {
                 builder
-                    .whereBetween('check_in', [from, to])
-                    .orWhereBetween('check_out', [from, to])
+                    .whereBetween('check_in', [
+                        from,
+                        moment(to).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('check_out', [
+                        moment(from).add(1, 'day').toDate(),
+                        to
+                    ])
             })
             .innerJoinRelated('beds.room')
             .where('beds:room.id', '=', room_id)
@@ -120,8 +127,14 @@ export class AdminRepository implements IAdminRespository {
             .where({ room_id })
             .where(builder => {
                 builder
-                    .whereBetween('from', [from, to])
-                    .orWhereBetween('to', [from, to])
+                    .whereBetween('from', [
+                        from,
+                        moment(to).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('to', [
+                        moment(from).add(1, 'day').toDate(),
+                        to
+                    ])
             })
     }
     createMaintenance(
@@ -145,6 +158,7 @@ export class AdminRepository implements IAdminRespository {
     deleteMainenance(maintenance_id: number) {
         return MaintenanceModel.query()
             .deleteById(maintenance_id)
-            .returning('*') as any
+            .returning('*')
+            .first()
     }
 }

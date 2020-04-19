@@ -7,7 +7,7 @@ import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { ICheckInRepository } from '../checkIn/checkIn.repository'
 import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
-import { DoorLockCodeEncodeInput } from '../door/door.interface';
+import { DoorLockCodeEncodeInput } from '../door/door.interface'
 import { DoorLockCodeService } from '../door/door.service'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
@@ -34,9 +34,7 @@ export interface IAdminService {
     listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
     getAllRooms(): Promise<AdminRoomSearch[]>
     getStaff(id: string): Promise<StaffDetails>
-    getDoorLockInput(
-        staffID: string,
-    ): Promise<DoorLockCodeEncodeInput>
+    getDoorLockInput(staffID: string): Promise<DoorLockCodeEncodeInput>
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
     createRoomMaintenance(
@@ -60,7 +58,12 @@ export class AdminService implements IAdminService {
         mqttClient,
         checkInRepository,
         doorlockCodeService
-    }: Dependencies<IAdminRespository | MqttClient | ICheckInRepository | DoorLockCodeService>) {
+    }: Dependencies<
+        | IAdminRespository
+        | MqttClient
+        | ICheckInRepository
+        | DoorLockCodeService
+    >) {
         this.adminRepository = adminRepository
         this.mqttClient = mqttClient
         this.checkInRepository = checkInRepository
@@ -203,12 +206,11 @@ export class AdminService implements IAdminService {
         const staff = await this.adminRepository.findStaffById(staffID)
         if (!staff)
             throw new BadRequestError('Request failed. Staff ID is invalid.')
-        const dummyRoomID = '9999';
-        const dummyStaffNationalID = '1234567890123';
-        const secret = this.doorlockCodeService.generateTOTP(
-            staffID + dummyRoomID + dummyStaffNationalID,
-            300
-        ).toString() // valid for 300 windows
+        const dummyRoomID = '9999'
+        const dummyStaffNationalID = '1234567890123'
+        const secret = this.doorlockCodeService
+            .generateTOTP(staffID + dummyRoomID + dummyStaffNationalID, 300)
+            .toString() // valid for 300 windows
         return {
             userID: staffID,
             roomID: dummyRoomID,
