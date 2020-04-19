@@ -2,6 +2,7 @@ import { RequestHandler } from 'express'
 import { Bearer } from 'permit'
 import { container } from '../container'
 import { UnauthorizedError } from '../error/HttpError'
+import { isEmpty } from '../utils'
 
 const permit = new Bearer({})
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
@@ -18,7 +19,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         permit.fail(res)
         return next(new UnauthorizedError(`Authentication is required!`))
     }
-    if (!userID || !role || !email) {
+    if (isEmpty(userID) || isEmpty(role) || isEmpty(email)) {
         return next(new UnauthorizedError(`Invalid Token!`))
     }
     res.locals.userID = userID

@@ -37,3 +37,7 @@ export const randomNumString = (length: number) => {
     }
     return result
 }
+
+export const isEmpty = (x: any) => {
+    return x === undefined || x === null
+}
