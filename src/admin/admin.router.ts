@@ -201,7 +201,7 @@ router.delete(
 router.get(
     '/generate',
     isAuthenticated,
-    hasRole('admin'),
+    hasRole(StaffRole.ADMIN),
     validateQuery(generateDoorLockCodeValidator),
     async (req, res) => {
         const { staffID } = res.locals
