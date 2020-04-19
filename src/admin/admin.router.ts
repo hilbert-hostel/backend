@@ -3,6 +3,7 @@ import moment from 'moment'
 import { LoginInput } from '../auth/auth.interface'
 import { loginValidator } from '../auth/auth.validation'
 import { container } from '../container'
+import { DoorLockCodeEncodeInput } from '../door/door.interface'
 import { hasRole } from '../middlewares/hasRole'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
@@ -24,11 +25,7 @@ import {
     listGuestsValidator,
     registerValidator
 } from './admin.validation'
-import {
-    generateDoorLockCodeValidator,
-    doorlockCodeDecodeValidator
-} from '../door/door.validation'
-import { DoorLockCodeEncodeInput } from '../door/door.interface'
+
 const router = Router()
 const {
     adminService,
@@ -202,11 +199,11 @@ router.get(
     '/generate',
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
-    validateQuery(generateDoorLockCodeValidator),
     async (req, res) => {
-        const { staffID } = res.locals
+        const { userID } = res.locals
+        console.log(userID)
         const input = (await adminService.getDoorLockInput(
-            staffID
+            userID
         )) as DoorLockCodeEncodeInput
         const encodedInput = doorlockCodeService.encode(input)
         res.json({ code: encodedInput })
