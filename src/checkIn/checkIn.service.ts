@@ -112,8 +112,8 @@ export class CheckInService implements ICheckInService {
         if (!sameDay(date, reservation.check_in)) {
             throw new BadRequestError(`Can not chech in this day ${date}.`)
         }
-        const kioskPhotoName = `check-in-photo-${reservationID}`
-        const idCardPhotoName = `id-card-photo-${reservationID}`
+        const kioskPhotoName = `check-in-photo-${reservationID}.jpg`
+        const idCardPhotoName = `id-card-photo-${reservationID}.jpg`
         const kioskPhotoKey = await this.fileService.uploadFile(
             kioskPhoto,
             kioskPhotoName
