@@ -1,7 +1,10 @@
 import { Dependencies } from '../container'
 import GuestModel, { Guest } from '../models/guest'
 import MaintenanceModel, { Maintenance } from '../models/maintenance'
-import ReservationModel, { ReservationWithGuest } from '../models/reservation'
+import ReservationModel, {
+    ReservationWithGuest,
+    Reservation
+} from '../models/reservation'
 import RoomModel, { Room } from '../models/room'
 import StaffModel, { Staff } from '../models/staff'
 import { IReservationRepository } from '../reservation/reservation.repository'
@@ -9,6 +12,11 @@ import { CreateStaff, ReservationInfoDatabase } from './admin.interface'
 
 export interface IAdminRespository {
     listReservations(from: Date, to: Date): Promise<ReservationInfoDatabase[]>
+    listRoomReservations(
+        room_id: number,
+        from: Date,
+        to: Date
+    ): Promise<Reservation[]>
     findRoomsInReservation(reservation_id: string): Promise<Room[]>
     createStaff(input: CreateStaff): Promise<Staff>
     findStaff(input: Partial<Staff>): Promise<Staff>
@@ -17,6 +25,11 @@ export interface IAdminRespository {
     listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
     getAllRooms(): Promise<Room[]>
     findStaffById(id: string): Promise<Staff>
+    listRoomMaintenance(
+        room_id: number,
+        from: Date,
+        to: Date
+    ): Promise<Maintenance[]>
     createMaintenance(
         room_id: number,
         from: Date,
@@ -55,6 +68,18 @@ export class AdminRepository implements IAdminRespository {
             reservations
         )) as ReservationInfoDatabase[]
     }
+    listRoomReservations(room_id: number, from: Date, to: Date) {
+        return ReservationModel.query()
+            .where(builder => {
+                builder
+                    .whereBetween('check_in', [from, to])
+                    .orWhereBetween('check_out', [from, to])
+            })
+            .innerJoinRelated('beds.room')
+            .where('beds:room.id', '=', room_id)
+            .distinct('reservation.id')
+            .select('reservation.*')
+    }
     createStaff(input: CreateStaff) {
         return StaffModel.query().insert(input)
     }
@@ -89,6 +114,15 @@ export class AdminRepository implements IAdminRespository {
     }
     findStaffById(id: string) {
         return StaffModel.query().findById(id)
+    }
+    listRoomMaintenance(room_id: number, from: Date, to: Date) {
+        return MaintenanceModel.query()
+            .where({ room_id })
+            .where(builder => {
+                builder
+                    .whereBetween('from', [from, to])
+                    .orWhereBetween('to', [from, to])
+            })
     }
     createMaintenance(
         room_id: number,

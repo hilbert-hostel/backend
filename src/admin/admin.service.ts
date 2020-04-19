@@ -221,11 +221,26 @@ export class AdminService implements IAdminService {
         if (!validDate) {
             throw new BadRequestError(`Invalid Date.`)
         }
-        const reservations = await this.listReservations(from, to)
+        const reservations = await this.adminRepository.listRoomReservations(
+            roomID,
+            from,
+            to
+        )
         const hasReservations = reservations.length > 0
         if (hasReservations) {
             throw new BadRequestError(
                 'Invalid date. There are reservations in this range of date.'
+            )
+        }
+        const existingMaitenance = await this.adminRepository.listRoomMaintenance(
+            roomID,
+            from,
+            to
+        )
+        const hasMaintenance = existingMaitenance.length > 0
+        if (hasMaintenance) {
+            throw new BadRequestError(
+                'Invalid date. There are maintenance in this range of date.'
             )
         }
         const roomMaintenance = await this.adminRepository.createMaintenance(
