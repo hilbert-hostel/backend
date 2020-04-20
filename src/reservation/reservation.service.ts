@@ -167,6 +167,17 @@ export class ReservationService implements IReservationService {
                 'Invalid Reservation. Some rooms do not have enough beds.'
             )
         }
+
+        const conflicts = await this.reservationRepository.conflictingReservations(
+            guest_id,
+            check_in,
+            check_out
+        )
+        if (conflicts.length > 0) {
+            throw new BadRequestError(
+                'Invalid Reservation. You already have reservations on this date.'
+            )
+        }
         for (const room of rooms) {
             const existingMaitenance = await this.reservationRepository.listRoomMaintenance(
                 room.id,

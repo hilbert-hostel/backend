@@ -36,6 +36,11 @@ export interface IReservationRepository {
     getReservation(reservation_id: string): Promise<ReservationWithRoom>
     getReservationTransaction(reservation_id: string): Promise<Reservation>
     listReservations(guest_id: string): Promise<ReservationWithRoom[]>
+    conflictingReservations(
+        guest_id: string,
+        check_in: Date,
+        check_out: Date
+    ): Promise<Reservation[]>
 }
 
 export class ReservationRepository implements IReservationRepository {
@@ -175,5 +180,27 @@ export class ReservationRepository implements IReservationRepository {
             .where({ guest_id })
             .withGraphJoined('transaction')
         return this.mapRoomsToReservations(reservations)
+    }
+
+    async conflictingReservations(
+        guest_id: string,
+        check_in: Date,
+        check_out: Date
+    ) {
+        const reservations = await ReservationModel.query()
+            .where({ guest_id })
+            .where(builder => {
+                builder
+                    .whereBetween('check_in', [
+                        check_in,
+                        moment(check_out).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('check_out', [
+                        moment(check_in).add(1, 'day').toDate(),
+                        check_out
+                    ])
+            })
+            .withGraphJoined('beds')
+        return reservations
     }
 }
