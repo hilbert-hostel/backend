@@ -107,27 +107,31 @@ export class ReservationService implements IReservationService {
                     ) as RoomSuggestion
             )
         })
-        const lowestPrice = pipe(
-            roomAssignmentByPrice,
-            map(fillInRoomDetail)
-        )({
-            roomList,
-            guests,
-            query: 3
-        })
+        try {
+            const lowestPrice = pipe(
+                roomAssignmentByPrice,
+                map(fillInRoomDetail)
+            )({
+                roomList,
+                guests,
+                query: 3
+            })
 
-        const lowestNumberOfRooms = pipe(
-            roomAssignmentByRoomOccupancy,
-            map(fillInRoomDetail)
-        )({
-            roomList,
-            guests,
-            query: 3
-        })
+            const lowestNumberOfRooms = pipe(
+                roomAssignmentByRoomOccupancy,
+                map(fillInRoomDetail)
+            )({
+                roomList,
+                guests,
+                query: 3
+            })
 
-        return {
-            rooms: result,
-            suggestions: { lowestPrice, lowestNumberOfRooms }
+            return {
+                rooms: result,
+                suggestions: { lowestPrice, lowestNumberOfRooms }
+            }
+        } catch (e) {
+            throw new BadRequestError(e.message)
         }
     }
 
