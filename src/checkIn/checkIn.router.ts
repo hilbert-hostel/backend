@@ -24,7 +24,7 @@ router.get(
         const { nationalID, date } = req.query as QueryReservationDetails
         const reservation = await checkInService.getReservationForCheckIn(
             nationalID,
-            date
+            new Date(date)
         )
 
         res.send(reservation)

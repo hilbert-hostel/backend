@@ -14,8 +14,8 @@ const { reservationService } = container
 router.get('/', validateQuery(roomSearchValidator), async (req, res) => {
     const { checkIn, checkOut, guests } = req.query as RoomSearchInput
     const payload = await reservationService.findAvailableRooms(
-        checkIn,
-        checkOut,
+        new Date(checkIn),
+        new Date(checkOut),
         guests
     )
     res.send(payload)
@@ -34,8 +34,8 @@ router.post(
         } = req.body as RoomReservationInput
         const guestID = getUserID(res)
         const reservation = await reservationService.makeReservation(
-            checkIn,
-            checkOut,
+            new Date(checkIn),
+            new Date(checkOut),
             guestID,
             rooms,
             specialRequests

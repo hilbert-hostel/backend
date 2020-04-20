@@ -30,7 +30,6 @@ const router = Router()
 const {
     adminService,
     jwtService,
-    checkInService,
     checkOutService,
     doorlockCodeService
 } = container
@@ -134,7 +133,7 @@ router.post(
     validateBody(adminCheckInValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckIn
-        const result = await adminService.checkIn(reservationID, date)
+        const result = await adminService.checkIn(reservationID, new Date(date))
         res.send({ message: result })
     }
 )
@@ -146,7 +145,10 @@ router.post(
     validateBody(adminCheckOutValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckOut
-        const result = await checkOutService.checkOut(reservationID, date)
+        const result = await checkOutService.checkOut(
+            reservationID,
+            new Date(date)
+        )
         res.send({ message: result })
     }
 )
@@ -164,8 +166,8 @@ router.post(
         } = req.body as CreateRoomMaintenanceInput
         const maintenance = await adminService.createRoomMaintenance(
             roomID,
-            from,
-            to,
+            new Date(from),
+            new Date(to),
             description
         )
         res.send(maintenance)
@@ -201,7 +203,6 @@ router.get(
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
         const { userID } = res.locals
-        console.log(userID)
         const input = (await adminService.getDoorLockInput(
             userID
         )) as DoorLockCodeEncodeInput

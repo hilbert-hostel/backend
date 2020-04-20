@@ -4,6 +4,7 @@ import {
     QueryReservationDetails,
     VerifyOTP
 } from './checkIn.interface'
+import { isValidDate } from '../utils'
 
 export const queryReservationDetailsValidator = yup
     .object()
@@ -13,7 +14,10 @@ export const queryReservationDetailsValidator = yup
             .length(13)
             .matches(/^[0-9]{13}$/)
             .required(),
-        date: yup.date().required()
+        date: yup
+            .string()
+            .required()
+            .test('is valid date', '${path} is not a valid date.', isValidDate)
     })
 
 export const verifyOTPValidator = yup.object().shape<VerifyOTP>({
@@ -28,10 +32,13 @@ export const checkInValidator = yup.object().shape<CheckIn>({
         .required(),
     nameTH: yup.string().required(),
     nameEN: yup.string().required(),
-    birthdate: yup.date().required(),
+    birthdate:         yup.string().required().test('is valid date', '${path} is not a valid date.', isValidDate),
+
     gender: yup.string().required(),
     issuer: yup.string().required(),
-    issueDate: yup.date().required(),
-    expireDate: yup.date().required(),
+    issueDate:         yup.string().required().test('is valid date', '${path} is not a valid date.', isValidDate),
+
+    expireDate:         yup.string().required().test('is valid date', '${path} is not a valid date.', isValidDate),
+
     address: yup.string().required()
 })

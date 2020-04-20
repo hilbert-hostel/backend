@@ -6,6 +6,7 @@ import {
     CreateStaff,
     ListGuestsInput
 } from './admin.interface'
+import { isValidDate } from '../utils'
 
 export const registerValidator = yup.object().shape<CreateStaff>({
     email: yup.string().email().required(),
@@ -41,7 +42,10 @@ export const listCheckInCheckOutValidator = listGuestsValidator
 
 export const adminCheckInValidator = yup.object().shape<AdminCheckIn>({
     reservationID: yup.string().required(),
-    date: yup.date().required()
+    date: yup
+        .string()
+        .required()
+        .test('is valid date', '${path} is not a valid date.', isValidDate)
 })
 
 export const adminCheckOutValidator = adminCheckInValidator
@@ -50,7 +54,13 @@ export const createRoomMaintenanceValidator = yup
     .object()
     .shape<CreateRoomMaintenanceInput>({
         roomID: yup.number().integer().required(),
-        from: yup.date().required(),
-        to: yup.date().required(),
+        from: yup
+            .string()
+            .required()
+            .test('is valid date', '${path} is not a valid date.', isValidDate),
+        to: yup
+            .string()
+            .required()
+            .test('is valid date', '${path} is not a valid date.', isValidDate),
         description: yup.string()
     })

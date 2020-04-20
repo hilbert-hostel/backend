@@ -1,5 +1,6 @@
 import { Response } from 'express'
 import { assoc, curry, keys, reduce } from 'ramda'
+import moment = require('moment')
 
 export const timeoutPromise = <T>(
     promise: Promise<T>,
@@ -41,3 +42,5 @@ export const randomNumString = (length: number) => {
 export const isEmpty = (x: any) => {
     return x === undefined || x === null
 }
+
+export const isValidDate = (str: any) => moment(str, moment.ISO_8601).isValid()
