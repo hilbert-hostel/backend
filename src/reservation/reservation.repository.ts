@@ -46,14 +46,27 @@ export interface IReservationRepository {
 export class ReservationRepository implements IReservationRepository {
     async findAvailableRooms(check_in: Date, check_out: Date) {
         const result = await RoomModel.query()
-            .withGraphJoined('beds', { joinOperation: 'innerJoin' })
-            .modifyGraph('beds', bed => {
-                bed.fullOuterJoinRelated('reservations')
-                    .whereNull('reservations.id')
-                    .orWhere('reservations.check_out', '<=', check_in)
-                    .orWhere('reservations.check_in', '>', check_out)
-                    .select('bed.id')
-            })
+            .withGraphJoined('beds')
+            .whereNotExists(
+                ReservationModel.query()
+                    .where(builder => {
+                        builder
+                            .whereBetween('check_in', [
+                                check_in,
+                                moment(check_out).subtract(1, 'day').toDate()
+                            ])
+                            .orWhereBetween('check_out', [
+                                moment(check_in).add(1, 'day').toDate(),
+                                check_out
+                            ])
+                    })
+                    .join(
+                        'reserved_bed as rb',
+                        'reservation.id',
+                        'rb.reservation_id'
+                    )
+                    .where('rb.bed_id', '=', ref('beds.id'))
+            )
             .whereNotExists(
                 MaintenanceModel.query()
                     .where('room_id', '=', ref('room.id'))
@@ -81,14 +94,41 @@ export class ReservationRepository implements IReservationRepository {
         const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
-            .modifyGraph('beds', bed => {
-                bed.fullOuterJoinRelated('reservations')
-                    .whereNull('reservations.id')
-                    .orWhere('reservations.check_out', '<=', check_in)
-                    .orWhere('reservations.check_in', '>', check_out)
-                    .select('bed.id')
-                    .orderBy('id', 'ASC')
-            })
+            .whereNotExists(
+                ReservationModel.query()
+                    .where(builder => {
+                        builder
+                            .whereBetween('check_in', [
+                                check_in,
+                                moment(check_out).subtract(1, 'day').toDate()
+                            ])
+                            .orWhereBetween('check_out', [
+                                moment(check_in).add(1, 'day').toDate(),
+                                check_out
+                            ])
+                    })
+                    .join(
+                        'reserved_bed as rb',
+                        'reservation.id',
+                        'rb.reservation_id'
+                    )
+                    .where('rb.bed_id', '=', ref('beds.id'))
+            )
+            .whereNotExists(
+                MaintenanceModel.query()
+                    .where('room_id', '=', room_id)
+                    .where(builder => {
+                        builder
+                            .whereBetween('from', [
+                                check_in,
+                                moment(check_out).subtract(1, 'day').toDate()
+                            ])
+                            .orWhereBetween('to', [
+                                moment(check_in).add(1, 'day').toDate(),
+                                check_out
+                            ])
+                    })
+            )
         return result
     }
     listRoomMaintenance(room_id: number, from: Date, to: Date) {
