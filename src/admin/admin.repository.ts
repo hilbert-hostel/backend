@@ -102,6 +102,7 @@ export class AdminRepository implements IAdminRespository {
             .whereNotNull('check_in_enter_time')
             .withGraphJoined('guest')
             .withGraphJoined('beds')
+            .withGraphJoined('record')
             .page(page, size)
             .orderBy('check_in_enter_time', 'DESC')
         return reservations.results as any

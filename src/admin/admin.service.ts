@@ -1,4 +1,3 @@
-import * as crypto from 'crypto'
 import { compare, hash } from 'bcryptjs'
 import moment from 'moment'
 import { MqttClient } from 'mqtt'
@@ -8,7 +7,7 @@ import { ICheckInRepository } from '../checkIn/checkIn.repository'
 import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
 import { DoorLockCodeEncodeInput } from '../door/door.interface'
-import { DoorLockCodeService } from '../door/door.service'
+import { IDoorLockCodeService } from '../door/door.service'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
 import { Bed } from '../models/bed'
@@ -25,6 +24,7 @@ import {
     StaffDetails
 } from './admin.interface'
 import { IAdminRespository } from './admin.repository'
+import { IFileService } from '../files/file.service'
 
 export interface IAdminService {
     listReservations(from: Date, to: Date): Promise<ReservationInfo[]>
@@ -52,22 +52,26 @@ export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
     mqttClient: MqttClient
     checkInRepository: ICheckInRepository
-    doorlockCodeService: DoorLockCodeService
+    doorlockCodeService: IDoorLockCodeService
+    fileService: IFileService
     constructor({
         adminRepository,
         mqttClient,
         checkInRepository,
-        doorlockCodeService
+        doorlockCodeService,
+        fileService
     }: Dependencies<
         | IAdminRespository
         | MqttClient
         | ICheckInRepository
-        | DoorLockCodeService
+        | IDoorLockCodeService
+        | IFileService
     >) {
         this.adminRepository = adminRepository
         this.mqttClient = mqttClient
         this.checkInRepository = checkInRepository
         this.doorlockCodeService = doorlockCodeService
+        this.fileService = fileService
     }
     async listReservations(from: Date, to: Date) {
         const validDate = moment(from).isBefore(to, 'day')
@@ -133,7 +137,8 @@ export class AdminService implements IAdminService {
                             check_out,
                             check_in_enter_time,
                             id,
-                            guest
+                            guest,
+                            record
                         } = r
                         const nights = stayDuration(check_in, check_out)
                         const beds = r.beds!.length
@@ -142,6 +147,15 @@ export class AdminService implements IAdminService {
                             beds,
                             nights,
                             guest: getGuestDetails(guest),
+                            record: {
+                                photo: this.fileService.getFile(record!.photo),
+                                idCardData: {
+                                    ...record!.id_card_data,
+                                    idCardPhoto: this.fileService.getFile(
+                                        record!.id_card_data.idCardPhoto
+                                    )
+                                }
+                            },
                             checkInTime: check_in_enter_time
                         } as CheckInInfo
                     }
