@@ -51,7 +51,9 @@ router.post(
             },
             roomID
         )
-        doorlockCodeService.unlockDoor(roomID)
+        if (isValid) {
+            doorlockCodeService.unlockDoor(roomID)
+        }
         console.log(isValid)
         res.json(isValid)
     }
