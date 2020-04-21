@@ -7,6 +7,7 @@ import { Guest } from './guest'
 import { Otp } from './otp'
 import { Record } from './record'
 import { Transaction } from './transaction'
+import { GuestReservationRoom } from './guest_reservation_room'
 export interface Reservation {
     id: string
     check_in: Date
@@ -16,7 +17,7 @@ export interface Reservation {
     updated_at: Date
     beds?: Bed[]
     guest?: Guest
-    followers?: Guest[]
+    followers?: GuestReservationRoom[]
     guest_id: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
@@ -38,7 +39,7 @@ export default class ReservationModel extends BaseModel implements Reservation {
     updated_at!: Date
     beds?: Bed[]
     guest?: Guest
-    followers?: Guest[]
+    followers?: GuestReservationRoom[]
     guest_id!: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
@@ -58,15 +59,11 @@ export default class ReservationModel extends BaseModel implements Reservation {
             }
         },
         followers: {
-            relation: Model.ManyToManyRelation,
-            modelClass: 'guest',
+            relation: Model.HasManyRelation,
+            modelClass: 'guest_reservation_room',
             join: {
                 from: 'reservation.id',
-                through: {
-                    from: 'guest_reservation_room.reservation_id',
-                    to: 'guest_reservation_room.guest_email'
-                },
-                to: 'guest.email'
+                to: 'guest_reservation_room.reservation_id'
             }
         },
         record: {

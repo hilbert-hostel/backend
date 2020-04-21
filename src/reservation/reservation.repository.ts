@@ -200,7 +200,7 @@ export class ReservationRepository implements IReservationRepository {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
             .withGraphJoined('transaction')
-
+            .withGraphJoined('followers')
         const rooms = await this.findRoomsInReservation(reservation_id)
         return {
             ...reservation,

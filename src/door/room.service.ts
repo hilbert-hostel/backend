@@ -4,6 +4,8 @@ import { GuestReservationRoom } from '../models/guest_reservation_room'
 import { Room } from '../models/room'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { IRoomRepository } from './room.repository'
+import { Guest } from '../models/guest'
+import { evolve, concat } from 'ramda'
 
 export interface IRoomService {
     shareRoom(
@@ -88,7 +90,20 @@ export class RoomService implements IRoomService {
         const reservation = await this.reservationRepository.getReservation(
             reservationID
         )
-        return reservation.rooms
+        const { rooms, followers } = reservation
+        const followersRoomMap = followers!.reduce((acc, cur) => {
+            const { room_id, guest_email } = cur
+            return {
+                ...acc,
+                [room_id]: concat(acc[room_id] ?? [], [guest_email])
+            }
+        }, {} as { [key: number]: string[] })
+        return rooms.map(room => {
+            return {
+                ...room,
+                followers: followersRoomMap[room.id] ?? []
+            }
+        })
     }
 
     async roomShared(email: string, reservationID: string) {
