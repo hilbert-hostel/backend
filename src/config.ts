@@ -28,7 +28,8 @@ export const config = {
     BASE_URL: env.BASE_URL,
     BUCKET_ID: env.BUCKET_ID,
     BUCKET_SECRET: env.BUCKET_SECRET,
-    BUCKET_NAME: env.BUCKET_NAME
+    BUCKET_NAME: env.BUCKET_NAME,
+    LOG_URL: env.LOG_URL
 }
 
 export type Config = typeof config

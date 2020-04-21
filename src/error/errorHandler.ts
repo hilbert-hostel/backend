@@ -2,10 +2,33 @@ import { ErrorRequestHandler } from 'express'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ValidationError } from 'yup'
 import { HttpError } from './HttpError'
-
-export const errorHandler: ErrorRequestHandler = async (err, _, res, __) => {
+import { container } from '../container'
+import { LogLevel } from '../log'
+import { isEmpty } from 'ramda'
+const { logger } = container
+export const errorHandler: ErrorRequestHandler = async (err, req, res, __) => {
     console.log(err)
+    let { query, body, params } = req
+    const format = (data: any) => (isEmpty(data) ? null : JSON.stringify(data))
+    query = format(query)
+    body = format(body)
+    params = format(params) as any
+
     const { message } = err
+    try {
+        await logger.log({
+            level: LogLevel.ERROR,
+            time: new Date(),
+            method: req.method,
+            url: req.originalUrl,
+            stack: err.stack,
+            query,
+            body,
+            params
+        })
+    } catch (e) {
+        console.log(e)
+    }
     if (err instanceof ValidationError) {
         return res.status(400).json({ message })
     } else if (err instanceof JsonWebTokenError) {

@@ -42,6 +42,7 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
+import { Logger, ILogger } from './log'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -64,6 +65,7 @@ export interface AllDependencies {
     doorlockCodeService: DoorLockCodeService
     roomRepository: IRoomRepository
     roomService: IRoomService
+    logger: ILogger
 }
 
 type RegisterDeps<T> = {
@@ -93,7 +95,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     adminService: asClass(AdminService),
     doorlockCodeService: asClass(DoorLockCodeService),
     roomRepository: asClass(RoomRepository),
-    roomService: asClass(RoomService)
+    roomService: asClass(RoomService),
+    logger: asClass(Logger)
 }
 
 DIContainer.register(dependencies)
