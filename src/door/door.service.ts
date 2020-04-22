@@ -17,7 +17,7 @@ export interface IDoorLockCodeService {
     generateHOTP(secret: string, counter: number): number
     generateTOTP(secret: string, window: number): number
     encode(input: DoorLockCodeEncodeInput): string
-    verify(input: DoorLockCodeDecodeInput): boolean
+    verify(input: DoorLockCodeDecodeInput, roomID: string): boolean
     unlockDoor(roomID: string): void
 }
 
@@ -90,10 +90,14 @@ export class DoorLockCodeService implements IDoorLockCodeService {
         )
     }
 
-    verify(input: DoorLockCodeDecodeInput) {
-        const [userID, roomID, nationalID, totp] = input.code.split('|')
+    verify(input: DoorLockCodeDecodeInput, roomID: string) {
+        const [userID, decodedRoomID, nationalID, totp] = input.code.split('|')
+        // not staff and not match room
+        if (decodedRoomID !== '9999' && decodedRoomID !== roomID) {
+            return false;
+        }
         const totpNumber = Number(totp)
-        const secret = userID + roomID + nationalID
+        const secret = userID + decodedRoomID + nationalID
         for (let errorWindow = 1; errorWindow <= 300; errorWindow++) {
             const calculatedTotp = this.generateTOTP(secret, errorWindow)
             if (calculatedTotp === totpNumber) {

@@ -18,6 +18,9 @@ export class CheckOutService implements ICheckOutService {
         if (!sameDay(date, reservation.check_out)) {
             throw new BadRequestError('Can not check out today.')
         }
+        if (!reservation.check_in_enter_time) {
+            throw new BadRequestError('You are not checked in.')
+        }
         return this.checkOutRepository.addCheckOutTime(reservationID, date)
     }
 }

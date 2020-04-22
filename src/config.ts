@@ -9,7 +9,7 @@ const env = new Proxy(process.env as Record<string, string>, {
             throw new Error(`${prop} is not set in environment variables.`)
         }
         return variable
-    },
+    }
 })
 export const config = {
     PORT: env.PORT,
@@ -29,6 +29,7 @@ export const config = {
     BUCKET_ID: env.BUCKET_ID,
     BUCKET_SECRET: env.BUCKET_SECRET,
     BUCKET_NAME: env.BUCKET_NAME,
+    LOG_URL: env.LOG_URL
 }
 
 export type Config = typeof config

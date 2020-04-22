@@ -24,7 +24,7 @@ router.get(
         const { nationalID, date } = req.query as QueryReservationDetails
         const reservation = await checkInService.getReservationForCheckIn(
             nationalID,
-            date
+            new Date(date)
         )
 
         res.send(reservation)
@@ -65,8 +65,8 @@ router.post(
             throw new BadRequestError('Photos missing.')
         const message = await checkInService.checkIn(
             id,
-            req.files.kioskPhoto,
-            req.files.idCardPhoto,
+            req.files.kioskPhoto[0].buffer,
+            req.files.idCardPhoto[0].buffer,
             idCardDetails,
             new Date()
         )

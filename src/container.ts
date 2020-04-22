@@ -42,10 +42,13 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
+import { Logger, ILogger } from './log'
+import { IGuestService, GuestService } from './guest/guest.service'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
     guestRepository: IGuestRepository
+    guestService: IGuestService
     verificationTokenRepository: IVerificationTokenRepository
     jwtService: IJwtService
     authService: IAuthService
@@ -64,6 +67,7 @@ export interface AllDependencies {
     doorlockCodeService: DoorLockCodeService
     roomRepository: IRoomRepository
     roomService: IRoomService
+    logger: ILogger
 }
 
 type RegisterDeps<T> = {
@@ -76,6 +80,7 @@ const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     initializeDatabase: asFunction(makeInitializeDatabase),
     guestRepository: asClass(GuestRepository),
+    guestService: asClass(GuestService),
     verificationTokenRepository: asClass(VerificationTokenRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
@@ -93,7 +98,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     adminService: asClass(AdminService),
     doorlockCodeService: asClass(DoorLockCodeService),
     roomRepository: asClass(RoomRepository),
-    roomService: asClass(RoomService)
+    roomService: asClass(RoomService),
+    logger: asClass(Logger)
 }
 
 DIContainer.register(dependencies)

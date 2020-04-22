@@ -1,5 +1,7 @@
+import moment from 'moment'
 import { ref } from 'objection'
-import MaintenanceModel from '../models/maintenance'
+import { GuestReservationRoom } from '../models/guest_reservation_room'
+import MaintenanceModel, { Maintenance } from '../models/maintenance'
 import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
 import RoomModel, { Room } from '../models/room'
@@ -8,6 +10,7 @@ import { Transaction } from '../models/transaction'
 export interface ReservationWithRoom extends Reservation {
     rooms: Room[]
     transaction: Transaction
+    followers: GuestReservationRoom[]
 }
 export interface IReservationRepository {
     findAvailableRooms(check_in: Date, check_out: Date): Promise<Room[]>
@@ -16,6 +19,11 @@ export interface IReservationRepository {
         check_out: Date,
         room_id: number
     ): Promise<Room>
+    listRoomMaintenance(
+        room_id: number,
+        from: Date,
+        to: Date
+    ): Promise<Maintenance[]>
     makeReservation(
         check_in: Date,
         check_out: Date,
@@ -27,33 +35,29 @@ export interface IReservationRepository {
         reservations: Reservation[]
     ): Promise<ReservationWithRoom[]>
     findRoomsInReservation(reservation_id: string): Promise<Room[]>
-    getReservation(reservation_id: string): Promise<ReservationWithRoom>
+    getReservationWithRoom(reservation_id: string): Promise<ReservationWithRoom>
+    getReservation(reservation_id: string): Promise<Reservation>
     getReservationTransaction(reservation_id: string): Promise<Reservation>
     listReservations(guest_id: string): Promise<ReservationWithRoom[]>
+    conflictingReservations(
+        guest_id: string,
+        check_in: Date,
+        check_out: Date
+    ): Promise<Reservation[]>
+    updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string
+    ): Promise<Reservation>
 }
 
 export class ReservationRepository implements IReservationRepository {
     async findAvailableRooms(check_in: Date, check_out: Date) {
         const result = await RoomModel.query()
-            .withGraphJoined('beds', { joinOperation: 'innerJoin' })
-            .modifyGraph('beds', (bed) => {
-                bed.fullOuterJoinRelated('reservations')
-                    .whereNull('reservations.id')
-                    .orWhere('reservations.check_out', '<=', check_in)
-                    .orWhere('reservations.check_in', '>', check_out)
-                    .select('bed.id')
-            })
-            .whereNotExists(
-                MaintenanceModel.query()
-                    .where('room_id', '=', ref('room.id'))
-                    .where((builder) => {
-                        builder
-                            .whereBetween('from', [check_in, check_out])
-                            .orWhereBetween('to', [check_in, check_out])
-                    })
-            )
+            .withGraphJoined('beds')
+            .modify('bedsAvailable', check_in, check_out)
+            .modify('noMaintenance', check_in, check_out)
             .withGraphJoined('photos')
-            .modifyGraph('photos', (photo) => {
+            .modifyGraph('photos', photo => {
                 photo.select('photo_url', 'photo_description')
             })
             .withGraphJoined('facilities')
@@ -64,15 +68,24 @@ export class ReservationRepository implements IReservationRepository {
         const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
-            .modifyGraph('beds', (bed) => {
-                bed.fullOuterJoinRelated('reservations')
-                    .whereNull('reservations.id')
-                    .orWhere('reservations.check_out', '<=', check_in)
-                    .orWhere('reservations.check_in', '>', check_out)
-                    .select('bed.id')
-                    .orderBy('id', 'ASC')
-            })
+            .modify('bedsAvailable', check_in, check_out)
+            .modify('noMaintenance', check_in, check_out)
         return result
+    }
+    listRoomMaintenance(room_id: number, from: Date, to: Date) {
+        return MaintenanceModel.query()
+            .where({ room_id })
+            .where(builder => {
+                builder
+                    .whereBetween('from', [
+                        from,
+                        moment(to).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('to', [
+                        moment(from).add(1, 'day').toDate(),
+                        to
+                    ])
+            })
     }
     async makeReservation(
         check_in: Date,
@@ -99,7 +112,7 @@ export class ReservationRepository implements IReservationRepository {
             .withGraphJoined('beds', {
                 joinOperation: 'rightJoin'
             })
-            .modifyGraph('beds', (bed) => {
+            .modifyGraph('beds', bed => {
                 bed.innerJoinRelated('reservations').where(
                     'reservations.id',
                     '=',
@@ -107,7 +120,7 @@ export class ReservationRepository implements IReservationRepository {
                 )
             })
             .withGraphJoined('photos')
-            .modifyGraph('photos', (photo) => {
+            .modifyGraph('photos', photo => {
                 photo.select('photo_url', 'photo_description')
             })
             .withGraphJoined('facilities')
@@ -115,7 +128,7 @@ export class ReservationRepository implements IReservationRepository {
     }
     mapRoomsToReservations(reservations: Reservation[]) {
         return Promise.all(
-            reservations.map(async (r) => {
+            reservations.map(async r => {
                 const rooms = await this.findRoomsInReservation(r.id)
                 return {
                     ...r,
@@ -124,18 +137,24 @@ export class ReservationRepository implements IReservationRepository {
             })
         )
     }
-    async getReservation(reservation_id: string) {
+    async getReservationWithRoom(reservation_id: string) {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
             .withGraphJoined('transaction')
-
+            .withGraphJoined('followers')
         const rooms = await this.findRoomsInReservation(reservation_id)
         return {
             ...reservation,
             rooms
         } as ReservationWithRoom
     }
-
+    async getReservation(reservation_id: string) {
+        const reservation = await ReservationModel.query()
+            .findById(reservation_id)
+            .withGraphJoined('transaction')
+            .withGraphJoined('followers')
+        return reservation
+    }
     async getReservationTransaction(reservation_id: string) {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
@@ -148,5 +167,32 @@ export class ReservationRepository implements IReservationRepository {
             .where({ guest_id })
             .withGraphJoined('transaction')
         return this.mapRoomsToReservations(reservations)
+    }
+
+    async conflictingReservations(
+        guest_id: string,
+        check_in: Date,
+        check_out: Date
+    ) {
+        const reservations = await ReservationModel.query()
+            .where({ guest_id })
+            .where(builder => {
+                builder
+                    .whereBetween('check_in', [
+                        check_in,
+                        moment(check_out).subtract(1, 'day').toDate()
+                    ])
+                    .orWhereBetween('check_out', [
+                        moment(check_in).add(1, 'day').toDate(),
+                        check_out
+                    ])
+            })
+            .withGraphJoined('beds')
+        return reservations
+    }
+    updateSpecialRequests(reservation_id: string, special_requests: string) {
+        return ReservationModel.query().patchAndFetchById(reservation_id, {
+            special_requests
+        })
     }
 }

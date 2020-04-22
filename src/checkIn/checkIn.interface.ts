@@ -1,6 +1,6 @@
 export interface QueryReservationDetails {
     nationalID: string
-    date: Date
+    date: string
 }
 
 export interface VerifyOTP {
@@ -11,11 +11,11 @@ export interface CheckIn {
     nationalID: string
     nameTH: string
     nameEN: string
-    birthdate: Date
+    birthdate: string
     gender: string
     issuer: string
-    issueDate: Date
-    expireDate: Date
+    issueDate: string
+    expireDate: string
     address: string
 }
 

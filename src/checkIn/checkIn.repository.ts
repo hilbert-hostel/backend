@@ -41,7 +41,7 @@ export class CheckInRepository implements ICheckInRepository {
             guest_id,
             check_in
         })
-        return this.reservationRepository.getReservation(reservation.id)
+        return this.reservationRepository.getReservationWithRoom(reservation.id)
     }
     async createOtp(
         reservation_id: string,

@@ -15,7 +15,11 @@ import {
     take
 } from 'ramda'
 import { Dependencies } from '../container'
-import { BadRequestError, UnauthorizedError } from '../error/HttpError'
+import {
+    BadRequestError,
+    UnauthorizedError,
+    ForbiddenError
+} from '../error/HttpError'
 import { Room } from '../models/room'
 import { renameKeys } from '../utils'
 import {
@@ -31,6 +35,7 @@ import {
     checkNoDuplicateRooms,
     validCheckInCheckOutDate
 } from './reservation.utils'
+import { Reservation } from '../models/reservation'
 export interface IReservationService {
     findAvailableRooms(
         check_in: Date,
@@ -53,6 +58,11 @@ export interface IReservationService {
         guest_id: string
     ): Promise<boolean>
     listGuestReservations(guest_id: string): Promise<ReservationDetail[]>
+    updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string,
+        guest_id: string
+    ): Promise<Reservation>
 }
 
 export class ReservationService implements IReservationService {
@@ -107,27 +117,31 @@ export class ReservationService implements IReservationService {
                     ) as RoomSuggestion
             )
         })
-        const lowestPrice = pipe(
-            roomAssignmentByPrice,
-            map(fillInRoomDetail)
-        )({
-            roomList,
-            guests,
-            query: 3
-        })
+        try {
+            const lowestPrice = pipe(
+                roomAssignmentByPrice,
+                map(fillInRoomDetail)
+            )({
+                roomList,
+                guests,
+                query: 3
+            })
 
-        const lowestNumberOfRooms = pipe(
-            roomAssignmentByRoomOccupancy,
-            map(fillInRoomDetail)
-        )({
-            roomList,
-            guests,
-            query: 3
-        })
+            const lowestNumberOfRooms = pipe(
+                roomAssignmentByRoomOccupancy,
+                map(fillInRoomDetail)
+            )({
+                roomList,
+                guests,
+                query: 3
+            })
 
-        return {
-            rooms: result,
-            suggestions: { lowestPrice, lowestNumberOfRooms }
+            return {
+                rooms: result,
+                suggestions: { lowestPrice, lowestNumberOfRooms }
+            }
+        } catch (e) {
+            throw new BadRequestError(e.message)
         }
     }
 
@@ -138,6 +152,12 @@ export class ReservationService implements IReservationService {
         rooms: SelectedRoom[],
         specialRequests: string = ''
     ) {
+        if (rooms.length === 0) {
+            throw new BadRequestError('You must choose some rooms.')
+        }
+        if (rooms.some(r => r.guests === 0)) {
+            throw new BadRequestError('Can not choose zero beds.')
+        }
         const noDuplicates = checkNoDuplicateRooms(rooms)
         if (!noDuplicates) {
             throw new BadRequestError(
@@ -148,7 +168,7 @@ export class ReservationService implements IReservationService {
             throw new BadRequestError('Invalid check in and check out date.')
         }
         const db_rooms = await Promise.all(
-            rooms.map((r) =>
+            rooms.map(r =>
                 this.reservationRepository.findAvailableBeds(
                     check_in,
                     check_out,
@@ -162,6 +182,30 @@ export class ReservationService implements IReservationService {
             throw new BadRequestError(
                 'Invalid Reservation. Some rooms do not have enough beds.'
             )
+        }
+
+        const conflicts = await this.reservationRepository.conflictingReservations(
+            guest_id,
+            check_in,
+            check_out
+        )
+        if (conflicts.length > 0) {
+            throw new BadRequestError(
+                'Invalid Reservation. You already have reservations on this date.'
+            )
+        }
+        for (const room of rooms) {
+            const existingMaitenance = await this.reservationRepository.listRoomMaintenance(
+                room.id,
+                check_in,
+                check_out
+            )
+            const hasMaintenance = existingMaitenance.length > 0
+            if (hasMaintenance) {
+                throw new BadRequestError(
+                    'Invalid date. There are maintenance in this range of date.'
+                )
+            }
         }
         const roomsMap: {
             [key: number]: { id: number }[]
@@ -185,7 +229,7 @@ export class ReservationService implements IReservationService {
         return this.getReservationDetails(reservation.id, guest_id)
     }
     async getReservationDetails(reservation_id: string, guest_id: string) {
-        const reservation = await this.reservationRepository.getReservation(
+        const reservation = await this.reservationRepository.getReservationWithRoom(
             reservation_id
         )
         if (!reservation) {
@@ -207,7 +251,7 @@ export class ReservationService implements IReservationService {
                 'transaction'
             ]),
             evolve({
-                rooms: map(evolve({ beds: (i) => i.length })),
+                rooms: map(evolve({ beds: i => i.length })),
                 // TODO implement real payment system
                 // transaction: Boolean
                 transaction: () => true
@@ -253,7 +297,7 @@ export class ReservationService implements IReservationService {
                     'transaction'
                 ]),
                 evolve({
-                    rooms: map(evolve({ beds: (i) => i.length })),
+                    rooms: map(evolve({ beds: i => i.length })),
                     // TODO implement real payment system
                     // transaction: Boolean
                     transaction: () => true
@@ -267,5 +311,23 @@ export class ReservationService implements IReservationService {
             ),
             reservation
         ) as ReservationDetail[]
+    }
+    async updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string,
+        guest_id: string
+    ) {
+        const reservation = await this.reservationRepository.getReservation(
+            reservation_id
+        )
+        if (reservation.guest_id !== guest_id) {
+            throw new ForbiddenError(
+                'Can not edit reservation that is not your own'
+            )
+        }
+        return this.reservationRepository.updateSpecialRequests(
+            reservation_id,
+            special_requests
+        )
     }
 }

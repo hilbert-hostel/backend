@@ -1,5 +1,6 @@
 import { Response } from 'express'
 import { assoc, curry, keys, reduce } from 'ramda'
+import moment = require('moment')
 
 export const timeoutPromise = <T>(
     promise: Promise<T>,
@@ -20,6 +21,7 @@ export const trace = <T>(i: T, ...message: any[]) => {
     return i
 }
 export const getUserID = (res: Response) => res.locals.userID as string
+
 export const renameKeys = curry(
     (keysMap: Record<string, string>, obj: Record<string, any>) =>
         reduce<string, Record<string, any>>(
@@ -36,3 +38,9 @@ export const randomNumString = (length: number) => {
     }
     return result
 }
+
+export const isEmpty = (x: any) => {
+    return x === undefined || x === null
+}
+
+export const isValidDate = (str: any) => moment(str, moment.ISO_8601).isValid()

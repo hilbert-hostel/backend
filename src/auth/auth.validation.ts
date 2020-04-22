@@ -2,10 +2,7 @@ import * as yup from 'yup'
 import { LoginInput, RegisterInput, VerifyUserInput } from './auth.interface'
 
 export const registerValidator = yup.object().shape<RegisterInput>({
-    email: yup
-        .string()
-        .email()
-        .required(),
+    email: yup.string().email().required(),
     password: yup
         .string()
         .min(9)

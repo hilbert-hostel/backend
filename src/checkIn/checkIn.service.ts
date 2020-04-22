@@ -59,7 +59,7 @@ export class CheckInService implements ICheckInService {
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({
-                rooms: map(evolve({ beds: (i) => i.length }))
+                rooms: map(evolve({ beds: i => i.length }))
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -106,11 +106,14 @@ export class CheckInService implements ICheckInService {
         const reservation = await this.checkInRepository.findReservationById(
             reservationID
         )
+        if (!reservation) {
+            throw new BadRequestError('Invalid Reservation ID')
+        }
         if (!sameDay(date, reservation.check_in)) {
             throw new BadRequestError(`Can not chech in this day ${date}.`)
         }
-        const kioskPhotoName = `check-in-photo-${reservationID}`
-        const idCardPhotoName = `id-card-photo-${reservationID}`
+        const kioskPhotoName = `check-in-photo-${reservationID}.jpg`
+        const idCardPhotoName = `id-card-photo-${reservationID}.jpg`
         const kioskPhotoKey = await this.fileService.uploadFile(
             kioskPhoto,
             kioskPhotoName

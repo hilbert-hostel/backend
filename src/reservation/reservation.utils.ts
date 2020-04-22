@@ -9,7 +9,7 @@ export const checkEnoughBeds = (actual: Room[], expected: SelectedRoom[]) => {
             [cur.id]: cur.beds!.length
         }
     }, {})
-    const valid = expected.every((e) => a[e.id] >= e.guests)
+    const valid = expected.every(e => a[e.id] >= e.guests)
     return valid
 }
 
@@ -24,5 +24,5 @@ export const checkNoDuplicateRooms = (rooms: SelectedRoom[]) => {
 }
 
 export const validCheckInCheckOutDate = (checkIn: Date, checkOut: Date) => {
-    return moment(checkOut).isAfter(checkIn, 'day')
+    return moment(checkIn).isBefore(checkOut, 'day')
 }

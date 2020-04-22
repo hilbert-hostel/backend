@@ -1,7 +1,9 @@
 import { Router } from 'express'
+import moment from 'moment'
 import { LoginInput } from '../auth/auth.interface'
 import { loginValidator } from '../auth/auth.validation'
 import { container } from '../container'
+import { DoorLockCodeEncodeInput } from '../door/door.interface'
 import { hasRole } from '../middlewares/hasRole'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
@@ -23,15 +25,24 @@ import {
     listGuestsValidator,
     registerValidator
 } from './admin.validation'
+
 const router = Router()
-const { adminService, jwtService, checkInService, checkOutService } = container
+const {
+    adminService,
+    jwtService,
+    checkOutService,
+    doorlockCodeService
+} = container
 router.get(
     '/reservation',
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
         const { from, to } = req.query
-        const reservation = await adminService.listReservations(from, to)
+        const reservation = await adminService.listReservations(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
         res.send(reservation)
     }
 )
@@ -122,7 +133,7 @@ router.post(
     validateBody(adminCheckInValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckIn
-        const result = await adminService.checkIn(reservationID, date)
+        const result = await adminService.checkIn(reservationID, new Date(date))
         res.send({ message: result })
     }
 )
@@ -134,7 +145,10 @@ router.post(
     validateBody(adminCheckOutValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckOut
-        const result = await checkOutService.checkOut(reservationID, date)
+        const result = await checkOutService.checkOut(
+            reservationID,
+            new Date(date)
+        )
         res.send({ message: result })
     }
 )
@@ -152,8 +166,8 @@ router.post(
         } = req.body as CreateRoomMaintenanceInput
         const maintenance = await adminService.createRoomMaintenance(
             roomID,
-            from,
-            to,
+            new Date(from),
+            new Date(to),
             description
         )
         res.send(maintenance)
@@ -165,8 +179,36 @@ router.get(
     hasRole(StaffRole.ADMIN),
     async (req, res) => {
         const { from, to } = req.query
-        const maintenance = await adminService.listRoomMaintenance(from, to)
+        const maintenance = await adminService.listRoomMaintenance(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
         res.send(maintenance)
     }
 )
+router.delete(
+    '/maintenance/:id',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const id = Number(req.params.id)
+        const maintenance = await adminService.deleteRoomMaintenance(id)
+        res.send(maintenance)
+    }
+)
+
+router.get(
+    '/generate',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    async (req, res) => {
+        const { userID } = res.locals
+        const input = (await adminService.getDoorLockInput(
+            userID
+        )) as DoorLockCodeEncodeInput
+        const encodedInput = doorlockCodeService.encode(input)
+        res.json({ code: encodedInput })
+    }
+)
+
 export { router as AdminRouter }

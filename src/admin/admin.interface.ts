@@ -81,15 +81,15 @@ export interface AdminRoomSearch {
 
 export interface AdminCheckIn {
     reservationID: string
-    date: Date
+    date: string
 }
 
 export type AdminCheckOut = AdminCheckIn
 
 export interface CreateRoomMaintenanceInput {
     roomID: number
-    from: Date
-    to: Date
+    from: string
+    to: string
     description?: string
 }
 

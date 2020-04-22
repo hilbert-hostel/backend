@@ -40,13 +40,21 @@ router.get(
     }
 )
 
-router.get(
+router.post(
     '/verify',
     validateQuery(doorlockCodeDecodeValidator),
     async (req, res) => {
-        const isValid = doorlockCodeService.verify({
-            code: req.query.code
-        })
+        const { code, roomID } = req.body
+        const isValid = doorlockCodeService.verify(
+            {
+                code
+            },
+            roomID
+        )
+        if (isValid) {
+            doorlockCodeService.unlockDoor(roomID)
+        }
+        console.log(isValid)
         res.json(isValid)
     }
 )
@@ -67,6 +75,6 @@ router.get('/room', isAuthenticated, async (req, res) => {
     const date = new Date()
     const { userID, email } = res.locals
     const rooms = await roomService.findRoomsThatCanEnter(userID, email, date)
-    res.send({ rooms })
+    res.send(rooms)
 })
 export { router as DoorLockCodeRouter }

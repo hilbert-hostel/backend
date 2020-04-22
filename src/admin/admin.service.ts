@@ -6,6 +6,8 @@ import { GuestDetails, LoginInput } from '../auth/auth.interface'
 import { ICheckInRepository } from '../checkIn/checkIn.repository'
 import { sameDay } from '../checkIn/checkIn.utils'
 import { Dependencies } from '../container'
+import { DoorLockCodeEncodeInput } from '../door/door.interface'
+import { IDoorLockCodeService } from '../door/door.service'
 import { BadRequestError } from '../error/HttpError'
 import { getGuestDetails } from '../guest/guest.utils'
 import { Bed } from '../models/bed'
@@ -22,15 +24,17 @@ import {
     StaffDetails
 } from './admin.interface'
 import { IAdminRespository } from './admin.repository'
+import { IFileService } from '../files/file.service'
 
 export interface IAdminService {
-    listReservations(from?: Date, to?: Date): Promise<ReservationInfo[]>
+    listReservations(from: Date, to: Date): Promise<ReservationInfo[]>
     registerStaff(data: CreateStaff): Promise<StaffDetails>
     loginStaff(data: LoginInput): Promise<StaffDetails>
     listGuests(page: number, size: number): Promise<GuestDetails[]>
     listCheckInCheckOut(page: number, size: number): Promise<CheckInOutSummary>
     getAllRooms(): Promise<AdminRoomSearch[]>
     getStaff(id: string): Promise<StaffDetails>
+    getDoorLockInput(staffID: string): Promise<DoorLockCodeEncodeInput>
     unlockDoor(roomID: string): void
     checkIn(reservationID: string, date: Date): Promise<Reservation>
     createRoomMaintenance(
@@ -39,7 +43,8 @@ export interface IAdminService {
         to: Date,
         description?: string
     ): Promise<RoomMaintenance>
-    listRoomMaintenance(from?: Date, to?: Date): Promise<RoomMaintenance[]>
+    listRoomMaintenance(from: Date, to: Date): Promise<RoomMaintenance[]>
+    deleteRoomMaintenance(maintenanceID: number): Promise<RoomMaintenance>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -47,19 +52,35 @@ export class AdminService implements IAdminService {
     adminRepository: IAdminRespository
     mqttClient: MqttClient
     checkInRepository: ICheckInRepository
+    doorlockCodeService: IDoorLockCodeService
+    fileService: IFileService
     constructor({
         adminRepository,
         mqttClient,
-        checkInRepository
-    }: Dependencies<IAdminRespository | MqttClient | ICheckInRepository>) {
+        checkInRepository,
+        doorlockCodeService,
+        fileService
+    }: Dependencies<
+        | IAdminRespository
+        | MqttClient
+        | ICheckInRepository
+        | IDoorLockCodeService
+        | IFileService
+    >) {
         this.adminRepository = adminRepository
         this.mqttClient = mqttClient
         this.checkInRepository = checkInRepository
+        this.doorlockCodeService = doorlockCodeService
+        this.fileService = fileService
     }
-    async listReservations(from?: Date, to?: Date) {
+    async listReservations(from: Date, to: Date) {
+        const validDate = moment(from).isBefore(to, 'day')
+        if (!validDate) {
+            throw new BadRequestError(`Invalid Date.`)
+        }
         const reservations = await this.adminRepository.listReservations(
-            from ?? moment().toDate(),
-            to ?? moment().add(1, 'week').toDate()
+            from,
+            to
         )
         return map(
             pipe(
@@ -116,15 +137,25 @@ export class AdminService implements IAdminService {
                             check_out,
                             check_in_enter_time,
                             id,
-                            guest
+                            guest,
+                            record
                         } = r
                         const nights = stayDuration(check_in, check_out)
-                        const beds = r.beds!.length
+                        const beds = r.beds?.length ?? 0
                         return {
                             id,
                             beds,
                             nights,
                             guest: getGuestDetails(guest),
+                            record: {
+                                photo: this.fileService.getFile(record!.photo),
+                                idCardData: {
+                                    ...record!.id_card_data,
+                                    idCardPhoto: this.fileService.getFile(
+                                        record!.id_card_data.idCardPhoto
+                                    )
+                                }
+                            },
                             checkInTime: check_in_enter_time
                         } as CheckInInfo
                     }
@@ -184,6 +215,24 @@ export class AdminService implements IAdminService {
         }
         return omit(['password'], staff)
     }
+
+    async getDoorLockInput(staffID: string) {
+        const staff = await this.adminRepository.findStaffById(staffID)
+        if (!staff)
+            throw new BadRequestError('Request failed. Staff ID is invalid.')
+        const dummyRoomID = '9999'
+        const dummyStaffNationalID = '1234567890123'
+        const secret = this.doorlockCodeService
+            .generateTOTP(staffID + dummyRoomID + dummyStaffNationalID, 300)
+            .toString() // valid for 300 windows
+        return {
+            userID: staffID,
+            roomID: dummyRoomID,
+            nationalID: dummyStaffNationalID,
+            secret: secret.padStart(6, '0')
+        }
+    }
+
     unlockDoor(roomID: string) {
         this.mqttClient.publish(`door/${roomID}`, 'unlock')
     }
@@ -212,9 +261,31 @@ export class AdminService implements IAdminService {
         to: Date,
         description?: string
     ) {
-        const validDate = moment(to).isAfter(from, 'day')
+        const validDate = moment(from).isBefore(to, 'day')
         if (!validDate) {
             throw new BadRequestError(`Invalid Date.`)
+        }
+        const reservations = await this.adminRepository.listRoomReservations(
+            roomID,
+            from,
+            to
+        )
+        const hasReservations = reservations.length > 0
+        if (hasReservations) {
+            throw new BadRequestError(
+                'Invalid date. There are reservations in this range of date.'
+            )
+        }
+        const existingMaitenance = await this.adminRepository.listRoomMaintenance(
+            roomID,
+            from,
+            to
+        )
+        const hasMaintenance = existingMaitenance.length > 0
+        if (hasMaintenance) {
+            throw new BadRequestError(
+                'Invalid date. There are maintenance in this range of date.'
+            )
         }
         const roomMaintenance = await this.adminRepository.createMaintenance(
             roomID,
@@ -222,23 +293,27 @@ export class AdminService implements IAdminService {
             to,
             description
         )
+
         return renameKeys(
             { room_id: 'roomID' },
             roomMaintenance
         ) as RoomMaintenance
     }
-    async listRoomMaintenance(from?: Date, to?: Date) {
-        const validDate = moment(to).isAfter(from, 'day')
+    async listRoomMaintenance(from: Date, to: Date) {
+        const validDate = moment(from).isBefore(to, 'day')
         if (!validDate) {
             throw new BadRequestError(`Invalid Date.`)
         }
-        const maintenance = await this.adminRepository.listMaintenance(
-            from ?? moment().toDate(),
-            to ?? moment().add(1, 'week').toDate()
-        )
+        const maintenance = await this.adminRepository.listMaintenance(from, to)
         return map(
             renameKeys({ room_id: 'roomID' }),
             maintenance
         ) as RoomMaintenance[]
+    }
+    async deleteRoomMaintenance(maintenanceID: number) {
+        const maintenance = await this.adminRepository.deleteMainenance(
+            maintenanceID
+        )
+        return renameKeys({ room_id: 'roomID' }, maintenance) as RoomMaintenance
     }
 }

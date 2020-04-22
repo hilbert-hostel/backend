@@ -1,7 +1,7 @@
 import * as Knex from 'knex'
 
 export async function up(knex: Knex): Promise<any> {
-    return knex.schema.createTable('guest_reservation_room', (table) => {
+    return knex.schema.createTable('guest_reservation_room', table => {
         table
             .string('guest_email')
             .references('guest.email')
