@@ -39,7 +39,7 @@ export default class GuestReservationRoomModel extends BaseModel
         },
         room: {
             relation: Model.BelongsToOneRelation,
-            modelClass: 'guest',
+            modelClass: 'room',
             join: {
                 from: 'guest_reservation_room.room_id',
                 to: 'room.id'
