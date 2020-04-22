@@ -1,11 +1,11 @@
+import { concat } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, ForbiddenError } from '../error/HttpError'
 import { GuestReservationRoom } from '../models/guest_reservation_room'
 import { Room } from '../models/room'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { IRoomRepository } from './room.repository'
-import { Guest } from '../models/guest'
-import { evolve, concat } from 'ramda'
+import { RoomPayload } from './room.interface'
 
 export interface IRoomService {
     shareRoom(
@@ -18,7 +18,7 @@ export interface IRoomService {
         guestID: string,
         email: string,
         date: Date
-    ): Promise<Room[]>
+    ): Promise<RoomPayload>
     hasPermissionToEnterRoom(
         guestID: string,
         email: string,
@@ -77,13 +77,15 @@ export class RoomService implements IRoomService {
         if (!reservation) {
             throw new BadRequestError('Not checked in.')
         }
-        const isOwner = await this.checkIsReservationOwner(
-            guestID,
-            reservation.id
-        )
-        return isOwner
+        const isOwner = reservation.guest_id === guestID
+
+        const rooms = isOwner
             ? await this.allRoomsInReservation(reservation.id)
             : [await this.roomShared(email, reservation.id)]
+        return {
+            rooms,
+            reservationID: reservation.id
+        }
     }
 
     async allRoomsInReservation(reservationID: string) {
@@ -91,7 +93,7 @@ export class RoomService implements IRoomService {
             reservationID
         )
         const { rooms, followers } = reservation
-        const followersRoomMap = followers!.reduce((acc, cur) => {
+        const followersRoomMap = followers.reduce((acc, cur) => {
             const { room_id, guest_email } = cur
             return {
                 ...acc,

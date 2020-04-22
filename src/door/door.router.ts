@@ -75,6 +75,6 @@ router.get('/room', isAuthenticated, async (req, res) => {
     const date = new Date()
     const { userID, email } = res.locals
     const rooms = await roomService.findRoomsThatCanEnter(userID, email, date)
-    res.send({ rooms })
+    res.send(rooms)
 })
 export { router as DoorLockCodeRouter }
