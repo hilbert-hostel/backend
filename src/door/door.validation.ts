@@ -8,7 +8,8 @@ export const generateDoorLockCodeValidator = yup.object().shape({
 export const doorlockCodeDecodeValidator = yup
     .object()
     .shape<DoorLockCodeDecodeInput>({
-        code: yup.string()
+        code: yup.string().required(),
+        roomID: yup.number().integer().required()
     })
 
 export const shareRoomValidator = yup.object().shape<ShareRoomInput>({

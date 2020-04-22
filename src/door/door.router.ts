@@ -4,7 +4,11 @@ import { ForbiddenError } from '../error/HttpError'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
 import { getUserID } from '../utils'
-import { DoorLockCodeEncodeInput, ShareRoomInput } from './door.interface'
+import {
+    DoorLockCodeEncodeInput,
+    ShareRoomInput,
+    DoorLockCodeDecodeInput
+} from './door.interface'
 import {
     doorlockCodeDecodeValidator,
     generateDoorLockCodeValidator,
@@ -44,18 +48,12 @@ router.post(
     '/verify',
     validateBody(doorlockCodeDecodeValidator),
     async (req, res) => {
-        const { code, roomID } = req.body
-        const isValid = doorlockCodeService.verify(
-            {
-                code
-            },
-            roomID
-        )
+        const { code, roomID } = req.body as DoorLockCodeDecodeInput
+        const { isValid, roomID: id } = doorlockCodeService.verify(code, roomID)
         if (isValid) {
-            doorlockCodeService.unlockDoor(roomID)
+            doorlockCodeService.unlockDoor(id)
         }
-        console.log(isValid)
-        res.json(isValid)
+        res.json({ isValid })
     }
 )
 
