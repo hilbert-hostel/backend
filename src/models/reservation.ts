@@ -4,10 +4,10 @@ import BaseModel from './base'
 import { Bed } from './bed'
 import { CreatedUpdatedAt, GenID } from './decorators'
 import { Guest } from './guest'
+import { GuestReservationRoom } from './guest_reservation_room'
 import { Otp } from './otp'
 import { Record } from './record'
 import { Transaction } from './transaction'
-import { GuestReservationRoom } from './guest_reservation_room'
 export interface Reservation {
     id: string
     check_in: Date

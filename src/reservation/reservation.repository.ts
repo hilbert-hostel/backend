@@ -1,5 +1,6 @@
 import moment from 'moment'
 import { ref } from 'objection'
+import { GuestReservationRoom } from '../models/guest_reservation_room'
 import MaintenanceModel, { Maintenance } from '../models/maintenance'
 import ReservationModel, { Reservation } from '../models/reservation'
 import ReservedBedModel from '../models/reserved_bed'
@@ -9,6 +10,7 @@ import { Transaction } from '../models/transaction'
 export interface ReservationWithRoom extends Reservation {
     rooms: Room[]
     transaction: Transaction
+    followers: GuestReservationRoom[]
 }
 export interface IReservationRepository {
     findAvailableRooms(check_in: Date, check_out: Date): Promise<Room[]>
@@ -47,41 +49,8 @@ export class ReservationRepository implements IReservationRepository {
     async findAvailableRooms(check_in: Date, check_out: Date) {
         const result = await RoomModel.query()
             .withGraphJoined('beds')
-            .whereNotExists(
-                ReservationModel.query()
-                    .where(builder => {
-                        builder
-                            .whereBetween('check_in', [
-                                check_in,
-                                moment(check_out).subtract(1, 'day').toDate()
-                            ])
-                            .orWhereBetween('check_out', [
-                                moment(check_in).add(1, 'day').toDate(),
-                                check_out
-                            ])
-                    })
-                    .join(
-                        'reserved_bed as rb',
-                        'reservation.id',
-                        'rb.reservation_id'
-                    )
-                    .where('rb.bed_id', '=', ref('beds.id'))
-            )
-            .whereNotExists(
-                MaintenanceModel.query()
-                    .where('room_id', '=', ref('room.id'))
-                    .where(builder => {
-                        builder
-                            .whereBetween('from', [
-                                check_in,
-                                moment(check_out).subtract(1, 'day').toDate()
-                            ])
-                            .orWhereBetween('to', [
-                                moment(check_in).add(1, 'day').toDate(),
-                                check_out
-                            ])
-                    })
-            )
+            .modify('bedsAvailable', check_in, check_out)
+            .modify('noMaintenance', check_in, check_out)
             .withGraphJoined('photos')
             .modifyGraph('photos', photo => {
                 photo.select('photo_url', 'photo_description')
@@ -94,41 +63,8 @@ export class ReservationRepository implements IReservationRepository {
         const result = RoomModel.query()
             .findById(room_id)
             .withGraphJoined('beds')
-            .whereNotExists(
-                ReservationModel.query()
-                    .where(builder => {
-                        builder
-                            .whereBetween('check_in', [
-                                check_in,
-                                moment(check_out).subtract(1, 'day').toDate()
-                            ])
-                            .orWhereBetween('check_out', [
-                                moment(check_in).add(1, 'day').toDate(),
-                                check_out
-                            ])
-                    })
-                    .join(
-                        'reserved_bed as rb',
-                        'reservation.id',
-                        'rb.reservation_id'
-                    )
-                    .where('rb.bed_id', '=', ref('beds.id'))
-            )
-            .whereNotExists(
-                MaintenanceModel.query()
-                    .where('room_id', '=', room_id)
-                    .where(builder => {
-                        builder
-                            .whereBetween('from', [
-                                check_in,
-                                moment(check_out).subtract(1, 'day').toDate()
-                            ])
-                            .orWhereBetween('to', [
-                                moment(check_in).add(1, 'day').toDate(),
-                                check_out
-                            ])
-                    })
-            )
+            .modify('bedsAvailable', check_in, check_out)
+            .modify('noMaintenance', check_in, check_out)
         return result
     }
     listRoomMaintenance(room_id: number, from: Date, to: Date) {
