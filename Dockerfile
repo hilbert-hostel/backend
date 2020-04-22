@@ -1,5 +1,6 @@
 FROM node:12 as builder
 WORKDIR /app
+EXPOSE 3000
 
 # Install dependencies
 COPY ./package.json ./yarn.lock ./
