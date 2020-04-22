@@ -17,7 +17,7 @@ export class JwtService implements IJwtService {
     generateToken(
         userID: string,
         email: string = '',
-        role: string = 'GUEST'
+        role: string = ''
     ): Promise<string> {
         return new Promise((resolve, reject) => {
             jwt.sign(

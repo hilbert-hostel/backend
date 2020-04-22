@@ -35,7 +35,7 @@ router.post('/register', validateBody(registerValidator), async (req, res) => {
 router.post('/login', validateBody(loginValidator), async (req, res) => {
     const input = req.body as LoginInput
     const user = await authService.login(input)
-    const token = await jwtService.generateToken(user.id, user.email)
+    const token = await jwtService.generateToken(user.id, user.email, 'GUEST')
     const payload: LoginPayload = { user: omit(['password'], user), token }
     res.json(payload)
 })
