@@ -142,6 +142,12 @@ export class ReservationService implements IReservationService {
         rooms: SelectedRoom[],
         specialRequests: string = ''
     ) {
+        if (rooms.length === 0) {
+            throw new BadRequestError('You must choose some rooms.')
+        }
+        if (rooms.some(r => r.guests === 0)) {
+            throw new BadRequestError('Can not choose zero beds.')
+        }
         const noDuplicates = checkNoDuplicateRooms(rooms)
         if (!noDuplicates) {
             throw new BadRequestError(
