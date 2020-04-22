@@ -141,7 +141,7 @@ export class AdminService implements IAdminService {
                             record
                         } = r
                         const nights = stayDuration(check_in, check_out)
-                        const beds = r.beds!.length
+                        const beds = r.beds?.length ?? 0
                         return {
                             id,
                             beds,
