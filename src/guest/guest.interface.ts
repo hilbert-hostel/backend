@@ -6,3 +6,10 @@ export type CreateGuest = Omit<
 >
 
 export type FindGuest = Partial<Guest>
+
+export interface UpdateGuest
+    extends Partial<
+        Pick<Guest, 'firstname' | 'lastname' | 'phone' | 'address'>
+    > {
+    nationalID: string
+}

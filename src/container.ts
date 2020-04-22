@@ -43,10 +43,12 @@ import {
     ReservationService
 } from './reservation/reservation.service'
 import { Logger, ILogger } from './log'
+import { IGuestService, GuestService } from './guest/guest.service'
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
     guestRepository: IGuestRepository
+    guestService: IGuestService
     verificationTokenRepository: IVerificationTokenRepository
     jwtService: IJwtService
     authService: IAuthService
@@ -78,6 +80,7 @@ const dependencies: RegisterDeps<AllDependencies> = {
     config: asValue(config),
     initializeDatabase: asFunction(makeInitializeDatabase),
     guestRepository: asClass(GuestRepository),
+    guestService: asClass(GuestService),
     verificationTokenRepository: asClass(VerificationTokenRepository),
     jwtService: asClass(JwtService),
     authService: asClass(AuthService),
