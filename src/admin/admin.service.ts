@@ -211,7 +211,7 @@ export class AdminService implements IAdminService {
     async getStaff(id: string) {
         const staff = await this.adminRepository.findStaffById(id)
         if (!staff) {
-            throw new BadRequestError('Invalid ID.')
+            throw new BadRequestError('No Staff with this ID.')
         }
         return omit(['password'], staff)
     }

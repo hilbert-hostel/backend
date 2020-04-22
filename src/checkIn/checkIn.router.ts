@@ -44,7 +44,13 @@ router.post(
         const id = req.params.id
         const valid = await checkInService.verifyOtp(id, otp)
         if (valid) {
-            res.send({ token: await jwtService.generateToken(req.params.id) })
+            res.send({
+                token: await jwtService.generateToken(
+                    req.params.id,
+                    '',
+                    'CHECKIN'
+                )
+            })
         } else {
             throw new BadRequestError('Incorrect OTP')
         }
