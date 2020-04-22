@@ -63,3 +63,7 @@ export interface ReservationDetail {
     rooms: ReservedRoom[]
     isPaid: boolean
 }
+
+export interface UpdateReservationSpecialRequest {
+    specialRequests: string
+}

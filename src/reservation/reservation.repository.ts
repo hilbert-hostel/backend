@@ -35,7 +35,8 @@ export interface IReservationRepository {
         reservations: Reservation[]
     ): Promise<ReservationWithRoom[]>
     findRoomsInReservation(reservation_id: string): Promise<Room[]>
-    getReservation(reservation_id: string): Promise<ReservationWithRoom>
+    getReservationWithRoom(reservation_id: string): Promise<ReservationWithRoom>
+    getReservation(reservation_id: string): Promise<Reservation>
     getReservationTransaction(reservation_id: string): Promise<Reservation>
     listReservations(guest_id: string): Promise<ReservationWithRoom[]>
     conflictingReservations(
@@ -43,6 +44,10 @@ export interface IReservationRepository {
         check_in: Date,
         check_out: Date
     ): Promise<Reservation[]>
+    updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string
+    ): Promise<Reservation>
 }
 
 export class ReservationRepository implements IReservationRepository {
@@ -132,7 +137,7 @@ export class ReservationRepository implements IReservationRepository {
             })
         )
     }
-    async getReservation(reservation_id: string) {
+    async getReservationWithRoom(reservation_id: string) {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
             .withGraphJoined('transaction')
@@ -143,7 +148,13 @@ export class ReservationRepository implements IReservationRepository {
             rooms
         } as ReservationWithRoom
     }
-
+    async getReservation(reservation_id: string) {
+        const reservation = await ReservationModel.query()
+            .findById(reservation_id)
+            .withGraphJoined('transaction')
+            .withGraphJoined('followers')
+        return reservation
+    }
     async getReservationTransaction(reservation_id: string) {
         const reservation = await ReservationModel.query()
             .findById(reservation_id)
@@ -178,5 +189,10 @@ export class ReservationRepository implements IReservationRepository {
             })
             .withGraphJoined('beds')
         return reservations
+    }
+    updateSpecialRequests(reservation_id: string, special_requests: string) {
+        return ReservationModel.query().patchAndFetchById(reservation_id, {
+            special_requests
+        })
     }
 }

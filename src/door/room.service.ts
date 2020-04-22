@@ -89,7 +89,7 @@ export class RoomService implements IRoomService {
     }
 
     async allRoomsInReservation(reservationID: string) {
-        const reservation = await this.reservationRepository.getReservation(
+        const reservation = await this.reservationRepository.getReservationWithRoom(
             reservationID
         )
         const { rooms, followers } = reservation

@@ -3,10 +3,15 @@ import { container } from '../container'
 import { isAuthenticated } from '../middlewares/isAuthenticated'
 import { validateBody, validateQuery } from '../middlewares/validate'
 import { getUserID } from '../utils'
-import { RoomReservationInput, RoomSearchInput } from './reservation.interface'
+import {
+    RoomReservationInput,
+    RoomSearchInput,
+    UpdateReservationSpecialRequest
+} from './reservation.interface'
 import {
     roomReservationValidator,
-    roomSearchValidator
+    roomSearchValidator,
+    updateReservationSpecialRequestsValidator
 } from './reservation.validation'
 
 const router = Router()
@@ -68,4 +73,20 @@ router.get('/:id/payment', isAuthenticated, async (req, res) => {
     res.send({ isPaid: true })
 })
 
+router.patch(
+    '/:id',
+    isAuthenticated,
+    validateBody(updateReservationSpecialRequestsValidator),
+    async (req, res) => {
+        const reservationID = req.params.id
+        const userID = getUserID(res)
+        const { specialRequests } = req.body as UpdateReservationSpecialRequest
+        const reservation = await reservationService.updateSpecialRequests(
+            reservationID,
+            specialRequests,
+            userID
+        )
+        res.send(reservation)
+    }
+)
 export { router as ReservationRouter }

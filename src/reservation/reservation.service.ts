@@ -15,7 +15,11 @@ import {
     take
 } from 'ramda'
 import { Dependencies } from '../container'
-import { BadRequestError, UnauthorizedError } from '../error/HttpError'
+import {
+    BadRequestError,
+    UnauthorizedError,
+    ForbiddenError
+} from '../error/HttpError'
 import { Room } from '../models/room'
 import { renameKeys } from '../utils'
 import {
@@ -31,6 +35,7 @@ import {
     checkNoDuplicateRooms,
     validCheckInCheckOutDate
 } from './reservation.utils'
+import { Reservation } from '../models/reservation'
 export interface IReservationService {
     findAvailableRooms(
         check_in: Date,
@@ -53,6 +58,11 @@ export interface IReservationService {
         guest_id: string
     ): Promise<boolean>
     listGuestReservations(guest_id: string): Promise<ReservationDetail[]>
+    updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string,
+        guest_id: string
+    ): Promise<Reservation>
 }
 
 export class ReservationService implements IReservationService {
@@ -219,7 +229,7 @@ export class ReservationService implements IReservationService {
         return this.getReservationDetails(reservation.id, guest_id)
     }
     async getReservationDetails(reservation_id: string, guest_id: string) {
-        const reservation = await this.reservationRepository.getReservation(
+        const reservation = await this.reservationRepository.getReservationWithRoom(
             reservation_id
         )
         if (!reservation) {
@@ -301,5 +311,23 @@ export class ReservationService implements IReservationService {
             ),
             reservation
         ) as ReservationDetail[]
+    }
+    async updateSpecialRequests(
+        reservation_id: string,
+        special_requests: string,
+        guest_id: string
+    ) {
+        const reservation = await this.reservationRepository.getReservation(
+            reservation_id
+        )
+        if (reservation.guest_id !== guest_id) {
+            throw new ForbiddenError(
+                'Can not edit reservation that is not your own'
+            )
+        }
+        return this.reservationRepository.updateSpecialRequests(
+            reservation_id,
+            special_requests
+        )
     }
 }

@@ -1,5 +1,9 @@
 import * as yup from 'yup'
-import { RoomReservationInput, RoomSearchInput } from './reservation.interface'
+import {
+    RoomReservationInput,
+    RoomSearchInput,
+    UpdateReservationSpecialRequest
+} from './reservation.interface'
 import { isValidDate } from '../utils'
 
 export const roomSearchValidator = yup.object().shape<RoomSearchInput>({
@@ -31,4 +35,10 @@ export const roomReservationValidator = yup
             })
         ),
         specialRequests: yup.string()
+    })
+
+export const updateReservationSpecialRequestsValidator = yup
+    .object()
+    .shape<UpdateReservationSpecialRequest>({
+        specialRequests: yup.string().required()
     })
