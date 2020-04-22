@@ -8,8 +8,9 @@ export interface Transaction {
     created_at: Date
     method: string
     amount: number
+    paid: boolean
     reservation_id: string
-    reservation: Reservation
+    reservation?: Reservation
 }
 @CreatedAt()
 export default class TransactionModel extends BaseModel implements Transaction {
@@ -17,8 +18,9 @@ export default class TransactionModel extends BaseModel implements Transaction {
     created_at!: Date
     method!: string
     amount!: number
+    paid!: boolean
     reservation_id!: string
-    reservation!: Reservation
+    reservation?: Reservation
     static tableName = 'transaction'
     static relationMappings = {
         reservation: {
