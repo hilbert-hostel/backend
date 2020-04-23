@@ -18,7 +18,7 @@ const router = Router()
 const { reservationService, paymentService } = container
 router.get('/', validateQuery(roomSearchValidator), async (req, res) => {
     const { checkIn, checkOut, guests } = req.query as RoomSearchInput
-    const payload = await reservationService.findAvailableRooms(
+    const payload = await reservationService.searchAvailableRooms(
         new Date(checkIn),
         new Date(checkOut),
         guests

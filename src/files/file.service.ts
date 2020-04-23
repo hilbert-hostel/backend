@@ -7,7 +7,6 @@ export interface IFileService {
     getFile(name: string): string
 }
 
-// TODO implement real file service with S3
 export class FileService implements IFileService {
     private BUCKET_ID: string
     private BUCKET_SECRET: string

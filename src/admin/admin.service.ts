@@ -90,15 +90,18 @@ export class AdminService implements IAdminService {
                     'check_out',
                     'rooms',
                     'guest',
-                    'special_requests'
+                    'special_requests',
+                    'transaction'
                 ]),
                 evolve({
-                    guest: getGuestDetails
+                    guest: getGuestDetails,
+                    transaction: t => t?.paid ?? false
                 }),
                 renameKeys({
                     check_in: 'checkIn',
                     check_out: 'checkOut',
-                    special_requests: 'specialRequests'
+                    special_requests: 'specialRequests',
+                    transaction: 'isPaid'
                 })
             )
         )(reservations) as ReservationInfo[]

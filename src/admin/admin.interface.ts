@@ -1,6 +1,7 @@
 import { GuestDetails } from '../auth/auth.interface'
 import { Guest } from '../models/guest'
 import { Staff } from '../models/staff'
+import { Transaction } from '../models/transaction'
 
 export interface ReservationInfo {
     id: string
@@ -9,6 +10,7 @@ export interface ReservationInfo {
     specialRequests?: string
     guest?: GuestDetails
     rooms: ReservedRooms[]
+    isPaid: boolean
 }
 export interface ReservationInfoDatabase {
     id: string
@@ -17,6 +19,7 @@ export interface ReservationInfoDatabase {
     specialRequests?: string
     guest: Guest
     rooms: ReservedRooms[]
+    transaction?: Transaction
 }
 
 export interface ReservedRooms {
