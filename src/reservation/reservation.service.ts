@@ -264,7 +264,7 @@ export class ReservationService implements IReservationService {
             ]),
             evolve({
                 rooms: map(evolve({ beds: i => i.length })),
-                transaction: t => t.paid
+                transaction: t => t?.paid ?? false
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -308,7 +308,7 @@ export class ReservationService implements IReservationService {
                 ]),
                 evolve({
                     rooms: map(evolve({ beds: i => i.length })),
-                    transaction: t => t.paid
+                    transaction: t => t?.paid
                 }),
                 renameKeys({
                     check_in: 'checkIn',
