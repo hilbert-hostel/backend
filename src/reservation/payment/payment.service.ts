@@ -1,9 +1,9 @@
-import { Dependencies } from '../../container'
-import { Config } from '../../config'
 import axios from 'axios'
+import { Config } from '../../config'
+import { Dependencies } from '../../container'
+import { BadRequestError, ForbiddenError } from '../../error/HttpError'
 import { IPaymentRepository } from './payment.repository'
 import { calculatePrice } from './payment.util'
-import { ForbiddenError, BadRequestError } from '../../error/HttpError'
 
 export interface IPaymentService {
     makePayment(
@@ -11,6 +11,7 @@ export interface IPaymentService {
         guestID: string
     ): Promise<{ url: string; amount: number }>
     checkPaymentStatus(reservationID: string, guestID: string): Promise<boolean>
+    updatePaymentStatus(transactionID: string): Promise<any>
 }
 
 interface AccessTokenPayload {
@@ -195,5 +196,13 @@ export class SCBPaymentService implements IPaymentService {
             reservation.transaction.id
         )
         return true
+    }
+    async updatePaymentStatus(transactionID: string) {
+        await this.paymentRepository.completeTransaction(transactionID)
+        return {
+            resCode: '00',
+            'resDesc ': 'success',
+            transactionId: transactionID
+        }
     }
 }

@@ -76,8 +76,16 @@ router.get('/:id/payment', isAuthenticated, async (req, res) => {
 router.post('/:id/payment', isAuthenticated, async (req, res) => {
     const reservationID = req.params.id as string
     const guestID = getUserID(res)
-    const result = await paymentService.makePayment(reservationID, guestID)
-    res.send(result)
+    const isPaid = await paymentService.checkPaymentStatus(
+        reservationID,
+        guestID
+    )
+    if (isPaid) {
+        res.send({ isPaid })
+    } else {
+        const result = await paymentService.makePayment(reservationID, guestID)
+        res.send({ isPaid, ...result })
+    }
 })
 
 router.patch(
@@ -96,4 +104,11 @@ router.patch(
         res.send(reservation)
     }
 )
+router.post('/payment/confirm', async (req, res) => {
+    console.log(req.body)
+    const { transactionId } = req.body
+    const result = await paymentService.updatePaymentStatus(transactionId)
+    res.send(result)
+})
+
 export { router as ReservationRouter }
