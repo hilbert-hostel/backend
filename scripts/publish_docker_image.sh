@@ -5,7 +5,7 @@ branch=${TRAVIS_BRANCH//\//-}
 tag_name="$DOCKER_USER/$DOCKER_REPO"
 docker build -t $DOCKER_REPO .
                         
-if [ $TRAVIS_BRANCH == "dev" ]
+if [ $TRAVIS_BRANCH == "master" ]
 then
     docker tag $DOCKER_REPO $tag_name:latest
     docker push $tag_name:latest
