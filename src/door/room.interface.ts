@@ -9,3 +9,11 @@ export interface RoomPayload {
     rooms: Room[]
     reservationID: string
 }
+
+export interface ShareRoomEmail {
+    ownerName: string
+    email: string
+    checkIn: Date
+    checkOut: Date
+    roomID: string
+}

@@ -15,6 +15,7 @@ export interface IRoomRepository {
         guest_email: string,
         date: Date
     ): Promise<Reservation | undefined>
+    findReservationWithOwner(reservation_id: string): Promise<Reservation>
     findGuestRoomReservation(
         guest_email: string,
         reservation_id: string
@@ -43,6 +44,11 @@ export class RoomRepository implements IRoomRepository {
                 reservation_id
             })
             .withGraphJoined('room')
+    }
+    findReservationWithOwner(guest_id: string) {
+        return ReservationModel.query()
+            .findById(guest_id)
+            .withGraphJoined('guest')
     }
     async findReservationIn(guest_id: string, guest_email: string, date: Date) {
         const reservationMade = await ReservationModel.query()

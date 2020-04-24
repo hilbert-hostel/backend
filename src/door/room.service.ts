@@ -6,6 +6,8 @@ import { Room } from '../models/room'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { IRoomRepository } from './room.repository'
 import { RoomPayload } from './room.interface'
+import moment = require('moment')
+import { IMailService } from '../mail/mail.service'
 
 export interface IRoomService {
     shareRoom(
@@ -14,6 +16,11 @@ export interface IRoomService {
         reservationID: string,
         roomID: number
     ): Promise<GuestReservationRoom>
+    notifyShareRoom(
+        reservationID: string,
+        email: string,
+        roomID: number
+    ): Promise<void>
     findRoomsThatCanEnter(
         guestID: string,
         email: string,
@@ -30,12 +37,15 @@ export interface IRoomService {
 export class RoomService implements IRoomService {
     roomRepository: IRoomRepository
     reservationRepository: IReservationRepository
+    mailService: IMailService
     constructor({
         roomRepository,
-        reservationRepository
-    }: Dependencies<IRoomRepository | IReservationRepository>) {
+        reservationRepository,
+        mailService
+    }: Dependencies<IRoomRepository | IReservationRepository | IMailService>) {
         this.roomRepository = roomRepository
         this.reservationRepository = reservationRepository
+        this.mailService = mailService
     }
     async shareRoom(
         ownerID: string,
@@ -52,11 +62,35 @@ export class RoomService implements IRoomService {
                 'Can not share room. You did not make this reservation.'
             )
         }
+        await this.notifyShareRoom(reservationID, email, roomID)
+
         return this.roomRepository.createGuestRoomReservation(
             email,
             reservationID,
             roomID
         )
+    }
+    async notifyShareRoom(
+        reservationID: string,
+        email: string,
+        roomID: number
+    ) {
+        const reservation = await this.roomRepository.findReservationWithOwner(
+            reservationID
+        )
+        const { guest } = reservation
+        const owner = `${guest?.firstname} ${guest?.lastname}`
+        const cin = moment(reservation.check_in).format('dddd, MMMM Do YYYY')
+        const cout = moment(reservation.check_out).format('dddd, MMMM Do YYYY')
+        const message = `${owner} shared a room with you. You can access room ${roomID}.
+This key is valid from ${cin} until ${cout}.
+Go to https://booking.hilbert.now.sh and log in to get your key.
+If you do not have an account, please register using this email.`
+        return this.mailService.sendMail({
+            to: email,
+            subject: 'Hilbert Room Access Key',
+            text: message
+        })
     }
     async checkIsReservationOwner(guestID: string, reservationID: string) {
         const reservation = await this.roomRepository.findReservationById(
