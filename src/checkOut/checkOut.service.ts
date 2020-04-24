@@ -15,6 +15,9 @@ export class CheckOutService implements ICheckOutService {
         const reservation = await this.checkOutRepository.findReservationById(
             reservationID
         )
+        if (!reservation) {
+            throw new BadRequestError('Invalid ID')
+        }
         if (!sameDay(date, reservation.check_out)) {
             throw new BadRequestError('Can not check out today.')
         }
