@@ -32,7 +32,8 @@ deploy:
         bucket_name: elasticbeanstalk-ap-southeast-1-887653784206
         bucket_path: server-hilbert
         on:
-                branch: dev
-                # repo: hilbert-hostel/backend
+                branch: master
+                condition: push 
+                repo: hilbert-hostel/backend
         access_key_id: $AWS_ACCESS_KEY
         secret_access_key: $AWS_SECRET_KEY
