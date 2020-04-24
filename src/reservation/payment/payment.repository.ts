@@ -13,6 +13,7 @@ export interface IPaymentRepository {
     deleteTransactionById(transaction_id: string): Promise<any>
     findReservationById(reservation_id: string): Promise<Reservation>
     findRoomsInReservationById(reservation_id: string): Promise<Room[]>
+    findReservationByTransactionId(transaction_id: string): Promise<Reservation>
 }
 
 export class PaymentRepository implements IPaymentRepository {
@@ -42,6 +43,7 @@ export class PaymentRepository implements IPaymentRepository {
         const result = await ReservationModel.query()
             .findById(reservation_id)
             .withGraphJoined('transaction')
+        console.log(result)
         return result
     }
     findRoomsInReservationById(reservation_id: string) {
@@ -56,5 +58,11 @@ export class PaymentRepository implements IPaymentRepository {
                     reservation_id
                 )
             })
+    }
+    async findReservationByTransactionId(transaction_id: string) {
+        const results = await TransactionModel.query()
+            .findById(transaction_id)
+            .withGraphJoined('reservation.guest')
+        return results.reservation as any
     }
 }

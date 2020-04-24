@@ -105,9 +105,9 @@ router.patch(
     }
 )
 router.post('/payment/confirm', async (req, res) => {
-    console.log(req.body)
     const { transactionId } = req.body
     const result = await paymentService.updatePaymentStatus(transactionId)
+    await paymentService.sendReceipt(transactionId)
     res.send(result)
 })
 

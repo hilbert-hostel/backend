@@ -3,7 +3,8 @@ import { Config } from '../../config'
 import { Dependencies } from '../../container'
 import { BadRequestError, ForbiddenError } from '../../error/HttpError'
 import { IPaymentRepository } from './payment.repository'
-import { calculatePrice } from './payment.util'
+import { calculatePrice, formatReceiptMessage } from './payment.util'
+import { IMailService } from '../../mail/mail.service'
 
 export interface IPaymentService {
     makePayment(
@@ -12,6 +13,7 @@ export interface IPaymentService {
     ): Promise<{ url: string; amount: number }>
     checkPaymentStatus(reservationID: string, guestID: string): Promise<boolean>
     updatePaymentStatus(transactionID: string): Promise<any>
+    sendReceipt(transactionID: string): Promise<void>
 }
 
 interface AccessTokenPayload {
@@ -53,14 +55,17 @@ export class SCBPaymentService implements IPaymentService {
     private readonly paymentRepository: IPaymentRepository
     private readonly baseUrl =
         'https://api-sandbox.partners.scb/partners/sandbox'
+    private readonly mailService: IMailService
     constructor({
         config,
-        paymentRepository
-    }: Dependencies<Config | IPaymentRepository>) {
+        paymentRepository,
+        mailService
+    }: Dependencies<Config | IPaymentRepository | IMailService>) {
         this.API_KEY = config.BANK_API_KEY
         this.API_SECRET = config.BANK_API_SECRET
         this.BILLER_ID = config.BANK_BILLER_ID
         this.paymentRepository = paymentRepository
+        this.mailService = mailService
     }
     async getAccessToken(reservationID: string) {
         const payload = await axios.post<AccessTokenPayload>(
@@ -204,5 +209,34 @@ export class SCBPaymentService implements IPaymentService {
             'resDesc ': 'success',
             transactionId: transactionID
         }
+    }
+    async sendReceipt(transactionID: string) {
+        const reservation = await this.paymentRepository.findReservationByTransactionId(
+            transactionID
+        )
+        const rooms = await this.paymentRepository.findRoomsInReservationById(
+            reservation.id
+        )
+        const price = calculatePrice(rooms)
+        const formattedRooms = rooms.map(r => ({
+            id: r.id,
+            beds: r.beds!.length
+        }))
+        const email = reservation.guest!.email
+        const message = formatReceiptMessage({
+            reservationID: reservation.id,
+            transactionID,
+            amount: price,
+            method: 'SCB',
+            checkIn: reservation.check_in,
+            checkOut: reservation.check_out,
+            rooms: formattedRooms,
+            name: `${reservation.guest?.firstname} ${reservation.guest?.lastname}`
+        })
+        return this.mailService.sendMail({
+            to: email,
+            subject: 'Hilbert Booking Complete',
+            text: message
+        })
     }
 }
