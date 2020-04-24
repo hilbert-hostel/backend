@@ -112,6 +112,7 @@ export class AdminRepository implements IAdminRespository {
         const reservations = await ReservationModel.query()
             .whereNotNull('check_out_exit_time')
             .withGraphJoined('guest')
+            .withGraphJoined('beds')
             .page(page, size)
             .orderBy('check_out_exit_time', 'DESC')
         return reservations.results as any
