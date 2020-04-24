@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { Room } from '../models/room'
 import { SelectedRoom } from './reservation.interface'
 
@@ -20,4 +21,8 @@ export const checkNoDuplicateRooms = (rooms: SelectedRoom[]) => {
         else map[id] = true
     }
     return true
+}
+
+export const validCheckInCheckOutDate = (checkIn: Date, checkOut: Date) => {
+    return moment(checkIn).isBefore(checkOut, 'day')
 }

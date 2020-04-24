@@ -17,7 +17,7 @@ export const validateBody = (schema: ObjectSchema): RequestHandler => async (
     }
 }
 
-export const validatQuery = (schema: ObjectSchema): RequestHandler => async (
+export const validateQuery = (schema: ObjectSchema): RequestHandler => async (
     req,
     _,
     next

@@ -1,6 +1,10 @@
 import { Room } from '../models/room'
 import { SelectedRoom } from './reservation.interface'
-import { checkEnoughBeds, checkNoDuplicateRooms } from './reservation.utils'
+import {
+    checkEnoughBeds,
+    checkNoDuplicateRooms,
+    validCheckInCheckOutDate
+} from './reservation.utils'
 
 describe('check enough beds', () => {
     const rooms: Room[] = [
@@ -192,5 +196,21 @@ describe('check no duplicate rooms', () => {
         expect(checkNoDuplicateRooms(selected1)).toBe(false)
         expect(checkNoDuplicateRooms(selected2)).toBe(false)
         expect(checkNoDuplicateRooms(selected3)).toBe(false)
+    })
+})
+
+describe('check valid date', () => {
+    test('should be true', () => {
+        const checkIn = new Date('2020-02-20')
+        const checkOut = new Date('2020-02-25')
+
+        expect(validCheckInCheckOutDate(checkIn, checkOut)).toBe(true)
+    })
+    test('should be false', () => {
+        const checkIn = new Date('2020-02-26')
+        const checkOut1 = new Date('2020-02-26')
+        const checkOut2 = new Date('2020-02-25')
+        expect(validCheckInCheckOutDate(checkIn, checkOut1)).toBe(false)
+        expect(validCheckInCheckOutDate(checkIn, checkOut2)).toBe(false)
     })
 })

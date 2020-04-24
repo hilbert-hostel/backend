@@ -10,10 +10,16 @@ import { isAuthenticated } from './middlewares/isAuthenticated'
 import { isCheckedIn } from './middlewares/isCheckedIn'
 import { isInRoom } from './middlewares/isInRoom'
 import { Router } from './router'
+import { LogLevel } from './log'
 
 const main = async () => {
     try {
-        const { mqttClient, initializeDatabase, connectMqtt } = container
+        const {
+            mqttClient,
+            initializeDatabase,
+            connectMqtt,
+            logger
+        } = container
         initializeDatabase()
         await connectMqtt()
         const app = express()
@@ -24,6 +30,34 @@ const main = async () => {
 
         app.use(express.json())
         app.use(morgan('dev'))
+        app.use(
+            morgan(
+                (tokens, req, res) =>
+                    JSON.stringify({
+                        method: tokens.method(req, res),
+                        url: tokens.url(req, res),
+                        status: Number(tokens.status(req, res)),
+                        responseTime: tokens['response-time'](req, res) + 'ms'
+                    }),
+                {
+                    stream: {
+                        async write(message) {
+                            try {
+                                const data = JSON.parse(message)
+                                await logger.log({
+                                    level: LogLevel.INFO,
+                                    time: new Date(),
+                                    ...data
+                                })
+                            } catch (e) {
+                                console.log(e)
+                            }
+                        }
+                    },
+                    skip: (req, res) => res.statusCode >= 400
+                }
+            )
+        )
         app.use(helmet())
         app.use('/', Router)
 

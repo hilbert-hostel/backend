@@ -7,21 +7,26 @@
     "dev": "nodemon --exec ts-node ./src/app.ts",
     "build": "tsc",
     "start": "node ./dist/app.js",
-    "test": "jest"
+    "test": "jest",
+    "seed": "./scripts/seed.sh"
   },
   "dependencies": {
     "awilix": "^4.2.3",
+    "aws-sdk": "^2.656.0",
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "helmet": "^3.21.2",
+    "hilbert-room-assignment": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.20.8",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
+    "multer": "^1.4.2",
     "nodemailer": "^6.4.5",
     "objection": "^2.1.2",
     "permit": "^0.2.4",
@@ -42,6 +47,7 @@
     "@types/jsonwebtoken": "^8.3.7",
     "@types/moment": "^2.13.0",
     "@types/morgan": "^1.7.37",
+    "@types/multer": "^1.4.2",
     "@types/nodemailer": "^6.4.0",
     "@types/permit": "^0.2.1",
     "@types/ramda": "^0.27.0",
@@ -55,6 +61,6 @@
     "nodemon": "^2.0.2",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   }
 }

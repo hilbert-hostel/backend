@@ -4,6 +4,8 @@ import BaseModel from './base'
 import { Bed } from './bed'
 import { CreatedUpdatedAt, GenID } from './decorators'
 import { Guest } from './guest'
+import { GuestReservationRoom } from './guest_reservation_room'
+import { Otp } from './otp'
 import { Record } from './record'
 import { Transaction } from './transaction'
 export interface Reservation {
@@ -15,16 +17,20 @@ export interface Reservation {
     updated_at: Date
     beds?: Bed[]
     guest?: Guest
+    followers?: GuestReservationRoom[]
     guest_id: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
-    otp?: string
+    otp?: Otp
     record?: Record
     transaction?: Transaction
 }
+export interface ReservationWithGuest extends Reservation {
+    guest: Guest
+}
 @GenID(shortid)
 @CreatedUpdatedAt()
-export class ReservationModel extends BaseModel implements Reservation {
+export default class ReservationModel extends BaseModel implements Reservation {
     id!: string
     check_in!: Date
     check_out!: Date
@@ -33,10 +39,11 @@ export class ReservationModel extends BaseModel implements Reservation {
     updated_at!: Date
     beds?: Bed[]
     guest?: Guest
+    followers?: GuestReservationRoom[]
     guest_id!: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
-    otp?: string
+    otp?: Otp
     record?: Record
     transaction?: Transaction
 
@@ -51,12 +58,20 @@ export class ReservationModel extends BaseModel implements Reservation {
                 to: 'guest.id'
             }
         },
+        followers: {
+            relation: Model.HasManyRelation,
+            modelClass: 'guest_reservation_room',
+            join: {
+                from: 'reservation.id',
+                to: 'guest_reservation_room.reservation_id'
+            }
+        },
         record: {
             relation: Model.HasOneRelation,
             modelClass: 'record',
             join: {
                 from: 'reservation.id',
-                to: 'record.reservation_id'
+                to: 'record.id'
             }
         },
         transaction: {
@@ -77,6 +92,14 @@ export class ReservationModel extends BaseModel implements Reservation {
                     to: 'reserved_bed.bed_id'
                 },
                 to: 'bed.id'
+            }
+        },
+        otp: {
+            relation: Model.HasOneRelation,
+            modelClass: 'otp',
+            join: {
+                from: 'reservation.id',
+                to: 'otp.id'
             }
         }
     }
