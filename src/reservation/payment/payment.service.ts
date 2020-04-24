@@ -95,7 +95,7 @@ export class SCBPaymentService implements IPaymentService {
             )
         }
         if (reservation.transaction) {
-            this.paymentRepository.deleteTransactionById(
+            await this.paymentRepository.deleteTransactionById(
                 reservation.transaction.id
             )
         }
