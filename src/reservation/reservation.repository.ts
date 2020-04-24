@@ -17,8 +17,8 @@ export interface IReservationRepository {
     findAvailableBeds(
         check_in: Date,
         check_out: Date,
-        room_id: number
-    ): Promise<Room>
+        room_ids: number[]
+    ): Promise<Room[]>
     listRoomMaintenance(
         room_id: number,
         from: Date,
@@ -64,9 +64,13 @@ export class ReservationRepository implements IReservationRepository {
             .orderBy('room.id')
         return result
     }
-    async findAvailableBeds(check_in: Date, check_out: Date, room_id: number) {
+    async findAvailableBeds(
+        check_in: Date,
+        check_out: Date,
+        room_ids: number[]
+    ) {
         const result = RoomModel.query()
-            .findById(room_id)
+            .whereIn('room.id', room_ids)
             .withGraphJoined('beds')
             .modify('bedsAvailable', check_in, check_out)
             .modify('noMaintenance', check_in, check_out)

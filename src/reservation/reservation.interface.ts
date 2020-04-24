@@ -11,7 +11,7 @@ export interface RoomSearch {
     description?: string
     price: number
     photos?: Photo[]
-    facilities?: RoomFacility[]
+    facilities: RoomFacility[]
     availability: RoomAvailability[]
 }
 export interface RoomSuggestion {
