@@ -15,10 +15,10 @@ import {
 } from './reservation.validation'
 
 const router = Router()
-const { reservationService } = container
+const { reservationService, paymentService } = container
 router.get('/', validateQuery(roomSearchValidator), async (req, res) => {
     const { checkIn, checkOut, guests } = req.query as RoomSearchInput
-    const payload = await reservationService.findAvailableRooms(
+    const payload = await reservationService.searchAvailableRooms(
         new Date(checkIn),
         new Date(checkOut),
         guests
@@ -62,15 +62,30 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     )
     res.send(reservation)
 })
-// TODO implement real payment system
+
 router.get('/:id/payment', isAuthenticated, async (req, res) => {
     const reservationID = req.params.id as string
     const guestID = getUserID(res)
-    const reservation = await reservationService.getReservationPaymentStatus(
+    const isPaid = await paymentService.checkPaymentStatus(
         reservationID,
         guestID
     )
-    res.send({ isPaid: true })
+    res.send({ isPaid })
+})
+
+router.post('/:id/payment', isAuthenticated, async (req, res) => {
+    const reservationID = req.params.id as string
+    const guestID = getUserID(res)
+    const isPaid = await paymentService.checkPaymentStatus(
+        reservationID,
+        guestID
+    )
+    if (isPaid) {
+        res.send({ isPaid })
+    } else {
+        const result = await paymentService.makePayment(reservationID, guestID)
+        res.send({ isPaid, ...result })
+    }
 })
 
 router.patch(
@@ -89,4 +104,11 @@ router.patch(
         res.send(reservation)
     }
 )
+router.post('/payment/confirm', async (req, res) => {
+    console.log(req.body)
+    const { transactionId } = req.body
+    const result = await paymentService.updatePaymentStatus(transactionId)
+    res.send(result)
+})
+
 export { router as ReservationRouter }

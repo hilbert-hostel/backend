@@ -17,8 +17,8 @@ export interface IDoorLockCodeService {
     generateHOTP(secret: string, counter: number): number
     generateTOTP(secret: string, window: number): number
     encode(input: DoorLockCodeEncodeInput): string
-    verify(input: DoorLockCodeDecodeInput, roomID: string): boolean
-    unlockDoor(roomID: string): void
+    verify(code: string, roomID: number): { isValid: boolean; roomID: number }
+    unlockDoor(roomID: number): void
 }
 
 export class DoorLockCodeService implements IDoorLockCodeService {
@@ -90,24 +90,24 @@ export class DoorLockCodeService implements IDoorLockCodeService {
         )
     }
 
-    verify(input: DoorLockCodeDecodeInput, roomID: string) {
-        const [userID, decodedRoomID, nationalID, totp] = input.code.split('|')
+    verify(code: string, roomID: number) {
+        const [userID, decodedRoomID, nationalID, totp] = code.split('|')
         // not staff and not match room
-        if (decodedRoomID !== '9999' && decodedRoomID !== roomID) {
-            return false;
+        if (decodedRoomID !== '9999' && Number(decodedRoomID) !== roomID) {
+            return { isValid: false, roomID: Number(decodedRoomID) }
         }
         const totpNumber = Number(totp)
         const secret = userID + decodedRoomID + nationalID
         for (let errorWindow = 1; errorWindow <= 300; errorWindow++) {
             const calculatedTotp = this.generateTOTP(secret, errorWindow)
             if (calculatedTotp === totpNumber) {
-                return true
+                return { isValid: true, roomID: Number(decodedRoomID) }
             }
         }
-        return false
+        return { isValid: false, roomID: Number(decodedRoomID) }
     }
 
-    unlockDoor(roomID: string) {
+    unlockDoor(roomID: number) {
         this.mqttClient.publish(`door/${roomID}`, 'unlock')
     }
 }

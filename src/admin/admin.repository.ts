@@ -65,6 +65,7 @@ export class AdminRepository implements IAdminRespository {
             .whereBetween('check_in', [from, to])
             .orWhereBetween('check_out', [from, to])
             .withGraphJoined('guest')
+            .withGraphJoined('transaction')
         return (await this.reservationRepository.mapRoomsToReservations(
             reservations
         )) as ReservationInfoDatabase[]

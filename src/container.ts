@@ -27,13 +27,23 @@ import {
 import { CheckOutService, ICheckOutService } from './checkOut/checkOut.service'
 import { config, Config } from './config'
 import { InitializeDatabase, makeInitializeDatabase } from './db'
-import { DoorLockCodeService } from './door/door.service'
+import { DoorLockCodeService, IDoorLockCodeService } from './door/door.service'
 import { IRoomRepository, RoomRepository } from './door/room.repository'
 import { IRoomService, RoomService } from './door/room.service'
 import { FileService, IFileService } from './files/file.service'
 import { GuestRepository, IGuestRepository } from './guest/guest.repository'
+import { GuestService, IGuestService } from './guest/guest.service'
+import { ILogger, Logger } from './log'
 import { IMailService, MailService } from './mail/mail.service'
 import { connectMqtt, ConnectMqtt, mqttClient } from './mqtt'
+import {
+    IPaymentRepository,
+    PaymentRepository
+} from './reservation/payment/payment.repository'
+import {
+    IPaymentService,
+    SCBPaymentService
+} from './reservation/payment/payment.service'
 import {
     IReservationRepository,
     ReservationRepository
@@ -42,8 +52,7 @@ import {
     IReservationService,
     ReservationService
 } from './reservation/reservation.service'
-import { Logger, ILogger } from './log'
-import { IGuestService, GuestService } from './guest/guest.service'
+
 export interface AllDependencies {
     config: Config
     initializeDatabase: InitializeDatabase
@@ -54,6 +63,8 @@ export interface AllDependencies {
     authService: IAuthService
     reservationRepository: IReservationRepository
     reservationService: IReservationService
+    paymentRepository: IPaymentRepository
+    paymentService: IPaymentService
     mqttClient: MqttClient
     connectMqtt: ConnectMqtt
     mailService: IMailService
@@ -64,7 +75,7 @@ export interface AllDependencies {
     checkOutService: ICheckOutService
     adminRepository: IAdminRespository
     adminService: IAdminService
-    doorlockCodeService: DoorLockCodeService
+    doorlockCodeService: IDoorLockCodeService
     roomRepository: IRoomRepository
     roomService: IRoomService
     logger: ILogger
@@ -86,6 +97,8 @@ const dependencies: RegisterDeps<AllDependencies> = {
     authService: asClass(AuthService),
     reservationRepository: asClass(ReservationRepository),
     reservationService: asClass(ReservationService),
+    paymentRepository: asClass(PaymentRepository),
+    paymentService: asClass(SCBPaymentService),
     mqttClient: asFunction(mqttClient, { lifetime: Lifetime.SINGLETON }),
     connectMqtt: asFunction(connectMqtt),
     mailService: asClass(MailService),

@@ -7,6 +7,7 @@ export interface DoorLockCodeEncodeInput {
 
 export interface DoorLockCodeDecodeInput {
     code: string
+    roomID: number
 }
 
 export interface ShareRoomInput {

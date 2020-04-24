@@ -1,6 +1,7 @@
 import {
     roomAssignmentByPrice,
-    roomAssignmentByRoomOccupancy
+    roomAssignmentByRoomOccupancy,
+    checkAvailabilityOfHotel
 } from 'hilbert-room-assignment'
 import {
     append,
@@ -37,7 +38,7 @@ import {
 } from './reservation.utils'
 import { Reservation } from '../models/reservation'
 export interface IReservationService {
-    findAvailableRooms(
+    searchAvailableRooms(
         check_in: Date,
         check_out: Date,
         guests: number
@@ -73,9 +74,16 @@ export class ReservationService implements IReservationService {
         this.reservationRepository = reservationRepository
     }
 
-    async findAvailableRooms(check_in: Date, check_out: Date, guests: number) {
+    async searchAvailableRooms(
+        check_in: Date,
+        check_out: Date,
+        guests: number
+    ) {
         if (!validCheckInCheckOutDate(check_in, check_out)) {
             throw new BadRequestError('Invalid check in and check out date.')
+        }
+        if (guests < 1) {
+            throw new BadRequestError('Invalid number of guests.')
         }
         const rooms = await this.reservationRepository.findAvailableRooms(
             check_in,
@@ -108,6 +116,10 @@ export class ReservationService implements IReservationService {
             ({ id, price, beds }) => ({ id, price, available: beds!.length }),
             rooms
         )
+        const enoughBeds = checkAvailabilityOfHotel({ roomList, guests })
+        if (!enoughBeds) {
+            throw new BadRequestError(`Not enough beds  for ${guests} guests`)
+        }
         const fillInRoomDetail = evolve({
             roomConfig: map(
                 (config: { id: number; price: number; guests: number }) =>
@@ -252,9 +264,7 @@ export class ReservationService implements IReservationService {
             ]),
             evolve({
                 rooms: map(evolve({ beds: i => i.length })),
-                // TODO implement real payment system
-                // transaction: Boolean
-                transaction: () => true
+                transaction: t => t?.paid ?? false
             }),
             renameKeys({
                 check_in: 'checkIn',
@@ -298,9 +308,7 @@ export class ReservationService implements IReservationService {
                 ]),
                 evolve({
                     rooms: map(evolve({ beds: i => i.length })),
-                    // TODO implement real payment system
-                    // transaction: Boolean
-                    transaction: () => true
+                    transaction: t => t?.paid
                 }),
                 renameKeys({
                     check_in: 'checkIn',

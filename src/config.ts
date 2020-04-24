@@ -29,7 +29,10 @@ export const config = {
     BUCKET_ID: env.BUCKET_ID,
     BUCKET_SECRET: env.BUCKET_SECRET,
     BUCKET_NAME: env.BUCKET_NAME,
-    LOG_URL: env.LOG_URL
+    LOG_URL: env.LOG_URL,
+    BANK_API_KEY: env.BANK_API_KEY,
+    BANK_API_SECRET: env.BANK_API_SECRET,
+    BANK_BILLER_ID: env.BANK_BILLER_ID
 }
 
 export type Config = typeof config

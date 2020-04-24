@@ -24,7 +24,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     if (isEmpty(userID) || isEmpty(role) || isEmpty(email)) {
         return next(new UnauthorizedError(`Invalid Token!`))
     }
-    console.log(role)
     if (role === 'GUEST') {
         const user = await guestRepository.findOneById(userID)
         if (!user) {
