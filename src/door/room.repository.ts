@@ -2,6 +2,9 @@ import GuestReservationRoomModel, {
     GuestReservationRoom
 } from '../models/guest_reservation_room'
 import ReservationModel, { Reservation } from '../models/reservation'
+import RoomModel, { Room } from '../models/room'
+import BedModel from '../models/bed'
+import { ref } from 'objection'
 
 export interface IRoomRepository {
     createGuestRoomReservation(
@@ -10,6 +13,7 @@ export interface IRoomRepository {
         room_id: number
     ): Promise<GuestReservationRoom>
     findReservationById(reservation_id: string): Promise<Reservation>
+    findRoomsInReservation(reservation_id: string): Promise<Room[]>
     findReservationIn(
         guest_id: string,
         guest_email: string,
@@ -36,6 +40,14 @@ export class RoomRepository implements IRoomRepository {
     }
     findReservationById(reservation_id: string) {
         return ReservationModel.query().findById(reservation_id)
+    }
+    findRoomsInReservation(reservation_id: string) {
+        return RoomModel.query().whereExists(
+            BedModel.query()
+                .joinRelated('reservations')
+                .where('reservations.id', '=', reservation_id)
+                .where('room_id', '=', ref('room.id'))
+        )
     }
     findGuestRoomReservation(guest_email: string, reservation_id: string) {
         return GuestReservationRoomModel.query()

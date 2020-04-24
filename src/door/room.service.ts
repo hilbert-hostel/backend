@@ -62,13 +62,30 @@ export class RoomService implements IRoomService {
                 'Can not share room. You did not make this reservation.'
             )
         }
-        await this.notifyShareRoom(reservationID, email, roomID)
-
-        return this.roomRepository.createGuestRoomReservation(
-            email,
-            reservationID,
-            roomID
+        const rooms = await this.roomRepository.findRoomsInReservation(
+            reservationID
         )
+        if (!rooms.some(r => r.id === roomID)) {
+            throw new BadRequestError('This room is not in this reservation')
+        }
+
+        try {
+            const result = await this.roomRepository.createGuestRoomReservation(
+                email,
+                reservationID,
+                roomID
+            )
+            await this.notifyShareRoom(reservationID, email, roomID)
+            return result
+        } catch (e) {
+            if (e.name === 'UniqueViolationError') {
+                throw new BadRequestError(
+                    'You already shared this room to this email.'
+                )
+            } else {
+                throw e
+            }
+        }
     }
     async notifyShareRoom(
         reservationID: string,
