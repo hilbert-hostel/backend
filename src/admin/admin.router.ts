@@ -23,7 +23,9 @@ import {
     createRoomMaintenanceValidator,
     listCheckInCheckOutValidator,
     listGuestsValidator,
-    registerValidator
+    registerValidator,
+    reservationValidator,
+    summaryValidator
 } from './admin.validation'
 
 const router = Router()
@@ -37,6 +39,7 @@ router.get(
     '/reservation',
     isAuthenticated,
     hasRole(StaffRole.ADMIN),
+    validateQuery(reservationValidator),
     async (req, res) => {
         const { from, to } = req.query
         const reservation = await adminService.listReservations(
@@ -210,5 +213,18 @@ router.get(
         res.json({ code: encodedInput })
     }
 )
-
+router.get(
+    '/summary',
+    isAuthenticated,
+    hasRole(StaffRole.ADMIN),
+    validateQuery(summaryValidator),
+    async (req, res) => {
+        const { from, to } = req.query
+        const summary = await adminService.generateSummary(
+            from ?? moment().toDate(),
+            to ?? moment().add(1, 'week').toDate()
+        )
+        res.json(summary)
+    }
+)
 export { router as AdminRouter }

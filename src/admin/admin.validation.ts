@@ -64,3 +64,22 @@ export const createRoomMaintenanceValidator = yup
             .test('is valid date', '${path} is not a valid date.', isValidDate),
         description: yup.string()
     })
+
+export const reservationValidator = yup.object().shape({
+    from: yup
+        .string()
+        .test(
+            'is valid date',
+            '${path} is not a valid date.',
+            d => !d || isValidDate(d)
+        ),
+    to: yup
+        .string()
+        .test(
+            'is valid date',
+            '${path} is not a valid date.',
+            d => !d || isValidDate(d)
+        )
+})
+
+export const summaryValidator = reservationValidator

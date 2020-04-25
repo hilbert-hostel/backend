@@ -5,6 +5,7 @@ import { BadRequestError, ForbiddenError } from '../../error/HttpError'
 import { IPaymentRepository } from './payment.repository'
 import { calculatePrice, formatReceiptMessage } from './payment.util'
 import { IMailService } from '../../mail/mail.service'
+import moment = require('moment')
 
 export interface IPaymentService {
     makePayment(
@@ -107,7 +108,12 @@ export class SCBPaymentService implements IPaymentService {
         const rooms = await this.paymentRepository.findRoomsInReservationById(
             reservationID
         )
-        const price = calculatePrice(rooms)
+        const nights = moment(reservation.check_out).diff(
+            moment(reservation.check_in),
+            'days'
+        )
+
+        const price = calculatePrice(rooms, nights)
         const { deeplinkUrl, transactionID } = await this.requestDeepLink(
             reservationID,
             price
@@ -217,7 +223,11 @@ export class SCBPaymentService implements IPaymentService {
         const rooms = await this.paymentRepository.findRoomsInReservationById(
             reservation.id
         )
-        const price = calculatePrice(rooms)
+        const nights = moment(reservation.check_out).diff(
+            moment(reservation.check_in),
+            'days'
+        )
+        const price = calculatePrice(rooms, nights)
         const formattedRooms = rooms.map(r => ({
             id: r.id,
             beds: r.beds!.length

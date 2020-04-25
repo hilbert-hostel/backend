@@ -2,9 +2,9 @@ import { Room } from '../../models/room'
 import { Receipt } from './payment.interface'
 import moment from 'moment'
 
-export const calculatePrice = (rooms: Room[]): number => {
+export const calculatePrice = (rooms: Room[], nights: number): number => {
     const priceOfEachRoom = rooms.map(r => r.price * (r?.beds?.length ?? 0))
-    return priceOfEachRoom.reduce((acc, cur) => acc + cur, 0)
+    return priceOfEachRoom.reduce((acc, cur) => acc + cur, 0) * nights
 }
 
 export const formatReceiptMessage = (data: Receipt): string => {
@@ -17,7 +17,7 @@ export const formatReceiptMessage = (data: Receipt): string => {
     const totalRooms = data.rooms.length
     const totalBeds = data.rooms.reduce((acc, curr) => acc + curr.beds, 0)
     const message = `Dear ${data.name},
-    
+
 Thank you for choosing Hilbert. Here is your receipt:
 Transaction ID: ${data.transactionID}
 Method of Payment: ${data.method}

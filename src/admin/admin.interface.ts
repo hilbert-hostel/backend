@@ -103,3 +103,11 @@ export interface RoomMaintenance {
     to: Date
     description?: string
 }
+
+export interface Summary {
+    from: Date
+    to: Date
+    guests: number
+    revenue: number
+    utilization: number
+}

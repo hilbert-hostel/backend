@@ -10,6 +10,7 @@ import StaffModel, { Staff } from '../models/staff'
 import { IReservationRepository } from '../reservation/reservation.repository'
 import { CreateStaff, ReservationInfoDatabase } from './admin.interface'
 import moment from 'moment'
+import BedModel from '../models/bed'
 
 export interface IAdminRespository {
     listReservations(from: Date, to: Date): Promise<ReservationInfoDatabase[]>
@@ -25,6 +26,7 @@ export interface IAdminRespository {
     listCheckIns(page: number, size: number): Promise<ReservationWithGuest[]>
     listCheckOuts(page: number, size: number): Promise<ReservationWithGuest[]>
     getAllRooms(): Promise<Room[]>
+    numberOfBeds(): Promise<number>
     findStaffById(id: string): Promise<Staff>
     listRoomMaintenance(
         room_id: number,
@@ -121,6 +123,11 @@ export class AdminRepository implements IAdminRespository {
         return RoomModel.query()
             .withGraphJoined('beds')
             .modifyGraph('beds', bed => bed.select('bed.id'))
+    }
+    numberOfBeds() {
+        return BedModel.query()
+            .count('* as count')
+            .then((b: any) => b[0].count)
     }
     findStaffById(id: string) {
         return StaffModel.query().findById(id)

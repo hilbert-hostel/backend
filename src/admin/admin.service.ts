@@ -21,10 +21,12 @@ import {
     CreateStaff,
     ReservationInfo,
     RoomMaintenance,
-    StaffDetails
+    StaffDetails,
+    Summary
 } from './admin.interface'
 import { IAdminRespository } from './admin.repository'
 import { IFileService } from '../files/file.service'
+import { generateSummary } from './summary'
 
 export interface IAdminService {
     listReservations(from: Date, to: Date): Promise<ReservationInfo[]>
@@ -45,6 +47,7 @@ export interface IAdminService {
     ): Promise<RoomMaintenance>
     listRoomMaintenance(from: Date, to: Date): Promise<RoomMaintenance[]>
     deleteRoomMaintenance(maintenanceID: number): Promise<RoomMaintenance>
+    generateSummary(from: Date, to: Date): Promise<Summary>
 }
 export const stayDuration = (checkIn: Date, checkOut: Date) =>
     moment(checkOut).diff(moment(checkIn), 'days')
@@ -318,5 +321,14 @@ export class AdminService implements IAdminService {
             maintenanceID
         )
         return renameKeys({ room_id: 'roomID' }, maintenance) as RoomMaintenance
+    }
+    async generateSummary(from: Date, to: Date) {
+        const reservations = await this.adminRepository.listReservations(
+            from,
+            to
+        )
+        const totalBeds = await this.adminRepository.numberOfBeds()
+        const summary = generateSummary(reservations, from, to, totalBeds)
+        return summary
     }
 }
