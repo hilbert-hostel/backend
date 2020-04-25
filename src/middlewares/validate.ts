@@ -1,16 +1,34 @@
 import { RequestHandler } from 'express'
 import { ObjectSchema } from 'yup'
 
-export const validate = (schema: ObjectSchema): RequestHandler => (
+export const validateBody = (schema: ObjectSchema): RequestHandler => async (
     req,
-    res,
+    _,
     next
 ) => {
-    schema
-        .validate(req.body, { stripUnknown: true })
-        .then(validated => {
-            req.body = validated
-            next()
+    try {
+        const validated = await schema.validate(req.body, {
+            stripUnknown: true
         })
-        .catch(next)
+        req.body = validated
+        next()
+    } catch (e) {
+        next(e)
+    }
+}
+
+export const validateQuery = (schema: ObjectSchema): RequestHandler => async (
+    req,
+    _,
+    next
+) => {
+    try {
+        const validated = await schema.validate(req.query, {
+            stripUnknown: true
+        })
+        req.query = validated
+        next()
+    } catch (e) {
+        next(e)
+    }
 }

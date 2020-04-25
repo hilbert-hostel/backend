@@ -6,7 +6,7 @@ services:
     container_name: hilbert-backend-dev
     depends_on:
       - db
-    restart: always
+    restart: on-failure
     volumes:
       - ./src:/app/src
       - ./node_modules:/app/node_modules
@@ -22,18 +22,20 @@ services:
       PORT: 3000
       SECRET: SECRET
     working_dir: /app
-    command: ['yarn', 'dev']
+    command: yarn dev
 
   db:
     image: postgres
-    restart: always
+    restart: on-failure
     volumes:
       - ./db:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
 
   adminer:
     image: adminer
-    restart: always
+    restart: on-failure
     ports:
       - 8080:8080

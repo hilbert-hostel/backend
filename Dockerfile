@@ -1,13 +1,15 @@
 FROM node:12 as builder
 WORKDIR /app
+EXPOSE 3000
 
 # Install dependencies
 COPY ./package.json ./yarn.lock ./
 RUN yarn
 
 # Build
-COPY ./tsconfig.json ./tsconfig.build.json ./
+COPY ./tsconfig.json ./
 COPY ./src ./src
+COPY ./scripts ./scripts
 RUN yarn build
 
 FROM node:12-alpine
