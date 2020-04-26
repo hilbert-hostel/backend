@@ -111,7 +111,7 @@ router.get(
 router.get(
     '/ping',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         const id = getUserID(res)
         const staff = await adminService.getStaff(id)
