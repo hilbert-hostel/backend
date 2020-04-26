@@ -38,7 +38,7 @@ const {
 router.get(
     '/reservation',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateQuery(reservationValidator),
     async (req, res) => {
         const { from, to } = req.query
@@ -77,7 +77,7 @@ router.post('/login', validateBody(loginValidator), async (req, res) => {
 router.get(
     '/guest',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateQuery(listGuestsValidator),
     async (req, res) => {
         const { page, size } = req.query
@@ -89,7 +89,7 @@ router.get(
 router.get(
     '/checkIn',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateQuery(listCheckInCheckOutValidator),
     async (req, res) => {
         const { page, size } = req.query
@@ -101,7 +101,7 @@ router.get(
 router.get(
     '/room',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         const rooms = await adminService.getAllRooms()
         res.send(rooms)
@@ -122,7 +122,7 @@ router.get(
 router.post(
     '/unlock',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         adminService.unlockDoor(req.body.roomID)
         res.send({ message: 'unlocked' })
@@ -132,7 +132,7 @@ router.post(
 router.post(
     '/checkIn',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateBody(adminCheckInValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckIn
@@ -144,7 +144,7 @@ router.post(
 router.post(
     '/checkOut',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateBody(adminCheckOutValidator),
     async (req, res) => {
         const { reservationID, date } = req.body as AdminCheckOut
@@ -155,10 +155,11 @@ router.post(
         res.send({ message: result })
     }
 )
+
 router.post(
     '/maintenance',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     validateBody(createRoomMaintenanceValidator),
     async (req, res) => {
         const {
@@ -179,7 +180,7 @@ router.post(
 router.get(
     '/maintenance',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         const { from, to } = req.query
         const maintenance = await adminService.listRoomMaintenance(
@@ -192,7 +193,7 @@ router.get(
 router.delete(
     '/maintenance/:id',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         const id = Number(req.params.id)
         const maintenance = await adminService.deleteRoomMaintenance(id)
@@ -203,7 +204,7 @@ router.delete(
 router.get(
     '/generate',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.ADMIN, StaffRole.MANAGER),
     async (req, res) => {
         const { userID } = res.locals
         const input = (await adminService.getDoorLockInput(
@@ -216,7 +217,7 @@ router.get(
 router.get(
     '/summary',
     isAuthenticated,
-    hasRole(StaffRole.ADMIN),
+    hasRole(StaffRole.MANAGER),
     validateQuery(summaryValidator),
     async (req, res) => {
         const { from, to } = req.query

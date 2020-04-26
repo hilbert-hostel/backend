@@ -174,11 +174,12 @@ export async function seed(knex: Knex): Promise<any> {
         id: guest_id,
         email: 'yamarashi@email.com',
         password: await hash('YamaKung69', 10),
-        firstname: 'F',
-        lastname: 'W',
+        firstname: 'Yamarashi',
+        lastname: 'Kishisa',
         national_id: '111111111111',
         phone: '000000000',
-        address: 'here'
+        address: 'here',
+        is_verified: true
     })
     //create admin account
     const admin_id = uuid()
@@ -186,11 +187,23 @@ export async function seed(knex: Knex): Promise<any> {
         id: admin_id,
         email: 'yamarashi@email.com',
         password: await hash('YamaKung69', 10),
-        firstname: 'F',
-        lastname: 'W',
+        firstname: 'Hilbert',
+        lastname: 'Admin',
         phone: '000000000',
         address: 'here',
         role: 'ADMIN'
+    })
+    //create owner account
+    const owner_id = uuid()
+    await knex('staff').insert({
+        id: owner_id,
+        email: 'sarun.n@email.com',
+        password: await hash('Weebs999', 10),
+        firstname: 'Sarun',
+        lastname: 'Cern',
+        phone: '000000000',
+        address: 'here',
+        role: 'MANAGER'
     })
     // create reservation
     const check_in = moment().add(1, 'day')
