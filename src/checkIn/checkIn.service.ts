@@ -56,6 +56,9 @@ export class CheckInService implements ICheckInService {
         if (!reservation) {
             throw new BadRequestError('Reservation not found.')
         }
+        if (!reservation.transaction?.paid) {
+            throw new BadRequestError('Reservation payment is not complete.')
+        }
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({

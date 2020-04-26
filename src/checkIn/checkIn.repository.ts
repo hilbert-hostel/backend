@@ -37,10 +37,12 @@ export class CheckInRepository implements ICheckInRepository {
         this.reservationRepository = reservationRepository
     }
     async getGuestReservation(guest_id: string, check_in: Date) {
-        const reservation = await ReservationModel.query().findOne({
-            guest_id,
-            check_in
-        })
+        const reservation = await ReservationModel.query()
+            .findOne({
+                guest_id,
+                check_in
+            })
+            .withGraphJoined('transaction')
         return this.reservationRepository.getReservationWithRoom(reservation.id)
     }
     async createOtp(
