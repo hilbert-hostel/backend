@@ -86,7 +86,9 @@ export class CheckInRepository implements ICheckInRepository {
         })
     }
     findReservationById(id: string): Promise<Reservation> {
-        return ReservationModel.query().findById(id)
+        return ReservationModel.query()
+            .findById(id)
+            .withGraphJoined('[transaction, record]')
     }
     async addCheckInTime(reservation_id: string, time: Date) {
         return ReservationModel.query().patchAndFetchById(reservation_id, {
