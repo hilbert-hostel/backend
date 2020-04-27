@@ -23,7 +23,7 @@ export interface IRoomRepository {
     findGuestRoomReservation(
         guest_email: string,
         reservation_id: string
-    ): Promise<GuestReservationRoom>
+    ): Promise<GuestReservationRoom | undefined>
 }
 
 export class RoomRepository implements IRoomRepository {
