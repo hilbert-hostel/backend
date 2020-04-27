@@ -175,7 +175,8 @@ export class AdminService implements IAdminService {
                             check_out,
                             check_out_exit_time,
                             id,
-                            guest
+                            guest,
+                            rating
                         } = r
                         const nights = stayDuration(check_in, check_out)
                         const beds = r.beds?.length ?? 0
@@ -184,7 +185,8 @@ export class AdminService implements IAdminService {
                             beds,
                             nights,
                             guest: getGuestDetails(guest),
-                            checkOutTime: check_out_exit_time
+                            checkOutTime: check_out_exit_time,
+                            rating
                         } as CheckOutInfo
                     }
                 )
