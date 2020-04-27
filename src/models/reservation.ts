@@ -21,6 +21,7 @@ export interface Reservation {
     guest_id: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
+    rating?: number
     otp?: Otp
     record?: Record
     transaction?: Transaction
@@ -43,6 +44,7 @@ export default class ReservationModel extends BaseModel implements Reservation {
     guest_id!: string
     check_in_enter_time?: Date
     check_out_exit_time?: Date
+    rating?: number
     otp?: Otp
     record?: Record
     transaction?: Transaction
