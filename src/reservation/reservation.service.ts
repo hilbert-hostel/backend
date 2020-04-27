@@ -179,7 +179,6 @@ export class ReservationService implements IReservationService {
         if (!validCheckInCheckOutDate(check_in, check_out)) {
             throw new BadRequestError('Invalid check in and check out date.')
         }
-        console.log(rooms)
         const db_rooms = await this.reservationRepository.findAvailableBeds(
             check_in,
             check_out,
