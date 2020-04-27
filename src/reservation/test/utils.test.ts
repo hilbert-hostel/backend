@@ -1,10 +1,10 @@
-import { Room } from '../models/room'
-import { SelectedRoom } from './reservation.interface'
+import { Room } from '../../models/room'
+import { SelectedRoom } from '../reservation.interface'
 import {
     checkEnoughBeds,
     checkNoDuplicateRooms,
     validCheckInCheckOutDate
-} from './reservation.utils'
+} from '../reservation.utils'
 
 describe('check enough beds', () => {
     const rooms: Room[] = [
