@@ -68,7 +68,21 @@ export class RoomService implements IRoomService {
         if (!rooms.some(r => r.id === roomID)) {
             throw new BadRequestError('This room is not in this reservation')
         }
-
+        const check = await this.roomRepository.findGuestRoomReservation(
+            email,
+            reservationID
+        )
+        if (check) {
+            if (check.room_id === roomID) {
+                throw new BadRequestError(
+                    'You already shared this room to this email.'
+                )
+            } else {
+                throw new BadRequestError(
+                    'This email already has access to a room.'
+                )
+            }
+        }
         try {
             const result = await this.roomRepository.createGuestRoomReservation(
                 email,
