@@ -76,7 +76,7 @@ export class ReservationRepository implements IReservationRepository {
             .modify('noMaintenance', check_in, check_out)
         return result
     }
-    listRoomMaintenance(room_id: number, from: Date, to: Date) {
+    async listRoomMaintenance(room_id: number, from: Date, to: Date) {
         return MaintenanceModel.query()
             .where({ room_id })
             .where(builder => {

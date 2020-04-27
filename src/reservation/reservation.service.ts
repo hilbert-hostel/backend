@@ -167,8 +167,8 @@ export class ReservationService implements IReservationService {
         if (rooms.length === 0) {
             throw new BadRequestError('You must choose some rooms.')
         }
-        if (rooms.some(r => r.guests === 0)) {
-            throw new BadRequestError('Can not choose zero beds.')
+        if (rooms.some(r => r.guests <= 0)) {
+            throw new BadRequestError('Invalid number of guests.')
         }
         const noDuplicates = checkNoDuplicateRooms(rooms)
         if (!noDuplicates) {
