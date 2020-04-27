@@ -1,6 +1,6 @@
 import VerificationTokenModel, {
     VerificationToken
-} from '../models/verificationToken'
+} from '../models/verification_token'
 
 export interface CreateVerificationToken {
     guest_id: string
