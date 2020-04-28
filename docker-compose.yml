@@ -2,15 +2,25 @@ version: '3.2'
 
 services:
   backend:
-    build:
-      context: ./
-    container_name: hilbert-backend
+    image: node:12
+    container_name: hilbert-backend-dev
+    depends_on:
+      - db
+    restart: on-failure
+    volumes:
+      - ./src:/app/src
+      - ./node_modules:/app/node_modules
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./scripts:/app/scripts
+    ports:
+      - 3000:3000
     environment:
-      PORT:
-      SECRET:
+      NODE_ENV: development
       DB_URI:
       DB:
-      NODE_ENV:
+      PORT:
+      SECRET:
       MQTT_HOST:
       MQTT_PORT:
       MQTT_USERNAME:
@@ -20,9 +30,28 @@ services:
       MAILER_CLIENT_SECRET:
       MAILER_REFRESH_TOKEN:
       BASE_URL:
-      BUCKET_SECRET:
       BUCKET_ID:
+      BUCKET_SECRET:
       BUCKET_NAME:
       LOG_URL:
+      BANK_API_KEY:
+      BANK_API_SECRET:
+      BANK_BILLER_ID:
+    working_dir: /app
+    command: yarn dev
+
+  db:
+    image: postgres
+    restart: on-failure
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
     ports:
-      - 3000:3000
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: on-failure
+    ports:
+      - 8080:8080
