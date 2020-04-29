@@ -56,6 +56,12 @@ export class CheckInService implements ICheckInService {
         if (!reservation) {
             throw new BadRequestError('Reservation not found.')
         }
+        if (!reservation.transaction?.paid) {
+            throw new BadRequestError('Reservation payment is not complete.')
+        }
+        if (reservation.check_in_enter_time) {
+            throw new BadRequestError('Already checked in.')
+        }
         return pipe(
             pick(['id', 'check_in', 'check_out', 'special_requests', 'rooms']),
             evolve({
@@ -108,6 +114,12 @@ export class CheckInService implements ICheckInService {
         )
         if (!reservation) {
             throw new BadRequestError('Invalid Reservation ID')
+        }
+        if (!reservation.transaction?.paid) {
+            throw new BadRequestError('Reservation payment is not complete.')
+        }
+        if (reservation.check_in_enter_time) {
+            throw new BadRequestError('Already checked in.')
         }
         if (!sameDay(date, reservation.check_in)) {
             throw new BadRequestError(`Can not chech in this day ${date}.`)

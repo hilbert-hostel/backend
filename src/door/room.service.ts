@@ -1,13 +1,12 @@
+import moment from 'moment'
 import { concat } from 'ramda'
 import { Dependencies } from '../container'
 import { BadRequestError, ForbiddenError } from '../error/HttpError'
-import { GuestReservationRoom } from '../models/guest_reservation_room'
-import { Room } from '../models/room'
-import { IReservationRepository } from '../reservation/reservation.repository'
-import { IRoomRepository } from './room.repository'
-import { RoomPayload } from './room.interface'
-import moment = require('moment')
 import { IMailService } from '../mail/mail.service'
+import { GuestReservationRoom } from '../models/guest_reservation_room'
+import { IReservationRepository } from '../reservation/reservation.repository'
+import { RoomPayload } from './room.interface'
+import { IRoomRepository } from './room.repository'
 
 export interface IRoomService {
     shareRoom(
@@ -68,7 +67,21 @@ export class RoomService implements IRoomService {
         if (!rooms.some(r => r.id === roomID)) {
             throw new BadRequestError('This room is not in this reservation')
         }
-
+        const check = await this.roomRepository.findGuestRoomReservation(
+            email,
+            reservationID
+        )
+        if (check) {
+            if (check.room_id === roomID) {
+                throw new BadRequestError(
+                    'You already shared this room to this email.'
+                )
+            } else {
+                throw new BadRequestError(
+                    'This email already has access to a room.'
+                )
+            }
+        }
         try {
             const result = await this.roomRepository.createGuestRoomReservation(
                 email,
@@ -132,7 +145,9 @@ If you do not have an account, please register using this email.`
 
         const rooms = isOwner
             ? await this.allRoomsInReservation(reservation.id)
-            : [await this.roomShared(email, reservation.id)]
+            : await this.roomShared(email, reservation.id).then(room =>
+                  room ? [room] : []
+              )
         return {
             rooms,
             reservationID: reservation.id
@@ -164,7 +179,7 @@ If you do not have an account, please register using this email.`
             email,
             reservationID
         )
-        return shared.room as Room
+        return shared?.room
     }
 
     async hasPermissionToEnterRoom(
@@ -186,6 +201,6 @@ If you do not have an account, please register using this email.`
             return rooms.some(r => r.id === roomID)
         }
         const room = await this.roomShared(email, reservation.id)
-        return room.id === roomID
+        return room?.id === roomID
     }
 }

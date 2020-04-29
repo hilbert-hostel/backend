@@ -1,0 +1,19 @@
+version: '3.2'
+
+services:
+  setup:
+    image: node:12
+    container_name: hilbert-backend-setup
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./scripts:/app/scripts
+    environment:
+      DB_URI:
+      NODE_ENV:
+      DB:
+    working_dir: /app
+    command: ./scripts/setup-db.sh
+    network_mode: 'host'

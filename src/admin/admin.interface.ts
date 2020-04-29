@@ -62,6 +62,7 @@ export interface CheckOutInfo {
     nights: number
     beds: number
     guest: GuestDetails
+    rating?: number
 }
 
 export interface CheckInOutSummary {

@@ -167,8 +167,8 @@ export class ReservationService implements IReservationService {
         if (rooms.length === 0) {
             throw new BadRequestError('You must choose some rooms.')
         }
-        if (rooms.some(r => r.guests === 0)) {
-            throw new BadRequestError('Can not choose zero beds.')
+        if (rooms.some(r => r.guests <= 0)) {
+            throw new BadRequestError('Invalid number of guests.')
         }
         const noDuplicates = checkNoDuplicateRooms(rooms)
         if (!noDuplicates) {
@@ -179,7 +179,6 @@ export class ReservationService implements IReservationService {
         if (!validCheckInCheckOutDate(check_in, check_out)) {
             throw new BadRequestError('Invalid check in and check out date.')
         }
-        console.log(rooms)
         const db_rooms = await this.reservationRepository.findAvailableBeds(
             check_in,
             check_out,

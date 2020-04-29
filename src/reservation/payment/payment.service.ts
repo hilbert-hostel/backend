@@ -5,7 +5,7 @@ import { BadRequestError, ForbiddenError } from '../../error/HttpError'
 import { IPaymentRepository } from './payment.repository'
 import { calculatePrice, formatReceiptMessage } from './payment.util'
 import { IMailService } from '../../mail/mail.service'
-import moment = require('moment')
+import moment from 'moment'
 
 export interface IPaymentService {
     makePayment(
@@ -69,26 +69,31 @@ export class SCBPaymentService implements IPaymentService {
         this.mailService = mailService
     }
     async getAccessToken(reservationID: string) {
-        const payload = await axios.post<AccessTokenPayload>(
-            `${this.baseUrl}/v1/oauth/token`,
-            {
-                applicationKey: this.API_KEY,
-                applicationSecret: this.API_SECRET
-            },
-            {
-                headers: {
-                    resourceOwnerId: this.API_KEY,
-                    requestUid: reservationID
+        try {
+            const payload = await axios.post<AccessTokenPayload>(
+                `${this.baseUrl}/v1/oauth/token`,
+                {
+                    applicationKey: this.API_KEY,
+                    applicationSecret: this.API_SECRET
+                },
+                {
+                    headers: {
+                        resourceOwnerId: this.API_KEY,
+                        requestUid: reservationID
+                    }
                 }
+            )
+            const {
+                data: { status, data }
+            } = payload
+            if (status?.code === 1000 && data?.accessToken) {
+                return data.accessToken
+            } else {
+                throw new Error(JSON.stringify(payload.data))
             }
-        )
-        const {
-            data: { status, data }
-        } = payload
-        if (status?.code === 1000 && data?.accessToken) {
-            return data.accessToken
-        } else {
-            throw new Error(JSON.stringify(payload.data))
+        } catch (e) {
+            console.log(e)
+            throw e
         }
     }
     async makePayment(reservationID: string, guestID: string) {
@@ -130,37 +135,41 @@ export class SCBPaymentService implements IPaymentService {
         }
     }
     async requestDeepLink(reservationID: string, amount: number) {
-        const accessToken = await this.getAccessToken(reservationID)
-        const payload = await axios.post<DeeplinkPayload>(
-            `${this.baseUrl}/v3/deeplink/transactions`,
-            {
-                transactionType: 'PURCHASE',
-                transactionSubType: ['BP'],
-                billPayment: {
-                    paymentAmount: amount,
-                    accountTo: this.BILLER_ID,
-                    ref1: reservationID,
-                    ref2: reservationID,
-                    ref3: reservationID
+        try {
+            const accessToken = await this.getAccessToken(reservationID)
+            const payload = await axios.post<DeeplinkPayload>(
+                `${this.baseUrl}/v3/deeplink/transactions`,
+                {
+                    transactionType: 'PURCHASE',
+                    transactionSubType: ['BP'],
+                    billPayment: {
+                        paymentAmount: amount,
+                        accountTo: this.BILLER_ID,
+                        ref1: reservationID,
+                        ref2: reservationID,
+                        ref3: reservationID
+                    }
+                },
+                {
+                    headers: {
+                        resourceOwnerId: this.API_KEY,
+                        requestUid: reservationID,
+                        Authorization: `Bearer ${accessToken}`,
+                        channel: 'scbeasy'
+                    }
                 }
-            },
-            {
-                headers: {
-                    resourceOwnerId: this.API_KEY,
-                    requestUid: reservationID,
-                    Authorization: `Bearer ${accessToken}`,
-                    channel: 'scbeasy'
-                }
+            )
+            const {
+                data: { status, data }
+            } = payload
+            if (status?.code !== 1000) {
+                throw new Error(JSON.stringify(payload.data))
             }
-        )
-        const {
-            data: { status, data }
-        } = payload
-        if (status?.code !== 1000) {
-            throw new Error(JSON.stringify(payload.data))
+            const { deeplinkUrl, transactionId } = data
+            return { deeplinkUrl, transactionID: transactionId }
+        } catch (e) {
+            throw e
         }
-        const { deeplinkUrl, transactionId } = data
-        return { deeplinkUrl, transactionID: transactionId }
     }
     async checkPaymentStatus(reservationID: string, guestID: string) {
         const reservation = await this.paymentRepository.findReservationById(
@@ -180,33 +189,38 @@ export class SCBPaymentService implements IPaymentService {
         if (reservation.transaction.paid) {
             return true
         }
-        const accessToken = await this.getAccessToken(reservationID)
-        const payload = await axios.get<TransactionPayload>(
-            `${this.baseUrl}/v2/transactions/${reservation.transaction.id}`,
-            {
-                headers: {
-                    resourceOwnerId: this.API_KEY,
-                    requestUid: reservationID,
-                    Authorization: `Bearer ${accessToken}`
+        try {
+            const accessToken = await this.getAccessToken(reservationID)
+            const payload = await axios.get<TransactionPayload>(
+                `${this.baseUrl}/v2/transactions/${reservation.transaction.id}`,
+                {
+                    headers: {
+                        resourceOwnerId: this.API_KEY,
+                        requestUid: reservationID,
+                        Authorization: `Bearer ${accessToken}`
+                    }
                 }
+            )
+            const {
+                data: { status, data }
+            } = payload
+            if (status?.code !== 1000) {
+                throw new Error(JSON.stringify(payload.data))
             }
-        )
-        const {
-            data: { status, data }
-        } = payload
-        if (status?.code !== 1000) {
-            throw new Error(JSON.stringify(payload.data))
-        }
 
-        const { statusCode } = data
-        if (statusCode !== 1) {
-            return false
-        }
+            const { statusCode } = data
+            if (statusCode !== 1) {
+                return false
+            }
 
-        await this.paymentRepository.completeTransaction(
-            reservation.transaction.id
-        )
-        return true
+            await this.paymentRepository.completeTransaction(
+                reservation.transaction.id
+            )
+            return true
+        } catch (e) {
+            console.log(e)
+            throw e
+        }
     }
     async updatePaymentStatus(transactionID: string) {
         await this.paymentRepository.completeTransaction(transactionID)
