@@ -27,7 +27,7 @@
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
     "multer": "^1.4.2",
-    "nodemailer": "^6.4.5",
+    "nodemailer": "^6.4.16",
     "objection": "^2.1.2",
     "permit": "^0.2.4",
     "pg": "^7.18.1",
