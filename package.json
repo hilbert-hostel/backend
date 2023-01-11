@@ -22,7 +22,7 @@
     "helmet": "^3.21.2",
     "hilbert-room-assignment": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.20.8",
+    "knex": "^2.4.0",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
